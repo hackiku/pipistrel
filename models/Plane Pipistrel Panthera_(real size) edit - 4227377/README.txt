@@ -1,0 +1,1 @@
+Plane Pipistrel Panthera*(real size) edit by Nighithall on Thingiverse: https://www.thingiverse.com/thing:4227377
