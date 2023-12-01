@@ -2,23 +2,33 @@ import streamlit as st
 import pandas as pd
 from virus_model_streamlit.virus_viewer_component import virus_viewer
 import inspect
-from calcs import convert_units, aircraft_specs, calculate_cruise_speed
+from calcs import *
+# from calcs import convert_units, aircraft_specs, calculate_cruise_speed, calculate_drag_coefficient
 
 
 def create_specs_table(category_data):
     """ Create a DataFrame from specs data for displaying as a table """
     # Flipping the rows and columns
     specs = {spec: [details['value'], details['unit'], details['latex']] for spec, details in category_data.items()}
-    df = pd.DataFrame(specs, index=[' ', '', '  ']).T  # Notice the .T for transpose
+    df = pd.DataFrame(specs, index=['Value', 'Unit', 'LaTeX']).T  # Notice the .T for transpose
     return df
+
+def spacer(height='5em'):
+    spacer_html = f'<div style="margin: {height};"></div>'
+    st.markdown(spacer_html, unsafe_allow_html=True)
 
 
 def main():
 
     st.title("Pipistrel Virus SW 121")
-    # Aircraft Specifications
-    st.header("Aircraft Specifications")
-    unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
+    
+    # specs
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.header("Aircraft Specifications")
+    with col2:
+        unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
 
     col1, col2 = st.columns(2)
     with col1:
@@ -41,48 +51,95 @@ def main():
         propulsion_df = create_specs_table(aircraft_specs["Propulsion"])
         st.table(propulsion_df)
 
-    st.success("Yay! you made it to space")
+    st.markdown('***')
 
-    # Airframe choice
-    st.header("Airframe choice")
-    st.markdown("""
-    Za izbor aeroprofila potrebni su sledeći ulazni podaci:
-    - Proizvodna površina krila
-    - Maksimalna masa na poletanju
-    - Karakteristike vazduha
-    - Brzina krstarenja
-    """)
+    st.header("Airframe Choice")
+    st.write("Calculating the computational wing area")
 
-    st.subheader("ISA Atmosphere")
     col1, col2 = st.columns(2)
-
     with col1:
-        st.latex(r"\rho = 0.736116 \, \text{kg/m}^3")
-        st.latex(r"P = 101325 \, \text{Pa}")
-        st.latex(r"T = 288.15 \, \text{K}")
-        st.latex(r"c = 340.29 \, \text{m/s}")
-
+        st.subheader("Wing Area")
+        st.latex(r"S_0 = \frac{l_0 + l_1}{2} \cdot \frac{b}{2}")
+        st.latex(r"= \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2}")
+        st.latex(r"S_0 = 10.301 \, \text{m}^2")
     with col2:
-        st.code("""
-        # Temperature
-        T = 288.15  # K
-        Pressure
-        P = 101325  # Pa
-        # Density
-        rho = 0.736116  # kg/m^3
-        c = 340.29  # Speed of Sound (m/s)
-        """, language='python')    
-
-    st.subheader("Cruise Speed Calculation")
+        wing_area_code = inspect.getsource(calculate_wing_surface_area)
+        st.code(wing_area_code, language='python')
+    
+    st.markdown('<div style="margin: 5em;"></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.latex(r"v_{krst} = 7.0 \cdot c = 320.529 \cdot 7.0 = 224.37 \, \text{m/s} = 807.73 \, \text{km/h}")
+        st.subheader("Average mass of aircraft")
+    with col2:
+        average_mass_code = inspect.getsource(calculate_average_mass)
+        st.code(average_mass_code, language='python')
+    st.latex(r"m_r = \frac{m_{max} + m_{min}}{2} = \frac{6700 + 12500}{2} = 9600 \, \text{kg}")
+    
+    spacer('3em')
+    st.markdown('***')
 
+    st.subheader("Drag Coefficient")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Enter the following parameters to calculate the drag coefficient during cruise flight:")
+        mr_input = st.number_input("Average Aircraft Mass (mr) [kg]", value=9600.0)
+        rho_input = st.number_input("Air Density (rho) [kg/m^3]", value=0.736116)
+        v_cruise_input = st.number_input("Cruise Speed (v_cruise) [m/s]", value=224.37)
+        S_input = st.number_input("Wing Reference Area (S) [m^2]", value=20.602)
+
+        if st.button('Calculate Drag Coefficient'):
+            C_D_cruise = calculate_drag_coefficient(mr_input, rho_input, v_cruise_input, S_input)
+            st.write(f"The calculated drag coefficient (C_D_cruise) is: {C_D_cruise:.3f}")
+    with col2:
+        isa_conditions_code = inspect.getsource(get_ISA_conditions)
+        st.code(isa_conditions_code, language='python')
+    with st.echo():
+        import math
+        print('camadonna')
+        st.write("This code block is being displayed and executed.")
+
+    spacer('3em')
+
+    
+    
+    st.subheader("ISA air conditions")
+    col1, col2 = st.columns(2)
+    with col1:
+        
+        col11, col12 = st.columns([3,1])
+        with col11:
+            altitude_input = st.number_input("Altitude (m)", value=3000)
+        with col12:
+            st.markdown('<div style="margin-top: 1.8em;"></div>', unsafe_allow_html=True)
+            st.button("Clear")
+        st.latex(r"T = 255.65 \, \text{K} \, (T = -17.5 \, \text{°C})")
+        st.latex(r"P = 54019.9 \, \text{Pa}")
+        st.latex(r"\rho = 0.736116 \, \text{kg/m}^3")
+        st.latex(r"c = 320.529 \, \text{m/s}")
+    with col2:
+        isa_conditions_code = inspect.getsource(get_ISA_conditions)
+        st.code(isa_conditions_code, language='python')
+
+    spacer('3em')
+
+    st.write("Calculating the cruise speed of the aircraft")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.latex(r"v_{krst} = M_{krst} \cdot c")
+        st.latex(r"= 0.7 \cdot 320.529")
+        st.latex(r"v_{krst} = 224.37 \, \text{m/s} \, (807.73 \, \text{km/h})")
     with col2:
         cruise_speed_code = inspect.getsource(calculate_cruise_speed)
         st.code(cruise_speed_code, language='python')
+
+    
+    st.markdown('***')
+    
+    st.subheader("Drag Coefficient Calculation")
+
+    
 
     
 if __name__ == "__main__":
