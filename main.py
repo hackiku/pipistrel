@@ -5,21 +5,43 @@ import inspect
 from calcs import convert_units, aircraft_specs, calculate_cruise_speed
 
 
-# specs table
-def display_specs(specs, units="SI"):
-    if units == "Aviation":
-        specs = convert_units(specs)  # aviation units
-    specs_df = pd.DataFrame.from_dict(specs, orient='index').transpose()
-    st.table(specs_df)  # Display DataFrame as a table
+def create_specs_table(category_data):
+    """ Create a DataFrame from specs data for displaying as a table """
+    # Flipping the rows and columns
+    specs = {spec: [details['value'], details['unit'], details['latex']] for spec, details in category_data.items()}
+    df = pd.DataFrame(specs, index=[' ', '', '  ']).T  # Notice the .T for transpose
+    return df
+
 
 def main():
 
-    st.title("Aerodynamics of the Pipistrel")
-
+    st.title("Pipistrel Virus SW 121")
     # Aircraft Specifications
     st.header("Aircraft Specifications")
     unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
-    display_specs(aircraft_specs, units=unit_system)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text("Dimensions")
+        dimensions_df = create_specs_table(aircraft_specs["Dimensions"])
+        st.table(dimensions_df)        
+    with col2:
+        st.text("Mass")
+        mass_df = create_specs_table(aircraft_specs["Mass"])
+        st.table(mass_df)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text("Performance")
+        performance_df = create_specs_table(aircraft_specs["Performance"])
+        st.table(performance_df)
+        
+    with col2:
+        st.text("Propulsion")
+        propulsion_df = create_specs_table(aircraft_specs["Propulsion"])
+        st.table(propulsion_df)
+
+    st.success("Yay! you made it to space")
 
     # Airframe choice
     st.header("Airframe choice")
