@@ -5,9 +5,7 @@ import inspect
 from calcs import *
 # from calcs import convert_units, aircraft_specs, calculate_cruise_speed, calculate_drag_coefficient
 
-
 def create_specs_table(category_data):
-    """ Create a DataFrame from specs data for displaying as a table """
     # Flipping the rows and columns
     specs = {spec: [details['value'], details['unit'], details['latex']] for spec, details in category_data.items()}
     df = pd.DataFrame(specs, index=['Value', 'Unit', 'LaTeX']).T  # Notice the .T for transpose
@@ -20,7 +18,11 @@ def spacer(height='5em'):
 
 def main():
 
-    st.title("Pipistrel Virus SW 121")
+    st.markdown("<h1 style='text-align: center;'>Aerodynamics & Airfoils</h1>", unsafe_allow_html=True)
+    st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
+
+    spacer("5em")
+    
     
     # specs
     
@@ -76,34 +78,10 @@ def main():
         st.code(average_mass_code, language='python')
     st.latex(r"m_r = \frac{m_{max} + m_{min}}{2} = \frac{6700 + 12500}{2} = 9600 \, \text{kg}")
     
-    spacer('3em')
+    # calcs
+
     st.markdown('***')
 
-    st.subheader("Drag Coefficient")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("Enter the following parameters to calculate the drag coefficient during cruise flight:")
-        mr_input = st.number_input("Average Aircraft Mass (mr) [kg]", value=9600.0)
-        rho_input = st.number_input("Air Density (rho) [kg/m^3]", value=0.736116)
-        v_cruise_input = st.number_input("Cruise Speed (v_cruise) [m/s]", value=224.37)
-        S_input = st.number_input("Wing Reference Area (S) [m^2]", value=20.602)
-
-        if st.button('Calculate Drag Coefficient'):
-            C_D_cruise = calculate_drag_coefficient(mr_input, rho_input, v_cruise_input, S_input)
-            st.write(f"The calculated drag coefficient (C_D_cruise) is: {C_D_cruise:.3f}")
-    with col2:
-        isa_conditions_code = inspect.getsource(get_ISA_conditions)
-        st.code(isa_conditions_code, language='python')
-    with st.echo():
-        import math
-        print('camadonna')
-        st.write("This code block is being displayed and executed.")
-
-    spacer('3em')
-
-    
-    
     st.subheader("ISA air conditions")
     col1, col2 = st.columns(2)
     with col1:
@@ -113,7 +91,7 @@ def main():
             altitude_input = st.number_input("Altitude (m)", value=3000)
         with col12:
             st.markdown('<div style="margin-top: 1.8em;"></div>', unsafe_allow_html=True)
-            st.button("Clear")
+            # st.button("Clear")
         st.latex(r"T = 255.65 \, \text{K} \, (T = -17.5 \, \text{°C})")
         st.latex(r"P = 54019.9 \, \text{Pa}")
         st.latex(r"\rho = 0.736116 \, \text{kg/m}^3")
@@ -124,7 +102,7 @@ def main():
 
     spacer('3em')
 
-    st.write("Calculating the cruise speed of the aircraft")
+    st.subheader("Cruise speed")
     col1, col2 = st.columns(2)
     with col1:
         st.latex(r"v_{krst} = M_{krst} \cdot c")
@@ -134,12 +112,39 @@ def main():
         cruise_speed_code = inspect.getsource(calculate_cruise_speed)
         st.code(cruise_speed_code, language='python')
 
-    
-    st.markdown('***')
-    
-    st.subheader("Drag Coefficient Calculation")
+    spacer('3em')
 
+    st.subheader("Drag Coefficient")
+    st.write("Enter the following parameters to calculate the drag coefficient during cruise flight:")
     
+    col1, col2 = st.columns(2)
+    with col1:
+        mr_input = st.number_input("Average Aircraft Mass (mr) [kg]", value=9600.0)
+        rho_input = st.number_input("Air Density (rho) [kg/m^3]", value=0.736116)
+        v_cruise_input = st.number_input("Cruise Speed (v_cruise) [m/s]", value=224.37)
+        S_input = st.number_input("Wing Reference Area (S) [m^2]", value=20.602)
+
+        calculate_button, clear_button = st.columns([3, 1])
+        with calculate_button:
+            if st.button('Calculate Drag Coefficient'):
+                C_D_cruise = calculate_drag_coefficient(mr_input, rho_input, v_cruise_input, S_input)
+                st.write(f"The calculated drag coefficient (C_D_cruise) is: {C_D_cruise:.3f}")
+        with clear_button:
+            if st.button('Clear'):
+                clear_values()
+
+    with col2:
+        isa_conditions_code = inspect.getsource(get_ISA_conditions)
+        st.code(isa_conditions_code, language='python')
+    with st.echo():
+        import math
+        print('camadonna')
+        st.write("This code block is being displayed and executed.")
+
+    spacer('3em')
+
+    st.markdown('***')
+        
 
     
 if __name__ == "__main__":
