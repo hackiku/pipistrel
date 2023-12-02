@@ -1,70 +1,87 @@
-# VIRUS SW 121A – EXPLORER
-# https://www.pipistrel-aircraft.com/products/explorer/#1680717339675-b6d1143d-a61a16807315013231680801553411
-
 import streamlit as st
 import pandas as pd
 from virus_model_streamlit.virus_viewer_component import virus_viewer
 import inspect
 from calcs import *
+from data import aircraft_specs
 import streamlit.components.v1 as components
 
-# from calcs import convert_units, aircraft_specs, calculate_cruise_speed, calculate_drag_coefficient
-
-def create_specs_table(category_data):
-    # Flipping the rows and columns
-    specs = {spec: [details['value'], details['unit'], details['latex']] for spec, details in category_data.items()}
-    df = pd.DataFrame(specs, index=['Value', 'Unit', 'LaTeX']).T  # Notice the .T for transpose
+def create_specs_table(aircraft_specs):
+    specs_data = []
+    for category, data in aircraft_specs.items():
+        # Add a category header as a separate entry
+        specs_data.append({
+            "Specification": f"**{category}**",  # Mark category names distinctly
+            "Value": "", 
+            "Unit": "", 
+            "LaTeX": ""
+        })
+        # Add individual specs
+        for spec, details in data.items():
+            specs_data.append({
+                "Specification": spec, 
+                "Value": details.get('value', ''), 
+                "Unit": details.get('unit', ''),   
+                "LaTeX": details.get('latex', '')  
+            })
+    
+    df = pd.DataFrame(specs_data)
     return df
+
+def filter_data_for_preset(data, preset):
+    airfoil_columns = [
+        'Length', 'Height', 'Wing Area', 'Aspect Ratio', 'Wingspan', 
+        'Max Power', 'Never Exceed Speed', 'Max Structural Cruising Speed', 
+        'Stall Speed Without Flaps', 'Best Climb Speed', 'Max Climb Rate', 'Maximum Operating Altitude'
+    ]
+
+    if preset == "Airfoil":
+        # filtered_data = data[data['Specification'].isin(airfoil_columns)]
+        filtered_data = pd.DataFrame([data.loc[data['Specification'] == spec].iloc[0] for spec in airfoil_columns if spec in data['Specification'].values])
+
+    else:  # 'All' or any other preset
+        filtered_data = data
+
+    return filtered_data
 
 def spacer(height='5em'):
     spacer_html = f'<div style="margin: {height};"></div>'
     st.markdown(spacer_html, unsafe_allow_html=True)
 
-
 def main():
-
     st.markdown("<h1 style='text-align: center;'>Aerodynamics & Airfoils</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
-
     spacer("5em")
-   
-    # Replace 'your_svelte_app_url' with the URL of your deployed Svelte app
-    svelte_app_url = "http://localhost:5174/pipistrel"
+
+    # 3D model
+    svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
     components.iframe(svelte_app_url, width=700, height=500)
+
+    # specs table
+    all_specs_df = create_specs_table(aircraft_specs)
+    preset = st.selectbox("Select Preset", ["Airfoil", "All"], index=0)
+    filtered_df = filter_data_for_preset(all_specs_df, preset)
+    st.table(filtered_df)  # Display the table
+
 
     # specs
     
+     
+    
+
     col1, col2 = st.columns(2)
     with col1:
         st.header("Aircraft Specifications")
     with col2:
         unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.text("Dimensions")
-        dimensions_df = create_specs_table(aircraft_specs["Dimensions"])
-        st.table(dimensions_df)        
-    with col2:
-        st.text("Mass")
-        mass_df = create_specs_table(aircraft_specs["Mass"])
-        st.table(mass_df)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.text("Performance")
-        performance_df = create_specs_table(aircraft_specs["Performance"])
-        st.table(performance_df)
-        
-    with col2:
-        st.text("Propulsion")
-        propulsion_df = create_specs_table(aircraft_specs["Propulsion"])
-        st.table(propulsion_df)
-
     st.markdown('***')
 
     st.header("Airframe Choice")
     st.write("Calculating the computational wing area")
+
+    st.image("./assets/side_front.png")
+    st.image("./assets/wing.png")
 
     col1, col2 = st.columns(2)
     with col1:
