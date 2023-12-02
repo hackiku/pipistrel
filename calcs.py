@@ -88,7 +88,9 @@ aircraft_specs = {
         "Maximum Takeoff": {"value": 13000, "unit": "kg", "latex": "M_{max}"},
     },
     "Propulsion": {
-        "Engine": {"value": "Rolls-Royce Spey 807 turbofan", "unit": "", "latex": ""},
+        "Model": {"value": "VIRUS SW 121A – EXPLORER", "unit": "", "latex": ""},
+        "Engine": {"value": "Rotax 912 S3, EASA certified engine", "unit": "", "latex": ""},
+        "Max Power": {"value": 49.1, "unit": "kN", "latex": "T"}
         "Thrust": {"value": 49.1, "unit": "kN", "latex": "T"}
     },
     "Performance": {

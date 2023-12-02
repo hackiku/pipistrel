@@ -1,8 +1,13 @@
+# VIRUS SW 121A – EXPLORER
+# https://www.pipistrel-aircraft.com/products/explorer/#1680717339675-b6d1143d-a61a16807315013231680801553411
+
 import streamlit as st
 import pandas as pd
 from virus_model_streamlit.virus_viewer_component import virus_viewer
 import inspect
 from calcs import *
+import streamlit.components.v1 as components
+
 # from calcs import convert_units, aircraft_specs, calculate_cruise_speed, calculate_drag_coefficient
 
 def create_specs_table(category_data):
@@ -22,8 +27,11 @@ def main():
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
 
     spacer("5em")
-    
-    
+   
+    # Replace 'your_svelte_app_url' with the URL of your deployed Svelte app
+    svelte_app_url = "http://localhost:5174/pipistrel"
+    components.iframe(svelte_app_url, width=700, height=500)
+
     # specs
     
     col1, col2 = st.columns(2)
