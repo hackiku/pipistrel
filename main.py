@@ -5,12 +5,13 @@ from calcs import *
 from data import aircraft_specs
 import streamlit.components.v1 as components
 
+# grab specs from data.py
 def create_specs_table(aircraft_specs):
     specs_data = []
     for category, data in aircraft_specs.items():
         # Add a category header as a separate entry
         specs_data.append({
-            "Specification": f"**{category}**",  # Mark category names distinctly
+            "Specification": f"**{category}**",
             "Value": "", 
             "Unit": "", 
             "LaTeX": ""
@@ -27,7 +28,19 @@ def create_specs_table(aircraft_specs):
     df = pd.DataFrame(specs_data)
     return df
 
-# manual filter of 'airfoil' preset
+# use data points in calculations
+def get_specific_data(df, category):
+    category_data = df[df['Specification'] == f"**{category}**"]
+    if not category_data.empty:
+        start_index = category_data.index[0] + 1
+        end_index = df[df['Specification'].str.startswith('**', na=False)].index
+        end_index = end_index[end_index > start_index].min()
+
+        return df[start_index:end_index]
+    return pd.DataFrame()
+
+
+# "Airfoil" preset manual filter
 def filter_data_for_preset(data, preset):
     airfoil_columns = [
         'Length', 'Height', 'Wing Area', 'Aspect Ratio', 'Wingspan', 
@@ -59,39 +72,24 @@ def main():
     svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
     components.iframe(svelte_app_url, width=700, height=500)
 
-    # aircraft specs
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.header("1. Aircraft Specs")
-    with col2:
-        unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
 
     st.markdown('***')
+
+    # 1. specs
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.title("1. Aircraft Specs")
+    with col2:
+        unit_system = st.radio("", ('SI Units', 'Aviation Units'))
 
     # specs table
     all_specs_df = create_specs_table(aircraft_specs)
     preset = st.selectbox("Select Preset", ["Airfoil", "All"], index=0)
     filtered_df = filter_data_for_preset(all_specs_df, preset)
-    st.table(filtered_df)  # Display the table
+    st.table(filtered_df)
 
-
-    st.markdown('***')
-
-    st.header("2. Airfoil Selection")
-    st.write("Calculating the computational wing area")
-
-    st.image("./assets/side_front.png")
-    st.image("./assets/wing.png")
-
-    st.write("Select root and tip chord length:")
     
-    st.subheader("Wing Area")
-    st.write("")
-
-    # ====================
-
-
     # 3col
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -101,14 +99,21 @@ def main():
     with col3:
         b = st.number_input('Wingspan (b) [m]', value=1.0, min_value=0.0, step=0.1)
 
-    spacer('5em')
+    st.markdown('***')
+
+    # ====================
 
     st.title("2. Airfoil selection")
+    spacer('2em')
+    
+    # 2.1. wing area
 
+    st.subheader('2.1. Wing area calculator')
+    st.write("At early design stages we approximate the area geometrically to kickstart the airfoil selection process.")
+    
     st.image('./assets/wing_black.jpg')
-
-    st.subheader('Wing Area Calculator')
-    # wing area
+    
+    # select l0, l1, b
     col1, col2 = st.columns(2)
     with col1:
         l0 = st.number_input('l0 - Root Chord Length (m)', value=1.576, min_value=0.0, step=0.1)
@@ -132,34 +137,70 @@ def main():
     """)
     st.latex("S = 20.602 \ {m}^2")
         
-    # ====================
-    spacer('5em')
+    spacer('2em')
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.latex(r"S_0 = \frac{l_0 + l_1}{2} \cdot \frac{b}{2}")
-        st.latex(r"= \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2}")
-        st.latex(r"S_0 = 10.301 \, \text{m}^2")
-        st.success(f"S = 20.602 m2")
-    with col2:
-        wing_area_code = inspect.getsource(calculate_wing_surface_area)
-        st.code(wing_area_code, language='python')
-    
-    st.markdown('<div style="margin: 5em;"></div>', unsafe_allow_html=True)
+# ====================
 
+    st.header('2.2. Average mass')
+
+    # Extracting weight data
+    weights_data_df = get_specific_data(all_specs_df, "Weights")
+
+    # Filter to include only specific entries
+    required_specs = ["Design Empty Weight", "Max Take Off Weight"]
+    filtered_weights_df = weights_data_df[weights_data_df['Specification'].isin(required_specs)]
+
+    # Create input fields for selected weight specifications
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Average mass of aircraft")
+
+        design_empty_weight = max_take_off_weight = 0.0
+
+        # Iterate through filtered weights data and create input fields
+        for index, row in filtered_weights_df.iterrows():
+            default_value = float(row['Value'])
+            spec = row['Specification']
+            description = row['Unit']
+
+            if spec == "Design Empty Weight":
+                design_empty_weight = st.number_input(
+                    label=f"{spec} ({description})", 
+                    value=default_value, 
+                    min_value=0.0, 
+                    step=0.1,
+                    format="%.2f"
+                )
+            elif spec == "Max Take Off Weight":
+                max_take_off_weight = st.number_input(
+                    label=f"{spec} ({description})", 
+                    value=default_value, 
+                    min_value=0.0, 
+                    step=0.1,
+                    format="%.2f"
+                )
+
+    # Button to calculate average mass
+    if st.button('Calculate Average Mass'):
+        average_mass = calculate_average_mass(max_take_off_weight, design_empty_weight)
+        # Format average_mass to 2 decimal places
+        average_mass_formatted = f"{average_mass:.2f}"
+        st.latex(fr"m_r = \frac{{m_{{max}} + m_{{min}}}}{2} = \frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {average_mass_formatted} \, \text{{kg}}")
+    else:
+        st.latex(r"m_r = \frac{m_{max} + m_{min}}{2}")
+
     with col2:
         average_mass_code = inspect.getsource(calculate_average_mass)
         st.code(average_mass_code, language='python')
-    st.latex(r"m_r = \frac{m_{max} + m_{min}}{2} = \frac{6700 + 12500}{2} = 9600 \, \text{kg}")
     
-    # calcs
 
-    st.markdown('***')
+    spacer('2em')
 
-    st.subheader("ISA air conditions")
+# ====================
+
+
+    # 2.3 ISA conditions
+
+    st.header("ISA air conditions")
     col1, col2 = st.columns(2)
     with col1:
         
@@ -176,6 +217,8 @@ def main():
     with col2:
         isa_conditions_code = inspect.getsource(get_ISA_conditions)
         st.code(isa_conditions_code, language='python')
+
+# ====================
 
     spacer('3em')
 
@@ -213,16 +256,9 @@ def main():
     with col2:
         isa_conditions_code = inspect.getsource(get_ISA_conditions)
         st.code(isa_conditions_code, language='python')
-    with st.echo():
-        import math
-        print('camadonna')
-        st.write("This code block is being displayed and executed.")
-
-    spacer('3em')
 
     st.markdown('***')
-        
 
-    
+            
 if __name__ == "__main__":
     main()
