@@ -54,14 +54,10 @@ def calculate_drag_coefficient(mr, rho, v_cruise, S):
 
 def calculate_cruise_speed(M_krst, c):
     """
-    Calculate the cruise speed of the aircraft.
-    
-    Parameters:
     M_krst -- Cruise Mach number
     c -- Speed of sound at cruising altitude (m/s)
     
-    Returns:
-    The cruise speed in m/s and km/h.
+    Returns: cruise speed in m/s and km/h.
     """
     v_krst = M_krst * c
     return v_krst

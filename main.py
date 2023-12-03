@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from virus_model_streamlit.virus_viewer_component import virus_viewer
 import inspect
 from calcs import *
 from data import aircraft_specs
@@ -28,6 +27,7 @@ def create_specs_table(aircraft_specs):
     df = pd.DataFrame(specs_data)
     return df
 
+# manual filter of 'airfoil' preset
 def filter_data_for_preset(data, preset):
     airfoil_columns = [
         'Length', 'Height', 'Wing Area', 'Aspect Ratio', 'Wingspan', 
@@ -44,18 +44,30 @@ def filter_data_for_preset(data, preset):
 
     return filtered_data
 
+# vertical whitespace
 def spacer(height='5em'):
     spacer_html = f'<div style="margin: {height};"></div>'
     st.markdown(spacer_html, unsafe_allow_html=True)
 
+# airspeed
 def main():
-    st.markdown("<h1 style='text-align: center;'>Aerodynamics & Airfoils</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Aircalcs</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
     spacer("5em")
 
     # 3D model
     svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
     components.iframe(svelte_app_url, width=700, height=500)
+
+    # aircraft specs
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.header("1. Aircraft Specs")
+    with col2:
+        unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
+
+    st.markdown('***')
 
     # specs table
     all_specs_df = create_specs_table(aircraft_specs)
@@ -64,31 +76,71 @@ def main():
     st.table(filtered_df)  # Display the table
 
 
-    # specs
-    
-     
-    
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.header("Aircraft Specifications")
-    with col2:
-        unit_system = st.radio("Select Unit System", ('SI Units', 'Aviation Units'))
-
     st.markdown('***')
 
-    st.header("Airframe Choice")
+    st.header("2. Airfoil Selection")
     st.write("Calculating the computational wing area")
 
     st.image("./assets/side_front.png")
     st.image("./assets/wing.png")
 
+    st.write("Select root and tip chord length:")
+    
+    st.subheader("Wing Area")
+    st.write("")
+
+    # ====================
+
+
+    # 3col
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        l0 = st.number_input('Root Chord Length (l0) [m]', value=1.0, min_value=0.0, step=0.1)
+    with col2:
+        l1 = st.number_input('Tip Chord Length (l1) [m]', value=1.0, min_value=0.0, step=0.1)
+    with col3:
+        b = st.number_input('Wingspan (b) [m]', value=1.0, min_value=0.0, step=0.1)
+
+    spacer('5em')
+
+    st.title("2. Airfoil selection")
+
+    st.image('./assets/wing_black.jpg')
+
+    st.subheader('Wing Area Calculator')
+    # wing area
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Wing Area")
+        l0 = st.number_input('l0 - Root Chord Length (m)', value=1.576, min_value=0.0, step=0.1)
+        l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, min_value=0.0, step=0.1)
+        b = st.number_input('Wingspan (b) [m]', value=4.475, min_value=1.0, step=0.1)
+        col11, col12 = st.columns(2)
+        with col11:
+            if st.button('Calculate Wing Area'):
+                wing_area = 0.5 * b * (l0 + l1)
+                st.write(f"The calculated wing area is: {wing_area:.2f} square meters")
+        with col12:
+            if st.button('🔄 Reset'):
+                # Reset logic goes here
+                pass
+    with col2:
+        wing_area_code = inspect.getsource(calculate_wing_surface_area)
+        st.code(wing_area_code, language='python')
+
+    st.latex(r"""
+    S_0 = (\frac{l_0 + l_1}{2} \cdot \frac{b}{2}) = \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2} = 10.301 \, \text{m}^2
+    """)
+    st.latex("S = 20.602 \ {m}^2")
+        
+    # ====================
+    spacer('5em')
+    
+    col1, col2 = st.columns(2)
+    with col1:
         st.latex(r"S_0 = \frac{l_0 + l_1}{2} \cdot \frac{b}{2}")
         st.latex(r"= \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2}")
         st.latex(r"S_0 = 10.301 \, \text{m}^2")
+        st.success(f"S = 20.602 m2")
     with col2:
         wing_area_code = inspect.getsource(calculate_wing_surface_area)
         st.code(wing_area_code, language='python')
