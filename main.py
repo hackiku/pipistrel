@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import inspect
-from calcs import *
+from calcs import * # all aerodynamics calculations
 from data import aircraft_specs
+from isa_lite import get_ISA_conditions
 import streamlit.components.v1 as components
 
 # grab specs from data.py
@@ -62,7 +63,10 @@ def spacer(height='5em'):
     spacer_html = f'<div style="margin: {height};"></div>'
     st.markdown(spacer_html, unsafe_allow_html=True)
 
-# airspeed
+
+# ============================================================
+# ============================================================
+
 def main():
     st.markdown("<h1 style='text-align: center;'>Aircalcs</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
@@ -101,7 +105,7 @@ def main():
 
     st.markdown('***')
 
-    # ====================
+# ====================
 
     st.title("2. Airfoil selection")
     spacer('2em')
@@ -197,30 +201,34 @@ def main():
 
 # ====================
 
+    # 2.3 ISA conditions 
 
-    # 2.3 ISA conditions
-
-    st.header("ISA air conditions")
+    st.subheader("2.3. ISA air conditions")
     col1, col2 = st.columns(2)
     with col1:
+        # Altitude slider
+        altitude_input = st.slider("Altitude (m)", min_value=0, max_value=50000, value=5000, step=100)
+
+        # Getting ISA conditions
+        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude_input)
+
+        # Displaying the values and zone using LaTeX
+        st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")
+        st.latex(f"P = {pressure:.2f} \, \ {{Pa}}")
+        st.latex(f"\\rho = {density:.5f} \, \ {{kg/m}}^3")
+        st.latex(f"c = {sound_speed:.2f} \, \ {{m/s}}")
+        st.info(f"🌍 {zone}")
         
-        col11, col12 = st.columns([3,1])
-        with col11:
-            altitude_input = st.number_input("Altitude (m)", value=3000)
-        with col12:
-            st.markdown('<div style="margin-top: 1.8em;"></div>', unsafe_allow_html=True)
-            # st.button("Clear")
-        st.latex(r"T = 255.65 \, \text{K} \, (T = -17.5 \, \text{°C})")
-        st.latex(r"P = 54019.9 \, \text{Pa}")
-        st.latex(r"\rho = 0.736116 \, \text{kg/m}^3")
-        st.latex(r"c = 320.529 \, \text{m/s}")
     with col2:
+        # Displaying source code for ISA conditions calculation
         isa_conditions_code = inspect.getsource(get_ISA_conditions)
         st.code(isa_conditions_code, language='python')
 
-# ====================
+    spacer('2em')
 
-    spacer('3em')
+# ====================
+    
+    # cruise speed
 
     st.subheader("Cruise speed")
     col1, col2 = st.columns(2)
@@ -233,6 +241,9 @@ def main():
         st.code(cruise_speed_code, language='python')
 
     spacer('3em')
+
+
+# ====================
 
     st.subheader("Drag Coefficient")
     st.write("Enter the following parameters to calculate the drag coefficient during cruise flight:")
