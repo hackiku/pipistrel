@@ -6,6 +6,9 @@ from data import aircraft_specs
 from isa_lite import get_ISA_conditions
 import streamlit.components.v1 as components
 
+section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
+
+
 # grab specs from data.py
 def create_specs_table(aircraft_specs):
     specs_data = []
@@ -202,15 +205,25 @@ def main():
 # ====================
 
     # 2.3 ISA conditions 
+    if 'altitude' not in st.session_state:
+        st.session_state['altitude'] = 5000  # Default altitude
 
+    # 2.3 ISA conditions
     st.subheader("2.3. ISA air conditions")
     col1, col2 = st.columns(2)
     with col1:
-        # Altitude slider
-        altitude_input = st.slider("Altitude (m)", min_value=0, max_value=50000, value=5000, step=100)
+        # Altitude slider using session state
+        altitude_input = st.slider(
+            "Altitude (m)", 
+            min_value=0, 
+            max_value=50000, 
+            value=st.session_state['altitude'], 
+            step=100
+        )
+        st.session_state['altitude'] = altitude_input  # Update session state with the new value
 
-        # Getting ISA conditions
-        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude_input)
+        # Getting ISA conditions based on session state altitude
+        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(st.session_state['altitude'])
 
         # Displaying the values and zone using LaTeX
         st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")

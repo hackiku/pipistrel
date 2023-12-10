@@ -1,7 +1,8 @@
 # calcs.py
 from data import aircraft_specs
 
-# ISA constants
+# ISA atmosphere TODO import 
+
 T = 288.15  # Temperature (K)
 p = 101325  # pressure (Pa)
 rho = 0.736116  # density kg/m^3
