@@ -1,3 +1,13 @@
+# data.py
+class Variable:
+    def __init__(self, name, value, latex='', unit='', value2=None, unit2=''):
+        self.name = name
+        self.value = value
+        self.latex = latex or name  # Fallback to name if no latex is provided
+        self.unit = unit
+        self.value2 = value2
+        self.unit2 = unit2
+
 aircraft_specs = {
     "Model": {
         "Name": {"value": "VIRUS SW 121A – EXPLORER", "description": "Model name of the aircraft"},

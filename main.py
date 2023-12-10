@@ -8,7 +8,6 @@ import streamlit.components.v1 as components
 
 section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
-
 # grab specs from data.py
 def create_specs_table(aircraft_specs):
     specs_data = []
