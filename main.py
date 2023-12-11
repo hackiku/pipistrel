@@ -7,16 +7,16 @@ from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
 from utils import spacer, variables_two_columns
 
-section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
+# section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
 b = Variable("Wingspan", 8.942, "b", "m")
 S = Variable("Wing Area", 20.602, "S", "m²")
-rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
-g = Variable("Gravitational Acceleration", 9.80665, "g", "m/s²")
+rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
+g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
 
-m_sr = Variable("Average Mass", 9600.00, "m_{sr}", "kg")
-v_krst = Variable("Cruising Speed", 224.37, r"v_{krst}", "m/s")
-c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
+m_sr = Variable("Average mass", 9600.00, "m_{sr}", "kg")
+v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
+c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
 
 # use data points in calculations
 def get_specific_data(df, category):
@@ -76,16 +76,6 @@ def main():
     filtered_df = filter_data_for_preset(all_specs_df, preset)
     st.table(filtered_df)
 
-    
-    # 3col
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        l0 = st.number_input('Root Chord Length (l0) [m]', value=1.0, min_value=0.0, step=0.1)
-    with col2:
-        l1 = st.number_input('Tip Chord Length (l1) [m]', value=1.0, min_value=0.0, step=0.1)
-    with col3:
-        b = st.number_input('Wingspan (b) [m]', value=1.0, min_value=0.0, step=0.1)
-
     st.markdown('***')
 
 # ====================
@@ -98,27 +88,22 @@ def main():
     st.subheader('2.1. Wing area calculator')
     st.write("At early design stages we approximate the area geometrically to kickstart the airfoil selection process.")
     
+    # image
     st.image('./assets/wing_black.jpg')
     
-    # select l0, l1, b
-    col1, col2 = st.columns(2)
+    # 3col
+    col1, col2, col3 = st.columns(3)
     with col1:
-        l0 = st.number_input('l0 - Root Chord Length (m)', value=1.576, min_value=0.0, step=0.1)
-        l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, min_value=0.0, step=0.1)
-        b = st.number_input('Wingspan (b) [m]', value=4.475, min_value=1.0, step=0.1)
-        col11, col12 = st.columns(2)
-        with col11:
-            if st.button('Calculate Wing Area'):
-                wing_area = 0.5 * b * (l0 + l1)
-                st.write(f"The calculated wing area is: {wing_area:.2f} square meters")
-        with col12:
-            if st.button('🔄 Reset'):
-                # Reset logic goes here
-                pass
+        l0 = st.number_input('Root Chord Length (l0) [m]', value=1.576, step=0.5)
     with col2:
-        wing_area_code = inspect.getsource(calculate_wing_surface_area)
-        st.code(wing_area_code, language='python')
+        l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, step=0.5)
+    with col3:
+        b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)
 
+    wing_area = 0.5 * b * (l0 + l1)
+
+    # select l0, l1, b
+    
     st.latex(r"""
     S_0 = (\frac{l_0 + l_1}{2} \cdot \frac{b}{2}) = \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2} = 10.301 \, \text{m}^2
     """)
@@ -195,7 +180,7 @@ def main():
         # Altitude slider using session state
         altitude_input = st.slider(
             "Altitude (m)", 
-            min_value=0, 
+            # min_value=0, 
             max_value=50000, 
             value=st.session_state['altitude'], 
             step=100
@@ -246,8 +231,13 @@ def main():
     with st.expander("Calculate Cruise Lift Coefficient"):
         def calculate_c_z_krst():
             c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
-            numbers = "\\frac{{9600.0 \\cdot 9.80665}}{{0.5 \\cdot 0.736116 \\cdot 224.37^2 \\cdot 20.602}}"
-            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [1em] = {numbers}"
+            # LaTeX string with variables
+            numbers = (
+                f"\\frac{{ {m_sr.value:.2f} \\cdot {g.value:.2f} }}"  # Format to two decimal places
+                f"{{0.5 \\cdot {rho.value:.6f} \\cdot {v_krst.value:.2f}^2 \\cdot {S.value:.2f} }}"  # Format to two decimal places
+            )
+            # Formula in LaTeX format
+            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] = {numbers}"
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -261,16 +251,14 @@ def main():
 
         calculate_c_z_krst()
     
-    variables_two_columns(c_z_krst, display_formula=False)
-    
     st.latex(f"""{c_z_krst.latex} = {c_z_krst.formula}""")
-    st.latex(f"{c_z_krst.latex} = {c_z_krst.value:3f}")
-    
+    # st.latex(f"{c_z_krst.latex} = {c_z_krst.value:3f}")
 
-
-
+    variables_two_columns(c_z_krst, display_formula=False)
+  
     st.markdown('***')
 
+    st.header("Airfoil selection")
             
 if __name__ == "__main__":
     main()

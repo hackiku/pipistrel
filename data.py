@@ -12,7 +12,6 @@ class Variable:
         self.formula = formula
 
 # grab specs from data.py
-
 def create_specs_table(aircraft_specs):
     specs_data = []
     for category, data in aircraft_specs.items():
@@ -34,6 +33,7 @@ def create_specs_table(aircraft_specs):
     
     df = pd.DataFrame(specs_data)
     return df
+
 
 
 aircraft_specs = {
