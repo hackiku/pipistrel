@@ -1,12 +1,13 @@
 # data.py
 class Variable:
-    def __init__(self, name, value, latex='', unit='', value2=None, unit2=''):
+    def __init__(self, name, value, latex='', unit='', value2=None, unit2='', formula=''):
         self.name = name
         self.value = value
         self.latex = latex or name  # Fallback to name if no latex is provided
         self.unit = unit
         self.value2 = value2
         self.unit2 = unit2
+        self.formula = formula
 
 aircraft_specs = {
     "Model": {

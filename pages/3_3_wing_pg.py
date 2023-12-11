@@ -16,6 +16,9 @@ rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
 
 l_s = Variable("Chord Length", 3.028, "l_s", "m")
 l_0 = Variable("Root Chord Length", 1.576, "l_0", "m")
+b = Variable("Wingspan", 8.942, "b", "m")
+S = Variable("Wing Area", 20.602, "S", "m²")
+
 
 # n = 1.576 / l_s  # Taper ratio (n)
 
@@ -33,8 +36,7 @@ def main():
     
     st.header("3.1 Wing Lift Features")
 
-    # Display variables using the two-column layout
-    
+    # key variables 
     variables_two_columns(c_z_max)
     variables_two_columns(alpha_n)
     
@@ -44,27 +46,34 @@ def main():
     st.subheader("3.1.1. Max lift coefficient of wings")
     st.write("Za proračun uzgonskih karakteristika krila i dobijanje podataka za formiranje krive uzgona je korišćen program Trapezno krilo - Glauert, a ulazni parametri su:")
 
-    # vkrst = 224.37 m/s = 807.73 km/h
     # # alpha crit 
     variables_two_columns(c_z_krst)
-    variables_two_columns(v_krst)
+    variables_two_columns(v_krst) # = 224.37 m/s = 807.73 km/h
     variables_two_columns(rho) # ρ
-    
 
-    # lambda      
-    st.markdown("***")
-    st.write("Calculate wing aspect ratio (λ):")
+    with st.expander("Calculate wing aspect ratio (λ)"):
+        
+        def calculate_lambda_wing():
+            lambda_wing.value = b.value**2 / S.value
+            lambda_wing.formula = f"\\lambda = \\frac{{{b.latex}^2}}{{{S.latex}}} = \\frac{{{b.value:.2f}^2}}{{{S.value:.2f}}} = {lambda_wing.value:.3f}"
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            b.value = st.number_input(f'{b.name} {b.unit}', value=b.value, step=0.01, format="%.3f")
+        with col2:
+            S.value = st.number_input(f'{S.name} {S.unit}', value=S.value, step=0.1, format="%.3f")
+        with col3:
+          st.latex(f"{b.latex} = {b.value:.3f}")
+        with col4:
+          st.latex(f"{S.latex} = {S.value:.3f}")
+            # st.latex = (S.latex)
+        calculate_lambda_wing()
+        # st.latex(lambda_wing.formula)               
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        b = st.number_input('Wingspan b [m]', value=8.942, step=0.01)
-    with col2:
-        S = st.number_input('Wing area S [m²]', value=20.602, step=0.1)
-    with col3:
-        lambda_wing.value = b**2 / S 
-        lambda_calculated = st.number_input('Aspect Ratio λ', value=lambda_wing.value, step=0.001, format="%.3f")
+    # λ
+    variables_two_columns(lambda_wing, display_formula=True)
+        
 
-    st.latex("\\lambda = \\frac{b^2}{S} = \\frac{" + f"{b:.2f}^2" + "}{ " + f"{S:.2f}" + "} = " + f"{lambda_calculated:.3f}" + "")
 
 
     
