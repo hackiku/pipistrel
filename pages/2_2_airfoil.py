@@ -1,9 +1,10 @@
 import streamlit as st
 from data import Variable
-from utils import spacer, variables_two_columns
+from utils import spacer, variables_two_columns, variables_three_columns
 
 c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "m/s")
 
+# d = Variable()
 airfoil_raw_data = [
     ["NACA WIN", 9.0, -2.0, 0.110, 1.62, 14.5, 0.25, 0.0045, -0.034, 0.263, -0.029],
     ["NACA 63(1)-212", 10.0, -2.0, 0.110, 1.62, 14.5, 0.25, 0.0045, -0.034, 0.263, -0.029],
@@ -29,6 +30,10 @@ for data in airfoil_raw_data:
     }
     airfoils.append(airfoil_dict)
 
+def calculate_relative_thickness(airfoil):
+    # Assuming the thickness to chord ratio is at the second index in airfoil data
+    return airfoil["M_Re"].value / 10  # This is a placeholder for the actual calculation
+
 def display_airfoil_table(airfoils_data):
     # Create the header row
     header_keys = list(next(iter(airfoils_data)).keys())[1:]  # Skip the first key which is "Name"
@@ -49,18 +54,28 @@ def main():
 
     st.latex(f"{c_z_krst.latex} = {airfoils[0]['Cz_op'].latex}")
 
-    def calculate_relative_airfoil_width():
-        # logic here later
-        return
-    
-    def update_table():
-        # now just make it update
-        return
-
     # Display airfoil data in a single table
-    st.markdown("### Airfoil Data")
+    st.markdown("### Wing root airfoils")
     st.markdown(display_airfoil_table(airfoils), unsafe_allow_html=True)
 
+    spacer()
+
+    st.subheader("Criteria")
+    variables_two_columns(c_z_krst, display_formula=True)
+    
+    c_z_op = None
+    # Sort the airfoils by 'Cz_op' in descending order
+    sorted_airfoils = sorted(airfoils, key=lambda x: x["Cz_op"].value, reverse=True)
+
+    # Get the top 5 airfoils with the highest 'Cz_op'
+    top_airfoils = sorted_airfoils[:5]
+
+    # Display the top 5 airfoils
+    for i, airfoil in enumerate(top_airfoils, start=1):
+        st.write(f"Top {i} Airfoil: {airfoil['Name']} with Cz_op = {airfoil['Cz_op'].value}")
+        variables_three_columns(airfoil["Cz_op"], emoji="✈️", display_formula=True)
+
+    variables_three_columns(c_z_op, emoji="✈️", display_formula=True)
     
 
 if __name__ == "__main__":
