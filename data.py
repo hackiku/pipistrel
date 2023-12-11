@@ -1,4 +1,6 @@
 # data.py
+import pandas as pd
+
 class Variable:
     def __init__(self, name, value, latex='', unit='', value2=None, unit2='', formula=''):
         self.name = name
@@ -8,6 +10,31 @@ class Variable:
         self.value2 = value2
         self.unit2 = unit2
         self.formula = formula
+
+# grab specs from data.py
+
+def create_specs_table(aircraft_specs):
+    specs_data = []
+    for category, data in aircraft_specs.items():
+        # Add a category header as a separate entry
+        specs_data.append({
+            "Specification": f"**{category}**",
+            "Value": "", 
+            "Unit": "", 
+            "LaTeX": ""
+        })
+        # Add individual specs
+        for spec, details in data.items():
+            specs_data.append({
+                "Specification": spec, 
+                "Value": details.get('value', ''), 
+                "Unit": details.get('unit', ''),   
+                "LaTeX": details.get('latex', '')  
+            })
+    
+    df = pd.DataFrame(specs_data)
+    return df
+
 
 aircraft_specs = {
     "Model": {

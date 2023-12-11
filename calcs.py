@@ -34,7 +34,7 @@ def get_ISA_conditions():
     }
     return conditions
 
-# ... (rest of the calculations)
+ # ... (rest of the calculations)
 
 
 # ... (rest of the calculations)

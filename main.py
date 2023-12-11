@@ -1,35 +1,22 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import inspect
 from calcs import * # all aerodynamics calculations
-from data import aircraft_specs
+from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
-import streamlit.components.v1 as components
+from utils import spacer, variables_two_columns
 
 section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
-# grab specs from data.py
-def create_specs_table(aircraft_specs):
-    specs_data = []
-    for category, data in aircraft_specs.items():
-        # Add a category header as a separate entry
-        specs_data.append({
-            "Specification": f"**{category}**",
-            "Value": "", 
-            "Unit": "", 
-            "LaTeX": ""
-        })
-        # Add individual specs
-        for spec, details in data.items():
-            specs_data.append({
-                "Specification": spec, 
-                "Value": details.get('value', ''), 
-                "Unit": details.get('unit', ''),   
-                "LaTeX": details.get('latex', '')  
-            })
-    
-    df = pd.DataFrame(specs_data)
-    return df
+b = Variable("Wingspan", 8.942, "b", "m")
+S = Variable("Wing Area", 20.602, "S", "m²")
+rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
+g = Variable("Gravitational Acceleration", 9.80665, "g", "m/s²")
+
+m_sr = Variable("Average Mass", 9600.00, "m_{sr}", "kg")
+v_krst = Variable("Cruising Speed", 224.37, r"v_{krst}", "m/s")
+c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
 
 # use data points in calculations
 def get_specific_data(df, category):
@@ -59,12 +46,6 @@ def filter_data_for_preset(data, preset):
         filtered_data = data
 
     return filtered_data
-
-# vertical whitespace
-def spacer(height='5em'):
-    spacer_html = f'<div style="margin: {height};"></div>'
-    st.markdown(spacer_html, unsafe_allow_html=True)
-
 
 # ============================================================
 # ============================================================
@@ -147,7 +128,7 @@ def main():
     
 # ====================
 
-    st.header('2.2. Average mass')
+    st.subheader('2.2. Average mass')
 
     # Extracting weight data
     weights_data_df = get_specific_data(all_specs_df, "Weights")
@@ -257,28 +238,36 @@ def main():
 
 # ====================
 
-    st.subheader("Drag Coefficient")
-    st.write("Enter the following parameters to calculate the drag coefficient during cruise flight:")
+    # Drag Coefficient (Cx)
+
+    st.subheader("Cruise lift coefficient")
+
     
-    col1, col2 = st.columns(2)
-    with col1:
-        mr_input = st.number_input("Average Aircraft Mass (mr) [kg]", value=9600.0)
-        rho_input = st.number_input("Air Density (rho) [kg/m^3]", value=0.736116)
-        v_cruise_input = st.number_input("Cruise Speed (v_cruise) [m/s]", value=224.37)
-        S_input = st.number_input("Wing Reference Area (S) [m^2]", value=20.602)
+    with st.expander("Calculate Cruise Lift Coefficient"):
+        def calculate_c_z_krst():
+            c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
+            numbers = "\\frac{{9600.0 \\cdot 9.80665}}{{0.5 \\cdot 0.736116 \\cdot 224.37^2 \\cdot 20.602}}"
+            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [1em] = {numbers}"
 
-        calculate_button, clear_button = st.columns([3, 1])
-        with calculate_button:
-            if st.button('Calculate Drag Coefficient'):
-                C_D_cruise = calculate_drag_coefficient(mr_input, rho_input, v_cruise_input, S_input)
-                st.write(f"The calculated drag coefficient (C_D_cruise) is: {C_D_cruise:.3f}")
-        with clear_button:
-            if st.button('Clear'):
-                clear_values()
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            m_sr.value = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
+        with col2:
+            g.value = st.number_input(f'{g.name} ({g.unit})', value=g.value, step=0.01, format="%.3f")
+        with col3:
+            rho.value = st.number_input(f'{rho.name} ({rho.unit})', value=rho.value, step=0.001, format="%.5f")
+        with col4:
+            v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
 
-    with col2:
-        isa_conditions_code = inspect.getsource(get_ISA_conditions)
-        st.code(isa_conditions_code, language='python')
+        calculate_c_z_krst()
+    
+    variables_two_columns(c_z_krst, display_formula=False)
+    
+    st.latex(f"""{c_z_krst.latex} = {c_z_krst.formula}""")
+    st.latex(f"{c_z_krst.latex} = {c_z_krst.value:3f}")
+    
+
+
 
     st.markdown('***')
 
