@@ -2,7 +2,7 @@ import streamlit as st
 from data import Variable
 from utils import spacer, variables_two_columns, variables_three_columns
 
-c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "m/s")
+c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
 
 # d = Variable()
 airfoil_raw_data = [
@@ -61,21 +61,24 @@ def main():
     spacer()
 
     st.subheader("Criteria")
-    variables_two_columns(c_z_krst, display_formula=True)
+
+    c_z_op = Variable("", 0)
+
+    def calculate_c_z_op():
+        c_z_op.value = sorted(airfoils, key=lambda x: abs(x["Cz_op"].value - c_z_krst.value))
+        c_z_op.formula = f"{c_z_op.latex} \approx " + f"{c_z_krst.value}"
+
+    st.latex(f"{c_z_op.formula}")
+    calculate_c_z_op()
+    variables_three_columns(c_z_krst, emoji="1️⃣", display_formula=False)
     
-    c_z_op = None
-    # Sort the airfoils by 'Cz_op' in descending order
-    sorted_airfoils = sorted(airfoils, key=lambda x: x["Cz_op"].value, reverse=True)
-
-    # Get the top 5 airfoils with the highest 'Cz_op'
+    sorted_airfoils = sorted(airfoils, key=lambda x: abs(x["Cz_op"].value - c_z_krst.value))        
     top_airfoils = sorted_airfoils[:5]
-
-    # Display the top 5 airfoils
+        
     for i, airfoil in enumerate(top_airfoils, start=1):
-        st.write(f"Top {i} Airfoil: {airfoil['Name']} with Cz_op = {airfoil['Cz_op'].value}")
-        variables_three_columns(airfoil["Cz_op"], emoji="✈️", display_formula=True)
+        st.write(f"#{i} Airfoil: {airfoil['Name']} with Cz_op = {airfoil['Cz_op'].value}")
 
-    variables_three_columns(c_z_op, emoji="✈️", display_formula=True)
+
     
 
 if __name__ == "__main__":
