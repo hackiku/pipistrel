@@ -1,10 +1,9 @@
-
 # 3_wing_pg.py
 
 import streamlit as st
 from data import Variable
 from utils import spacer, variables_two_columns
-import math
+
 
 # Instantiate variables using the Variable class
 c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "m/s")
@@ -19,7 +18,6 @@ l_s = Variable("Chord Length", 3.028, "l_s", "m")
 l_0 = Variable("Root Chord Length", 1.576, "l_0", "m")
 b = Variable("Wingspan", 8.942, "b", "m")
 S = Variable("Wing Area", 20.602, "S", "m²")
-
 
 # n = 1.576 / l_s  # Taper ratio (n)
 
@@ -91,11 +89,6 @@ def main():
 
     calculate_taper_ratio()
     variables_two_columns(n, display_formula=True)  # n
-        
-    st.markdown("***")
-
-
-    
 
     st.markdown("***")
 
