@@ -55,7 +55,8 @@ def main():
         
         def calculate_lambda_wing():
             lambda_wing.value = b.value**2 / S.value
-            lambda_wing.formula = f"\\lambda = \\frac{{{b.latex}^2}}{{{S.latex}}} = \\frac{{{b.value:.2f}^2}}{{{S.value:.2f}}} = {lambda_wing.value:.3f}"
+            numbers = "=" + f"\\frac{{{b.value:.2f}^2}}{{{S.value:.2f}}}"
+            lambda_wing.formula = f"\\lambda = \\frac{{{b.latex}^2}}{{{S.latex}}} {numbers}"
         
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -63,39 +64,34 @@ def main():
         with col2:
             S.value = st.number_input(f'{S.name} {S.unit}', value=S.value, step=0.1, format="%.3f")
         with col3:
-          st.latex(f"{b.latex} = {b.value:.3f}")
+          st.latex(f"{b.latex} = {b.value:.3f} \ {b.unit}")
         with col4:
-          st.latex(f"{S.latex} = {S.value:.3f}")
+          st.latex(f"{S.latex} = {S.value:.3f} \ {S.unit}")
             # st.latex = (S.latex)
-        calculate_lambda_wing()
         # st.latex(lambda_wing.formula)               
+    
+    calculate_lambda_wing()
+    variables_two_columns(lambda_wing, display_formula=True) # λ
 
-    # λ
-    variables_two_columns(lambda_wing, display_formula=True)
+    with st.expander("Calculate wing taper ratio (n)"):
+      def calculate_taper_ratio():
+          n.value = l_0.value / l_s.value
+          numbers = "=" + f"\\frac{{{l_0.value:.2f}}}{{{l_s.value:.2f}}}"
+          n.formula = f"n = \\frac{{{l_0.latex}}}{{{l_s.latex}}} {numbers}"
+
+      col1, col2, col3 = st.columns(3)
+      with col1:
+          l_0.value = st.number_input(f'{l_0.name} {l_0.unit}', value=l_0.value, step=0.01, format="%.3f")
+      with col2:
+          l_s.value = st.number_input(f'{l_s.name} {l_s.unit}', value=l_s.value, step=0.01, format="%.3f")
+      with col3:
+          st.latex(f"{l_0.latex} = {l_0.value:.3f} \ {l_0.unit}")
+          st.latex(f"{l_s.latex} = {l_s.value:.3f} \ {l_s.unit}")
+
+    calculate_taper_ratio()
+    variables_two_columns(n, display_formula=True)  # n
         
-
-
-
-    
     st.markdown("***")
-
-    st.write("Calculate taper ratio (n):")
-    
-    variables_two_columns(n)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    
-
-
-    with col1:
-        l_0_value = st.number_input('Root Chord Length l_0 [m]', value=1.576, step=0.01)
-    with col2:
-        l_s_value = st.number_input('Chord Length l_s [m]', value=3.028, step=0.01)
-    with col3:
-        n_calculated = l_0_value / l_s_value
-        st.write(f"n = {n_calculated:.3f}")
-        n.value = n_calculated  # Update the variable's value
 
 
     
