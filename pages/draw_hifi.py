@@ -39,12 +39,13 @@ class Line:
         return ((self.start_x + self.end_x) // 2, (self.start_y + self.end_y) // 2)
 
 lines = {
-    'Wing Measurement': Line([357, 262, 914, 262], line_color="green", line_width=1),
+    'Wing Measurement': Line([356, 360, 915, 360], line_color="green", line_width=1),
     'Tail Measurement': Line([365, 449, 365, 848], line_color="red", line_width=1),
-    'Body Measurement': Line([228, 60, 364, 60], line_color="yellow", line_width=1),
-    'Centerline': Line([296, 112, 296, 932], line_color="orange", line_width=1),
+    'Fuselage Measurement': Line([228, 60, 364, 60], line_color="yellow", line_width=1),
+    'Cabin Measurement': Line([236, 120, 356, 120], line_color="yellow", line_width=1),
     'Elevator Width': Line([168, 960, 425, 960], line_color="yellow", line_width=1),
-    'Elevator Length': Line([100, 847, 100, 934], line_color="green", line_width=1),
+    'Elevator Length': Line([100, 848, 100, 934], line_color="green", line_width=1),
+    # 'Centerline': Line([296, 112, 296, 932], line_color="orange", line_width=1),
 }
 
 def update_line_positions(line, start_x, start_y, end_x, end_y):
@@ -63,11 +64,40 @@ def draw_text(draw, text, position, text_color='white', font_size=40):
     font = ImageFont.load_default()
     draw.text(position, text, fill=text_color, font=font)
 
-def convert_px_to_m(pixel_length):
-    wing_length_original = 4.855
-    tail_length_original = 3.210
-    fuselage_length_original = 1.100
-    return wing_length_original / pixel_length
+known_lengths = {
+    'Wing Measurement': 4.855,
+    'Tail Measurement': 3.210,
+    'Fuselage Measurement': 1.100,
+    'Cabin Measurement': 1.000,
+    'Elevator Width': 2.175,
+    'Elevator Length': 0.738,
+}
+
+def convert_px_to_m(lines):
+    total_weighted_conversion = 0
+    total_pixel_length = 0
+
+    for line_key, real_length in known_lengths.items():
+        if line_key in lines:
+            pixel_length = lines[line_key].calculate_length()
+            if pixel_length > 0:
+                conversion_factor = real_length / pixel_length
+                # Weight the conversion factor by the pixel length of the line
+                total_weighted_conversion += conversion_factor * pixel_length
+                total_pixel_length += pixel_length
+
+    if total_pixel_length > 0:
+        # Calculate the weighted average conversion factor
+        return total_weighted_conversion / total_pixel_length
+    else:
+        return None
+
+    # Average the conversion factors
+    if conversion_factors:
+        return sum(conversion_factors) / len(conversion_factors)
+    else:
+        return None
+
 
 img_path = "./assets/wing_black_horizontal.png"
 img = Image.open(img_path)
@@ -78,25 +108,36 @@ pixel_canvas_width, pixel_canvas_height = img.size
 # meter_canvas_width = pixel_canvas_width * conversion_factor
 # meter_canvas_height = pixel_canvas_height * conversion_factor
 
-# Column layout for the line position controls
+# STATE
+for line_key in lines.keys():
+    if line_key not in st.session_state:
+        line = lines[line_key]
+        st.session_state[line_key] = [line.start_x, line.start_y, line.end_x, line.end_y]
+
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     selected_line_key = st.selectbox('Select Line to Modify', list(lines.keys()))
-    selected_line = lines[selected_line_key]
+    # selected_line = lines[selected_line_key]
 with col2:
-    start_x = st.number_input('Start X', value=selected_line.start_x, max_value=pixel_canvas_width, step=1)
+    st.session_state[selected_line_key][0] = st.number_input('Start X', value=st.session_state[selected_line_key][0], max_value=pixel_canvas_width, step=1)
 with col3:
-    start_y = st.number_input('Start Y', value=selected_line.start_y, max_value=pixel_canvas_height, step=1)
+    st.session_state[selected_line_key][1] = st.number_input('Start Y', value=st.session_state[selected_line_key][1], max_value=pixel_canvas_height, step=1)
 with col4:
-    end_x = st.number_input('End X', value=selected_line.end_x, max_value=pixel_canvas_width, step=1)
+    st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
 with col5:
-    end_y = st.number_input('End Y', value=selected_line.end_y, max_value=pixel_canvas_height, step=1)
+    st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
 
 # Update the selected line with the new positions
-update_line_positions(selected_line, start_x, start_y, end_x, end_y)
+selected_line = lines[selected_line_key]
+selected_line.start_x, selected_line.start_y, selected_line.end_x, selected_line.end_y = st.session_state[selected_line_key]
 
-wing_pixel_length = lines['Wing Measurement'].calculate_length()
-conversion_factor = convert_px_to_m(wing_pixel_length)
+for key, line in lines.items():
+    if key in st.session_state:
+        line.start_x, line.start_y, line.end_x, line.end_y = st.session_state[key]
+
+# update_line_positions(selected_line, start_x, start_y, end_x, end_y)
+
+conversion_factor = convert_px_to_m(lines)
 
 # Redraw the lines on the image
 img = Image.open(img_path)
@@ -115,4 +156,20 @@ draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", 
 draw_text(draw, f"Conversion factor: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
 draw_text(draw, f"Conversion factor: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 90))
 # Display the updated image in the Streamlit app
+
+table_data = []
+for line_key, line in lines.items():
+    pixel_length = line.calculate_length()
+    meter_length = pixel_length * conversion_factor
+    actual_length = known_lengths.get(line_key, 0)
+    error = abs(actual_length - meter_length) / actual_length * 100 if actual_length else 0
+    table_data.append((line_key, pixel_length, meter_length, actual_length, error))
+
+# Display the table in Streamlit
+table_markdown = "| Measurement | Pixel Length | Calculated Length (m) | Actual Length (m) | Error (%) |\n"
+table_markdown += "| ------------ | ------------- | ---------------------- | ------------------ | ---------- |\n"
+for data in table_data:
+    table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
+
+st.markdown(table_markdown)
 st.image(img)
