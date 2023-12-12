@@ -38,9 +38,7 @@ class Trapezoid:
     def draw(self, draw):
         # Draw the four sides of the trapezoid
         draw.line([self.top_left, self.top_right, self.bottom_right, self.bottom_left, self.top_left], 
-                  fill=self.color, width=self.line_width)
-
-
+            fill=self.color, width=self.line_width)
 
 img = Image.open("./assets/wing_black.jpg")
 width, height = img.size
@@ -48,7 +46,7 @@ draw = ImageDraw.Draw(img)
 
 # Initialize lines
 original_line = Line((258, 25), (258, 336), line_color="green", label="Line 1")
-line_fuselage = Line((150, 160), (150, 600), line_color="orange", label="Line 2")
+line_fuselage = Line((139, 348), (139, 431), line_color="darkblue", label="Line 2")
 line_powerplant = Line((388, 328), (616, 328), line_color="blue", label="Line 3")
 
 # Streamlit UI for selecting and modifying specific lines
@@ -90,11 +88,10 @@ length_original_meters = 4.855  # The original length in meters
 conversion_factor = line_length_pixels / length_original_meters
 line_length_meters = line_length_pixels / conversion_factor
 
-
 y1 = y2 = 26
 x1 = 325 # top left
 x2 = 380 # top right
-y3 = y4 = 400 # bottom
+y3 = y4 = 389 # bottom
 x3 = 380
 x4 = 309
 
@@ -108,8 +105,6 @@ wing_trapezoid = Trapezoid(top_left, top_right, bottom_right, bottom_left, color
 
 # Draw the trapezoid on the image
 wing_trapezoid.draw(draw)
-
-
 
 # Display the image
 st.image(img)
