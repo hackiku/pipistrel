@@ -14,8 +14,9 @@ class Line:
         self.line_color = line_color
         self.line_width = line_width
 
+    # Draw the line on the image
+
     def draw(self, draw):
-        # Draw the line on the image
         draw.line((self.start_x, self.start_y, self.end_x, self.end_y), fill=self.line_color, width=self.line_width)
         self.annotate_length(draw)
 
@@ -47,6 +48,33 @@ lines = {
     'Elevator Length': Line([100, 848, 100, 934], line_color="green", line_width=1),
     # 'Centerline': Line([296, 112, 296, 932], line_color="orange", line_width=1),
 }
+
+class Trapezoid:
+    def __init__(self, l_0, l_1, x_root, x_tip, y_root, y_tip, line_color='red', line_width=2):
+        self.l_0 = l_0
+        self.l_1 = l_1
+        self.x_root = x_root
+        self.x_tip = x_tip
+        self.y_root = y_root
+        self.y_tip = y_tip
+        self.line_color = line_color
+        self.line_width = line_width
+
+    def draw(self, draw):
+        # Calculate corner points
+        top_left = (self.x_root, self.y_root - self.l_0 / 2)
+        top_right = (self.x_tip, self.y_root - self.l_0 / 2)
+        bottom_left = (self.x_root, self.y_root + self.l_0 / 2)
+        bottom_right = (self.x_tip, self.y_tip + self.l_1 / 2)
+
+        # Draw the trapezoid
+        draw.line([top_left, bottom_left], fill=self.line_color, width=self.line_width)
+        draw.line([bottom_left, bottom_right], fill=self.line_color, width=self.line_width)
+        draw.line([bottom_right, top_right], fill=self.line_color, width=self.line_width)
+        draw.line([top_right, top_left], fill=self.line_color, width=self.line_width)
+
+default_trapezoid_values = [100, 20, 500, 600, 400, 450]
+trapezoid = Trapezoid(*default_trapezoid_values)
 
 def update_line_positions(line, start_x, start_y, end_x, end_y):
     line.start_x = start_x
@@ -92,12 +120,10 @@ def convert_px_to_m(lines):
     else:
         return None
 
-    # Average the conversion factors
-    if conversion_factors:
-        return sum(conversion_factors) / len(conversion_factors)
-    else:
-        return None
-
+    # if conversion_factors:
+    #    return sum(conversion_factors) / len(conversion_factors)
+    # else:
+    #    return None
 
 img_path = "./assets/wing_black_horizontal.png"
 img = Image.open(img_path)
@@ -105,8 +131,6 @@ draw = ImageDraw.Draw(img)
 
 # define canvas
 pixel_canvas_width, pixel_canvas_height = img.size
-# meter_canvas_width = pixel_canvas_width * conversion_factor
-# meter_canvas_height = pixel_canvas_height * conversion_factor
 
 # STATE
 for line_key in lines.keys():
@@ -114,22 +138,41 @@ for line_key in lines.keys():
         line = lines[line_key]
         st.session_state[line_key] = [line.start_x, line.start_y, line.end_x, line.end_y]
 
-col1, col2, col3, col4, col5 = st.columns(5)
+with st.expander("Measurements"):
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        selected_line_key = st.selectbox('Select Line to Modify', list(lines.keys()))
+        # selected_line = lines[selected_line_key]
+    with col2:
+        st.session_state[selected_line_key][0] = st.number_input('Start X', value=st.session_state[selected_line_key][0], max_value=pixel_canvas_width, step=1)
+    with col3:
+        st.session_state[selected_line_key][1] = st.number_input('Start Y', value=st.session_state[selected_line_key][1], max_value=pixel_canvas_height, step=1)
+    with col4:
+        st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
+    with col5:
+        st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
+
+col1, col2, col3 = st.columns(3)
 with col1:
-    selected_line_key = st.selectbox('Select Line to Modify', list(lines.keys()))
-    # selected_line = lines[selected_line_key]
+    trapezoid.l_0 = st.number_input('Root Length (l_0)', value=trapezoid.l_0, step=10)
 with col2:
-    st.session_state[selected_line_key][0] = st.number_input('Start X', value=st.session_state[selected_line_key][0], max_value=pixel_canvas_width, step=1)
+    trapezoid.x_root = st.number_input('Root X Position (x_root)', value=trapezoid.x_root, step=10)
 with col3:
-    st.session_state[selected_line_key][1] = st.number_input('Start Y', value=st.session_state[selected_line_key][1], max_value=pixel_canvas_height, step=1)
+    trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=10)
+
+col4, col5, col6 = st.columns(3)
 with col4:
-    st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
+    trapezoid.l_1 = st.number_input('Tip Length (l_1)', value=trapezoid.l_1, step=10)
 with col5:
-    st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
+    trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=10)
+with col6:
+    trapezoid.y_tip = st.number_input('Tip Y Position (y_tip)', value=trapezoid.y_tip, step=10)
 
 # Update the selected line with the new positions
 selected_line = lines[selected_line_key]
 selected_line.start_x, selected_line.start_y, selected_line.end_x, selected_line.end_y = st.session_state[selected_line_key]
+
+trapezoid.draw(draw)
 
 for key, line in lines.items():
     if key in st.session_state:
@@ -148,6 +191,7 @@ for line_key, line in lines.items():
     meter_length = pixel_length * conversion_factor
     line.annotate_length(draw, meter_length)
 
+trapezoid.draw(draw)
 draw_all_lines(draw, lines)
 
 canvas_info_position = (pixel_canvas_width - int(0.2 * pixel_canvas_width), pixel_canvas_height - int(0.2 * pixel_canvas_height))
@@ -171,5 +215,5 @@ table_markdown += "| ------------ | ------------- | ---------------------- | ---
 for data in table_data:
     table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
 
-st.markdown(table_markdown)
 st.image(img)
+st.markdown(table_markdown)
