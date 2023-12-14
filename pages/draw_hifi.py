@@ -40,7 +40,7 @@ class Line:
         return ((self.start_x + self.end_x) // 2, (self.start_y + self.end_y) // 2)
 
 lines = {
-    'Wing Measurement': Line([356, 360, 915, 360], line_color="green", line_width=1),
+    'Wing Measurement': Line([356, 260, 915, 260], line_color="green", line_width=1),
     'Tail Measurement': Line([365, 449, 365, 848], line_color="red", line_width=1),
     'Fuselage Measurement': Line([228, 60, 364, 60], line_color="yellow", line_width=1),
     'Cabin Measurement': Line([236, 120, 356, 120], line_color="yellow", line_width=1),
@@ -51,29 +51,29 @@ lines = {
 
 class Trapezoid:
     def __init__(self, l_0, l_1, x_root, x_tip, y_root, y_tip, line_color='red', line_width=2):
-        self.l_0 = l_0
-        self.l_1 = l_1
-        self.x_root = x_root
-        self.x_tip = x_tip
-        self.y_root = y_root
-        self.y_tip = y_tip
+        self.l_0 = l_0  # Tip length
+        self.l_1 = l_1  # Root length
+        self.x_root = x_root  # X position for the root line
+        self.x_tip = x_tip  # X position for the tip line
+        self.y_root = y_root  # Top y-coordinate for the root line
+        self.y_tip = y_tip  # Top y-coordinate for the tip line
         self.line_color = line_color
         self.line_width = line_width
 
     def draw(self, draw):
-        # Calculate corner points
-        top_left = (self.x_root, self.y_root - self.l_0 / 2)
-        top_right = (self.x_tip, self.y_root - self.l_0 / 2)
-        bottom_left = (self.x_root, self.y_root + self.l_0 / 2)
-        bottom_right = (self.x_tip, self.y_tip + self.l_1 / 2)
+        # Calculate corner points for the trapezoid
+        top_root = (self.x_root, self.y_root)
+        bottom_root = (self.x_root, self.y_root + self.l_1)
+        top_tip = (self.x_tip, self.y_tip)
+        bottom_tip = (self.x_tip, self.y_tip + self.l_0)
 
         # Draw the trapezoid
-        draw.line([top_left, bottom_left], fill=self.line_color, width=self.line_width)
-        draw.line([bottom_left, bottom_right], fill=self.line_color, width=self.line_width)
-        draw.line([bottom_right, top_right], fill=self.line_color, width=self.line_width)
-        draw.line([top_right, top_left], fill=self.line_color, width=self.line_width)
+        draw.line([top_root, bottom_root], fill=self.line_color, width=self.line_width)  # Root line
+        draw.line([bottom_root, bottom_tip], fill=self.line_color, width=self.line_width)  # Bottom line
+        draw.line([bottom_tip, top_tip], fill=self.line_color, width=self.line_width)  # Tip line
+        draw.line([top_tip, top_root], fill=self.line_color, width=self.line_width)  # Top line
 
-default_trapezoid_values = [100, 20, 500, 600, 400, 450]
+default_trapezoid_values = [90, 130, 300, 914, 320, 360]
 trapezoid = Trapezoid(*default_trapezoid_values)
 
 def update_line_positions(line, start_x, start_y, end_x, end_y):
@@ -125,95 +125,101 @@ def convert_px_to_m(lines):
     # else:
     #    return None
 
-img_path = "./assets/wing_black_horizontal.png"
-img = Image.open(img_path)
-draw = ImageDraw.Draw(img)
+def main():
 
-# define canvas
-pixel_canvas_width, pixel_canvas_height = img.size
+    img_path = "./assets/wing_black_horizontal.png"
+    img = Image.open(img_path)
+    draw = ImageDraw.Draw(img)
 
-# STATE
-for line_key in lines.keys():
-    if line_key not in st.session_state:
-        line = lines[line_key]
-        st.session_state[line_key] = [line.start_x, line.start_y, line.end_x, line.end_y]
+    # define canvas
+    pixel_canvas_width, pixel_canvas_height = img.size
 
-with st.expander("Measurements"):
-    col1, col2, col3, col4, col5 = st.columns(5)
+    # STATE
+    for line_key in lines.keys():
+        if line_key not in st.session_state:
+            line = lines[line_key]
+            st.session_state[line_key] = [line.start_x, line.start_y, line.end_x, line.end_y]
+
+    with st.expander("Measurements"):
+        col1, col2, col3, col4, col5 = st.columns(5)
+        with col1:
+            selected_line_key = st.selectbox('Select Line to Modify', list(lines.keys()))
+            # selected_line = lines[selected_line_key]
+        with col2:
+            st.session_state[selected_line_key][0] = st.number_input('Start X', value=st.session_state[selected_line_key][0], max_value=pixel_canvas_width, step=1)
+        with col3:
+            st.session_state[selected_line_key][1] = st.number_input('Start Y', value=st.session_state[selected_line_key][1], max_value=pixel_canvas_height, step=1)
+        with col4:
+            st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
+        with col5:
+            st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
+
+    col1, col2, col3 = st.columns(3)
     with col1:
-        selected_line_key = st.selectbox('Select Line to Modify', list(lines.keys()))
-        # selected_line = lines[selected_line_key]
+        trapezoid.l_0 = st.number_input('Tip Length (l_0)', value=trapezoid.l_0, step=10)
     with col2:
-        st.session_state[selected_line_key][0] = st.number_input('Start X', value=st.session_state[selected_line_key][0], max_value=pixel_canvas_width, step=1)
+        trapezoid.x_root = st.number_input('Root X Position (x_root)', value=trapezoid.x_root, step=10)
     with col3:
-        st.session_state[selected_line_key][1] = st.number_input('Start Y', value=st.session_state[selected_line_key][1], max_value=pixel_canvas_height, step=1)
+        trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=10)
+
+    col4, col5, col6 = st.columns(3)
     with col4:
-        st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
+        trapezoid.l_1 = st.number_input('Root Length (l_1)', value=trapezoid.l_1, step=10)
     with col5:
-        st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
+        trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=10)
+    with col6:
+        trapezoid.y_tip = st.number_input('Tip Y Position (y_tip)', value=trapezoid.y_tip, step=10)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    trapezoid.l_0 = st.number_input('Root Length (l_0)', value=trapezoid.l_0, step=10)
-with col2:
-    trapezoid.x_root = st.number_input('Root X Position (x_root)', value=trapezoid.x_root, step=10)
-with col3:
-    trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=10)
+    # Update the selected line with the new positions
+    selected_line = lines[selected_line_key]
+    selected_line.start_x, selected_line.start_y, selected_line.end_x, selected_line.end_y = st.session_state[selected_line_key]
 
-col4, col5, col6 = st.columns(3)
-with col4:
-    trapezoid.l_1 = st.number_input('Tip Length (l_1)', value=trapezoid.l_1, step=10)
-with col5:
-    trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=10)
-with col6:
-    trapezoid.y_tip = st.number_input('Tip Y Position (y_tip)', value=trapezoid.y_tip, step=10)
+    trapezoid.draw(draw)
 
-# Update the selected line with the new positions
-selected_line = lines[selected_line_key]
-selected_line.start_x, selected_line.start_y, selected_line.end_x, selected_line.end_y = st.session_state[selected_line_key]
+    for key, line in lines.items():
+        if key in st.session_state:
+            line.start_x, line.start_y, line.end_x, line.end_y = st.session_state[key]
 
-trapezoid.draw(draw)
+    # update_line_positions(selected_line, start_x, start_y, end_x, end_y)
 
-for key, line in lines.items():
-    if key in st.session_state:
-        line.start_x, line.start_y, line.end_x, line.end_y = st.session_state[key]
+    conversion_factor = convert_px_to_m(lines)
 
-# update_line_positions(selected_line, start_x, start_y, end_x, end_y)
+    # Redraw the lines on the image
+    img = Image.open(img_path)
+    draw = ImageDraw.Draw(img)
 
-conversion_factor = convert_px_to_m(lines)
+    for line_key, line in lines.items():
+        pixel_length = line.calculate_length()
+        meter_length = pixel_length * conversion_factor
+        line.annotate_length(draw, meter_length)
 
-# Redraw the lines on the image
-img = Image.open(img_path)
-draw = ImageDraw.Draw(img)
+    trapezoid.draw(draw)
+    draw_all_lines(draw, lines)
 
-for line_key, line in lines.items():
-    pixel_length = line.calculate_length()
-    meter_length = pixel_length * conversion_factor
-    line.annotate_length(draw, meter_length)
+    canvas_info_position = (pixel_canvas_width - int(0.2 * pixel_canvas_width), pixel_canvas_height - int(0.2 * pixel_canvas_height))
+    draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", canvas_info_position)
+    # draw_text(draw, f"Meter canvas = {meter_canvas_width:.2f} x {meter_canvas_height:.2f} m", (canvas_info_position[0], canvas_info_position[1] + 30))
+    draw_text(draw, f"Conversion factor: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
+    draw_text(draw, f"Conversion factor: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 90))
+    # Display the updated image in the Streamlit app
 
-trapezoid.draw(draw)
-draw_all_lines(draw, lines)
+    st.image(img)
 
-canvas_info_position = (pixel_canvas_width - int(0.2 * pixel_canvas_width), pixel_canvas_height - int(0.2 * pixel_canvas_height))
-draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", canvas_info_position)
-# draw_text(draw, f"Meter canvas = {meter_canvas_width:.2f} x {meter_canvas_height:.2f} m", (canvas_info_position[0], canvas_info_position[1] + 30))
-draw_text(draw, f"Conversion factor: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
-draw_text(draw, f"Conversion factor: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 90))
-# Display the updated image in the Streamlit app
+    with st.expander("Pixel to m conversion accuracy"):
+        table_data = []
+        for line_key, line in lines.items():
+            pixel_length = line.calculate_length()
+            meter_length = pixel_length * conversion_factor
+            actual_length = known_lengths.get(line_key, 0)
+            error = abs(actual_length - meter_length) / actual_length * 100 if actual_length else 0
+            table_data.append((line_key, pixel_length, meter_length, actual_length, error))
 
-table_data = []
-for line_key, line in lines.items():
-    pixel_length = line.calculate_length()
-    meter_length = pixel_length * conversion_factor
-    actual_length = known_lengths.get(line_key, 0)
-    error = abs(actual_length - meter_length) / actual_length * 100 if actual_length else 0
-    table_data.append((line_key, pixel_length, meter_length, actual_length, error))
+        # Display the table in Streamlit
+        table_markdown = "| Measurement | Pixel Length | Calculated Length (m) | Actual Length (m) | Error (%) |\n"
+        table_markdown += "| ------------ | ------------- | ---------------------- | ------------------ | ---------- |\n"
+        for data in table_data:
+            table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
+        st.markdown(table_markdown)
 
-# Display the table in Streamlit
-table_markdown = "| Measurement | Pixel Length | Calculated Length (m) | Actual Length (m) | Error (%) |\n"
-table_markdown += "| ------------ | ------------- | ---------------------- | ------------------ | ---------- |\n"
-for data in table_data:
-    table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
-
-st.image(img)
-st.markdown(table_markdown)
+if __name__ == "__main__":
+    main()

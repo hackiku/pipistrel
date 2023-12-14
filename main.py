@@ -2,14 +2,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import inspect
-from calcs import * # all aerodynamics calculations
+from calcs import *
 from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
 from utils import spacer, variables_two_columns
+from pages.draw_hifi import *
+from pages.draw_hifi import main as draw_hifi_main
 
 # section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
-b = Variable("Wingspan", 8.942, "b", "m")
+# b = Variable("Wingspan", 8.942, "b", "m")
+b = Variable("Wingspan", aircraft_specs["Dimensions"]["Wingspan"]["value"], "b", aircraft_specs["Dimensions"]["Wingspan"]["unit"])
 S = Variable("Wing Area", 20.602, "S", "m²")
 rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
 g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
@@ -59,7 +62,6 @@ def main():
     svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
     components.iframe(svelte_app_url, width=700, height=500)
 
-
     st.markdown('***')
 
     # 1. specs
@@ -89,27 +91,28 @@ def main():
     st.write("At early design stages we approximate the area geometrically to kickstart the airfoil selection process.")
     
     # image
-    st.image('./assets/wing_black.jpg')
-    
-    # 3col
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        l0 = st.number_input('Root Chord Length (l0) [m]', value=1.576, step=0.5)
-    with col2:
-        l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, step=0.5)
-    with col3:
-        b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)
 
-    wing_area = 0.5 * b * (l0 + l1)
+    draw_hifi_main()
+
+    # col1, col2, col3 = st.columns(3)
+    # with col1:
+    #     l0 = st.number_input('Root Chord Length (l0) [m]', value=1.576, step=0.5)
+    # with col2:
+    #     l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, step=0.5)
+    # with col3:
+    #     b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)    
+    
+    b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)
+    wing_area = 0.5 * b * (trapezoid.l_0 + trapezoid.l_1)
 
     # select l0, l1, b
     
-    st.latex(r"""
-    S_0 = (\frac{l_0 + l_1}{2} \cdot \frac{b}{2}) = \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2} = 10.301 \, \text{m}^2
+    st.latex(f"""
+    S_0 = (\frac{trapezoid.l_0 + trapezoid.l_1}{2} \cdot \frac{b}{2}) = \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2} = 10.301 \, \text{{m}}^2
     """)
-    st.latex("S = 20.602 \ {m}^2")
+    st.latex(r"S = 20.602 \ {m}^2")
         
-    spacer('2em')
+    spacer()
     
 # ====================
 
