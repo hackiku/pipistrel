@@ -48,8 +48,6 @@ def main():
     - Gradijent uzgona krila α
     - Kritičninapadniugaokrilaαkr""")
     
-    st.image('./assets/wing_black.jpg')
-    
     st.header("3.1 Lift characteristics of wing")
     st.markdown("Proračun se u prvoj iteraciji u programu Trapezno krilo- Glauert obavlja pod pretpostavkom nultog konstruktivnog vitoperenja")
 

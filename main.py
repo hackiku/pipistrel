@@ -2,17 +2,18 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import inspect
-from calcs import *
+# from calcs import *
 from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
 from utils import spacer, variables_two_columns
-from pages.draw_hifi import *
-from pages.draw_hifi import main as draw_hifi_main
+from pages import draw_hifi
+# from pages.draw_hifi import *
+# from pages.draw_hifi import main as draw_hifi_main
 
 # section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
 # b = Variable("Wingspan", 8.942, "b", "m")
-b = Variable("Wingspan", aircraft_specs["Dimensions"]["Wingspan"]["value"], "b", aircraft_specs["Dimensions"]["Wingspan"]["unit"])
+# b = Variable("Wingspan", aircraft_specs["Dimensions"]["Wingspan"]["value"], "b", aircraft_specs["Dimensions"]["Wingspan"]["unit"])
 S = Variable("Wing Area", 20.602, "S", "m²")
 rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
 g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
@@ -59,8 +60,8 @@ def main():
     spacer("5em")
 
     # 3D model
-    svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
-    components.iframe(svelte_app_url, width=700, height=500)
+    # svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
+    # components.iframe(svelte_app_url, width=400, height=400)
 
     st.markdown('***')
 
@@ -90,31 +91,36 @@ def main():
     st.subheader('2.1. Wing area calculator')
     st.write("At early design stages we approximate the area geometrically to kickstart the airfoil selection process.")
     
-    # image
+    # image 
 
-    draw_hifi_main()
+    draw_hifi.main()
 
-    # col1, col2, col3 = st.columns(3)
-    # with col1:
-    #     l0 = st.number_input('Root Chord Length (l0) [m]', value=1.576, step=0.5)
-    # with col2:
-    #     l1 = st.number_input('Tip Chord Length (l1) [m]', value=3.028, step=0.5)
-    # with col3:
-    #     b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)    
+    st.markdown('***')
+
+
+    l0_m = Variable("Root Chord Length", draw_hifi.trapezoid.l_0 * 0.0084, "l_0", "m")
+    l1_m = Variable("Tip Chord Length", draw_hifi.trapezoid.l_1 * 0.0084, "l_1", "m")
+    b_m = Variable("Wingspan", 10.70, "b", "m")
     
-    b = st.number_input('Wingspan (b) [m]', value=4.475, step=0.5)
-    wing_area = 0.5 * b * (trapezoid.l_0 + trapezoid.l_1)
+    # st.write(f"l1 is {l1_poh} l0 is {l0_poh}")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        l0_m.value = st.number_input('Root Chord Length (l0_m) [m]', value=l0_m.value, step=0.5)
+    with col2:
+        l1_m.value = st.number_input('Tip Chord Length (l1_m) [m]', value=l1_m.value, step=0.5)
+    with col3:
+        b_m.value = st.number_input('Wingspan (b) [m]', value=b_m.value, step=0.5)
 
-    # select l0, l1, b
-    
-    st.latex(f"""
-    S_0 = (\frac{trapezoid.l_0 + trapezoid.l_1}{2} \cdot \frac{b}{2}) = \frac{1.576 + 3.028}{2} \cdot \frac{4.475}{2} = 10.301 \, \text{{m}}^2
-    """)
-    st.latex(r"S = 20.602 \ {m}^2")
+    wing_area = 0.5 * b_m.value * (l0_m.value + l1_m.value)
+
+    # wing surface formula
+    st.latex(f"S = \\frac{{{l0_m.latex} + {l1_m.latex}}}{2} \\cdot {b_m.latex}")
+    st.latex(f"S = \\frac{{{l0_m.value:.3f} + {l1_m.value:.3f}}}{2} \\cdot {b_m.value:.3f}")
+    st.latex(f"S = {wing_area:.3f} \\, \\text{{m}}^2")
         
     spacer()
     
-# ====================
+# ==================== MASS
 
     st.subheader('2.2. Average mass')
 
@@ -228,7 +234,7 @@ def main():
 
     # Drag Coefficient (Cx)
 
-    st.subheader("Cruise lift coefficient")
+    st.subheader("Lift coefficient at cruise (c_z_krst)")
 
     
     with st.expander("Calculate Cruise Lift Coefficient"):
