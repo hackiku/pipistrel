@@ -2,23 +2,16 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import inspect
-# from calcs import *
 from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
 from utils import spacer, variables_two_columns
 from pages import draw_hifi
-# from pages.draw_hifi import *
-# from pages.draw_hifi import main as draw_hifi_main
-
-# section = st.sidebar.radio('Go to section', ['Introduction', 'Aircraft Specs', 'Airfoil Selection', 'ISA Conditions', 'Performance Metrics'])
 
 # b = Variable("Wingspan", 8.942, "b", "m")
 # b = Variable("Wingspan", aircraft_specs["Dimensions"]["Wingspan"]["value"], "b", aircraft_specs["Dimensions"]["Wingspan"]["unit"])
 S = Variable("Wing Area", 20.602, "S", "m²")
-rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
-g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
 
-m_sr = Variable("Average mass", 9600.00, "m_{sr}", "kg")
+m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
 v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
 c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
 
@@ -97,7 +90,6 @@ def main():
 
     st.markdown('***')
 
-
     l0_m = Variable("Root Chord Length", draw_hifi.trapezoid.l_0 * 0.0084, "l_0", "m")
     l1_m = Variable("Tip Chord Length", draw_hifi.trapezoid.l_1 * 0.0084, "l_1", "m")
     b_m = Variable("Wingspan", 10.70, "b", "m")
@@ -114,73 +106,41 @@ def main():
     wing_area = 0.5 * b_m.value * (l0_m.value + l1_m.value)
 
     # wing surface formula
-    st.latex(f"S = \\frac{{{l0_m.latex} + {l1_m.latex}}}{2} \\cdot {b_m.latex}")
-    st.latex(f"S = \\frac{{{l0_m.value:.3f} + {l1_m.value:.3f}}}{2} \\cdot {b_m.value:.3f}")
+    st.latex(f"S = \\frac{{{l0_m.latex} + {l1_m.latex}}}{2} \\cdot {b_m.latex} = \\frac{{{l0_m.value:.3f} + {l1_m.value:.3f}}}{2} \\cdot {b_m.value:.3f}")
     st.latex(f"S = {wing_area:.3f} \\, \\text{{m}}^2")
-        
+
     spacer()
     
 # ==================== MASS
 
+    # mass 
+
     st.subheader('2.2. Average mass')
 
-    # Extracting weight data
-    weights_data_df = get_specific_data(all_specs_df, "Weights")
+    max_take_off_weight = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
+    design_empty_weight = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
 
-    # Filter to include only specific entries
-    required_specs = ["Design Empty Weight", "Max Take Off Weight"]
-    filtered_weights_df = weights_data_df[weights_data_df['Specification'].isin(required_specs)]
-
-    # Create input fields for selected weight specifications
+    # Create input fields for max takeoff weight and design empty weight
     col1, col2 = st.columns(2)
     with col1:
-
-        design_empty_weight = max_take_off_weight = 0.0
-
-        # Iterate through filtered weights data and create input fields
-        for index, row in filtered_weights_df.iterrows():
-            default_value = float(row['Value'])
-            spec = row['Specification']
-            description = row['Unit']
-
-            if spec == "Design Empty Weight":
-                design_empty_weight = st.number_input(
-                    label=f"{spec} ({description})", 
-                    value=default_value, 
-                    min_value=0.0, 
-                    step=0.1,
-                    format="%.2f"
-                )
-            elif spec == "Max Take Off Weight":
-                max_take_off_weight = st.number_input(
-                    label=f"{spec} ({description})", 
-                    value=default_value, 
-                    min_value=0.0, 
-                    step=0.1,
-                    format="%.2f"
-                )
-
-    # Button to calculate average mass
-    if st.button('Calculate Average Mass'):
-        average_mass = calculate_average_mass(max_take_off_weight, design_empty_weight)
-        # Format average_mass to 2 decimal places
-        average_mass_formatted = f"{average_mass:.2f}"
-        st.latex(fr"m_r = \frac{{m_{{max}} + m_{{min}}}}{2} = \frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {average_mass_formatted} \, \text{{kg}}")
-    else:
-        st.latex(r"m_r = \frac{m_{max} + m_{min}}{2}")
-
+        max_take_off_weight = st.number_input("Max Take Off Weight (kg)", value=max_take_off_weight, min_value=0,
+        step=20)
     with col2:
-        average_mass_code = inspect.getsource(calculate_average_mass)
-        st.code(average_mass_code, language='python')
-    
+        design_empty_weight = st.number_input("Design Empty Weight (kg)", value=design_empty_weight, min_value=0, 
+        step=20)
+
+    # Calculate average mass
+    m_sr.value = float (max_take_off_weight + design_empty_weight) / 2
+    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr.value:.2f} \\, \\text{{kg}}")
 
     spacer('2em')
+    
+# ==================== ISA
 
-# ====================
-
-    # 2.3 ISA conditions 
-    if 'altitude' not in st.session_state:
-        st.session_state['altitude'] = 5000  # Default altitude
+    rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
+    g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
+    
+    altitude = 4500
 
     # 2.3 ISA conditions
     st.subheader("2.3. ISA air conditions")
@@ -189,15 +149,16 @@ def main():
         # Altitude slider using session state
         altitude_input = st.slider(
             "Altitude (m)", 
-            # min_value=0, 
+            min_value=0,
+            value = altitude,
             max_value=50000, 
-            value=st.session_state['altitude'], 
-            step=100
-        )
-        st.session_state['altitude'] = altitude_input  # Update session state with the new value
+            # value=st.session_state['altitude'], 
+            step=100)
+        altitude = altitude_input
 
-        # Getting ISA conditions based on session state altitude
-        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(st.session_state['altitude'])
+        # get ISA conditions from isa_lite.py
+        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
+        rho.value = density
 
         # Displaying the values and zone using LaTeX
         st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")
@@ -211,39 +172,54 @@ def main():
         isa_conditions_code = inspect.getsource(get_ISA_conditions)
         st.code(isa_conditions_code, language='python')
 
-    spacer('2em')
+    spacer()
 
-# ====================
+# ==================== SPEED
     
     # cruise speed
 
-    st.subheader("Cruise speed")
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([3,1])
     with col1:
-        st.latex(r"v_{krst} = M_{krst} \cdot c")
-        st.latex(r"= 0.7 \cdot 320.529")
-        st.latex(r"v_{krst} = 224.37 \, \text{m/s} \, (807.73 \, \text{km/h})")
+        st.subheader("2.3. Define cruise speed")
     with col2:
-        cruise_speed_code = inspect.getsource(calculate_cruise_speed)
-        st.code(cruise_speed_code, language='python')
+        st.write()
+        # unit = st.radio("", ['Km/h', 'm/s'])
+    
+    st.write(r"Recommended: 70-80% of Vne for piston engines.")
 
-    spacer('3em')
+    # Retrieve the Never Exceed Speed from aircraft_specs
+    v_ne_poh = aircraft_specs["Performance"]["Never Exceed Speed"]["value"]
 
+    col1, col2, col3 = st.columns([4, 1, 2])
+    with col1:
+        percentage_of_vne = st.slider("Percentage of Vne (%)", min_value=0, max_value=100, value=70, step=1)
+    with col2:
+        unit = st.radio("", ['Km/h', 'm/s'])
+    with col3:
+        if unit == 'Km/h':
+            v_ne = st.number_input("Never Exceed Speed (Km/h)", value=v_ne_poh, min_value=0.00, step=10.00)
+            v_krst.value = percentage_of_vne / 100.0 * (v_ne / 3.6)  # Convert to m/s
+        else:
+            v_ne = st.number_input("Never Exceed Speed (m/s)", value=v_ne_poh / 3.6, min_value=0.00, step=1.00)
+            v_krst.value = percentage_of_vne / 100.0 * v_ne  # Already in m/s
 
-# ====================
+    st.latex(f"v_{{\\text{{krst}}}} = \\frac{{\\text{{Vne}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_ne:.3f} \\times {percentage_of_vne}}}{{100}}")
+    st.latex(f"v_{{\\text{{krst}}}} = {v_krst.value*3.6:.2f} \\, \\text{{Km/h}} = {v_krst.value:.2f} \\, \\text{{m/s}}")
 
-    # Drag Coefficient (Cx)
+    spacer()
+
+# ==================== LIFT COEFF
 
     st.subheader("Lift coefficient at cruise (c_z_krst)")
 
     
-    with st.expander("Calculate Cruise Lift Coefficient"):
+    with st.expander("Change parameters (m_sr, g, rho, v_krst) or lift coefficient value"):
         def calculate_c_z_krst():
             c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
             # LaTeX string with variables
             numbers = (
-                f"\\frac{{ {m_sr.value:.2f} \\cdot {g.value:.2f} }}"  # Format to two decimal places
-                f"{{0.5 \\cdot {rho.value:.6f} \\cdot {v_krst.value:.2f}^2 \\cdot {S.value:.2f} }}"  # Format to two decimal places
+                f"\\frac{{ {m_sr.value:.2f} \\cdot {g.value:.2f} }}"
+                f"{{0.5 \\cdot {rho.value:.6f} \\cdot {v_krst.value:.2f}^2 \\cdot {S.value:.2f} }}"
             )
             # Formula in LaTeX format
             c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] = {numbers}"

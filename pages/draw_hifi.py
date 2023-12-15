@@ -153,6 +153,8 @@ def main():
             st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
         with col5:
             st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
+        
+        st.markdown("table")
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -203,7 +205,6 @@ def main():
     draw_text(draw, f"Conversion factor: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 90))
     # Display the updated image in the Streamlit app
 
-    st.image(img)
 
     with st.expander("Pixel to m conversion accuracy"):
         table_data = []
@@ -220,6 +221,8 @@ def main():
         for data in table_data:
             table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
         st.markdown(table_markdown)
+
+    st.image(img)
 
 if __name__ == "__main__":
     main()
