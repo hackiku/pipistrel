@@ -1,7 +1,7 @@
 streamlit
 scipy
 numpy
-PIL
+Pillow
 math
 pandas
 sys
