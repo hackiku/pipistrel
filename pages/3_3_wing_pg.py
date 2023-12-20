@@ -111,6 +111,38 @@ def main():
     st.subheader("3.1.1. Max lift coefficient of wings")
     st.write("Proračun se u prvoj iteraciji u programu Trapezno krilo- Glauert obavlja pod pretpostavkom nultog konstruktivnog vitoperenja")
 
+    fortran_inputs = f"""
+    C     *************** UNOS ULAZNIH PODATAKA I OPCIJA *******************
+
+    C     IZBOR PRORACUNSKE OPCIJE: ZA VREDNOOST IZB=1 RACUNA SA UNAPRED
+    C     ZADATIM KOEFICIJENTOM UZGONA KRILA CZ; U SUPROTNOM, ZA SVAKI
+    C     DRUGI INTEGER (npr. IZB=0) CZ RACUNA NA OSNOVU SPECIFICNOG
+    C     OPTERECENJA KRILA, BRZINE I GUSTINE NA REZIMU KRSTARENJA
+
+        IZB=1
+        DATA CZ / {c_z_krst.value} /  !ZADATI KOEFICIJENT UZGONA KRILA
+        DATA SPECOP /800. / !ZADATO SPECIFICNO OPTERECENJE KRILA [N/m^2]
+
+    C             PARAMETRI GEOMETRIJE KRILA I REZIMA KRSTARENJA:
+    C                                          konst.
+    C              broj    vitkost suzenje   vitop.   brzina   gustina
+    C            preseka                     [step.]  [km/h]   [kg/m^3]
+        DATA      K,       LAM,   EN,       EPS_K,    V,        RO
+        &     /    16,      6.,   0.437,      0.0,    211.33,    0.77678 /
+
+        DATA CZMAXAP_S / 1.5 / ! maks. koef. uzgona ap. u korenu krila
+        DATA CZMAXAP_0 / 1.46 / ! maks. koef. uzgona ap. na kraju krila
+        DATA AAAP_S / 0.100 / !grad. uzgona ap. u korenu [1/o]
+        DATA AAAP_0 / 0.110 / !grad. uzgona ap. na kraju [1/o]
+        !teorijska  vrednost gradijenta uzgona 2PI = 0.1096622 [1/o]
+        DATA ANAP_S / -1.2 / !ugao nultog uzgona ap. u korenu krila [o]
+        DATA ANAP_0 / -1.0 / !ugao nultog uzgona ap. na kraju krila [o]
+        DATA LS / 2.583 /  ! duzina tetive u korenu krila u metrima
+
+    C     ******************** KRAJ UNOSA PODATAKA *************************
+    """ 
+    st.code(fortran_inputs, language='fortran')
+
     st.image('./assets/glauert_inverted.png')
     
     st.markdown(r'''
