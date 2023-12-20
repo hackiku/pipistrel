@@ -28,17 +28,10 @@ def main():
     # Initial guess for alfa, user can change it
     # initial_guess = st.number_input("Initial guess for angle of attack (alfa)", value=10.0, step=1.0)
     initial_guess = 10.0
+    
+    alfa_solution = fsolve(equation, initial_guess)
 
-    # Button to solve the equation
-    if st.button('Calculate angle of attack (alfa)'):
-        # Solve the equation using the user's inputs
-        alfa_solution = fsolve(equation, initial_guess)
-
-        # Display the solution using Streamlit's success message
-        st.success(f"Solution for alfa: {alfa_solution[0]:.5f} degrees")
-
-        # Also print the solution to the console
-        print("Solution for alfa:", alfa_solution)
+    st.success(f"Solution for alfa: {alfa_solution[0]:.5f} degrees")
 
 # Run the main function in Streamlit
 if __name__ == "__main__":
