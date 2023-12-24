@@ -35,6 +35,12 @@ def variables_three_columns(var, display_formula=False, emoji="1️⃣"):
             spacer('2em') # verticlal align formula with input
             st.markdown(f"$${var.latex} = {var.value:.3f} \ {var.unit}$$")
 
+def emoji_header(emoji, text):
+    col1, col2 = st.columns([1,8])
+    with col1:
+        st.header(emoji)
+    with col2:
+        st.header(text)    
 
 def display_generic_table(data):
     # Assume the first row of data contains all the keys we need for headers
