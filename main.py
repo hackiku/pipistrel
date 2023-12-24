@@ -111,16 +111,14 @@ def main():
 
     spacer()
     
-# ==================== MASS
-
-    # mass 
+#==================== MASS ====================#
 
     st.subheader('2.2. Average mass')
 
     max_take_off_weight = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
     design_empty_weight = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
 
-    # Create input fields for max takeoff weight and design empty weight
+    # max takeoff weight & design empty weight
     col1, col2 = st.columns(2)
     with col1:
         max_take_off_weight = st.number_input("Max Take Off Weight (kg)", value=max_take_off_weight, min_value=0,

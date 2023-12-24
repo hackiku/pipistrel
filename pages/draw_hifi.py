@@ -41,10 +41,10 @@ class Line:
 
 lines = {
     'Wing Measurement': Line([356, 260, 915, 260], line_color="green", line_width=1),
-    'Tail Measurement': Line([365, 449, 365, 848], line_color="red", line_width=1),
-    'Fuselage Measurement': Line([228, 60, 364, 60], line_color="yellow", line_width=1),
-    'Cabin Measurement': Line([236, 120, 356, 120], line_color="yellow", line_width=1),
-    'Elevator Width': Line([168, 960, 425, 960], line_color="yellow", line_width=1),
+    'Tail Measurement': Line([342, 449, 342, 848], line_color="green", line_width=1),
+    'Fuselage Measurement': Line([228, 60, 364, 60], line_color="green", line_width=1),
+    'Cabin Measurement': Line([236, 115, 356, 115], line_color="green", line_width=1),
+    'Elevator Width': Line([168, 960, 425, 960], line_color="green", line_width=1),
     'Elevator Length': Line([100, 848, 100, 934], line_color="green", line_width=1),
     # 'Centerline': Line([296, 112, 296, 932], line_color="orange", line_width=1),
 }
@@ -73,7 +73,8 @@ class Trapezoid:
         draw.line([bottom_tip, top_tip], fill=self.line_color, width=self.line_width)  # Tip line
         draw.line([top_tip, top_root], fill=self.line_color, width=self.line_width)  # Top line
 
-default_trapezoid_values = [90, 130, 300, 914, 320, 360]
+# x root = 100: arbitrary, later uses average_x_root
+default_trapezoid_values = [90, 130, 100, 910, 320, 360]
 trapezoid = Trapezoid(*default_trapezoid_values)
 
 def update_line_positions(line, start_x, start_y, end_x, end_y):
@@ -87,9 +88,9 @@ def draw_all_lines(draw, lines):
     for line in lines.values():
         line.draw(draw)
 
-def draw_text(draw, text, position, text_color='white', font_size=40):
-    # font = ImageFont.truetype("arial.ttf", font_size)
-    font = ImageFont.load_default()
+def draw_text(draw, text, position, text_color='white', font_size=16):
+    # Load the custom font from the specified path
+    font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', font_size)
     draw.text(position, text, fill=text_color, font=font)
 
 known_lengths = {
@@ -125,15 +126,35 @@ def convert_px_to_m(lines):
     # else:
     #    return None
 
+# find center of 3x horizontal body lines
+def calculate_average_center(lines, line_keys):
+    midpoints = []
+    for key in line_keys:
+        line = lines[key]
+        midpoints.append((line.start_x + line.end_x) // 2)
+    # Calculate the average of the midpoints
+    average_midpoint = sum(midpoints) // len(midpoints)
+    return average_midpoint
+
+
+
 def main():
 
-    img_path = "./assets/wing_black_horizontal.png"
+    img_choice = st.radio("Choose image", ["Black", "White"])
+    if img_choice == "Black":
+        img_path = "./assets/wing_black.png"
+    else:
+        img_path = "./assets/wing_white.png"
+
     img = Image.open(img_path)
     draw = ImageDraw.Draw(img)
 
     # define canvas
     pixel_canvas_width, pixel_canvas_height = img.size
 
+    line_keys = ['Fuselage Measurement', 'Cabin Measurement', 'Elevator Width']
+    average_x_root = calculate_average_center(lines, line_keys)
+    st.write(average_x_root)
     # STATE
     for line_key in lines.keys():
         if line_key not in st.session_state:
@@ -153,15 +174,20 @@ def main():
             st.session_state[selected_line_key][2] = st.number_input('End X', value=st.session_state[selected_line_key][2], max_value=pixel_canvas_width, step=1)
         with col5:
             st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
-        
-        st.markdown("table")
+    
+    st.markdown("table")
 
+    #==================== TRAPEZOID ====================#
+    
     col1, col2, col3 = st.columns(3)
     with col1:
+        st.text("dimensions")
         trapezoid.l_0 = st.number_input('Tip Length (l_0)', value=trapezoid.l_0, step=10)
     with col2:
-        trapezoid.x_root = st.number_input('Root X Position (x_root)', value=trapezoid.x_root, step=10)
+        st.text("vertical sides")
+        trapezoid.x_root = st.number_input('Root X Position (x_root)', value=average_x_root, step=10)
     with col3:
+        st.text("move up/down")
         trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=10)
 
     col4, col5, col6 = st.columns(3)
@@ -196,15 +222,30 @@ def main():
         line.annotate_length(draw, meter_length)
 
     trapezoid.draw(draw)
+
     draw_all_lines(draw, lines)
 
-    canvas_info_position = (pixel_canvas_width - int(0.2 * pixel_canvas_width), pixel_canvas_height - int(0.2 * pixel_canvas_height))
-    draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", canvas_info_position)
-    # draw_text(draw, f"Meter canvas = {meter_canvas_width:.2f} x {meter_canvas_height:.2f} m", (canvas_info_position[0], canvas_info_position[1] + 30))
-    draw_text(draw, f"Conversion factor: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
-    draw_text(draw, f"Conversion factor: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 90))
-    # Display the updated image in the Streamlit app
+    #==================== CANVAS TEXT ====================#
 
+    # draw & calc half wingspan
+    half_wingspan_meters = abs(trapezoid.x_tip - trapezoid.x_root) * conversion_factor
+    half_wingspan_line = Line([trapezoid.x_root, trapezoid.y_root + 180, trapezoid.x_tip, trapezoid.y_root + 180], line_color="red", line_width=1)
+    half_wingspan_line.draw(draw)
+
+    midpoint = half_wingspan_line.midpoint()
+    offset = (20, -20)
+    draw_text(draw, f"{half_wingspan_meters:.2f} m", (midpoint[0] + offset[0], midpoint[1] + offset[1]), text_color="red", font_size=20)
+
+    # Update the trapezoid area calculation
+    trapezoid_area = 0.5 * half_wingspan_meters * (trapezoid.l_0 + trapezoid.l_1)* conversion_factor
+    area_text_position = (pixel_canvas_width - 400, pixel_canvas_height - 250)
+    draw_text(draw, f"S = {trapezoid_area:.2f} m²", area_text_position, text_color="red", font_size=40)
+    
+    # canvas legend
+    canvas_info_position = (pixel_canvas_width - int(0.32 * pixel_canvas_width), pixel_canvas_height - int(0.12 * pixel_canvas_height))
+    draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", canvas_info_position)
+    draw_text(draw, f"Convert to m: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 30))
+    draw_text(draw, f"Convert to px: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
 
     with st.expander("Pixel to m conversion accuracy"):
         table_data = []
