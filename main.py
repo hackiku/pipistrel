@@ -53,8 +53,8 @@ def main():
     spacer("5em")
 
     # 3D model
-    # svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
-    # components.iframe(svelte_app_url, width=400, height=400)
+    svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
+    components.iframe(svelte_app_url, width=400, height=400)
 
     st.markdown('***')
 
