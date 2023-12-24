@@ -7,6 +7,16 @@ import re
 cz_selector = st.number_input("Cruise Lift Coefficient", value = 0.247, step = 0.001, format = "%.3f")
 c_z_krst = Variable("Cruise Lift Coefficient", cz_selector, r"C_{z_{krst}}", "")
 
+# Function to extract the relative thickness from the NACA name
+def extract_thickness(naca_name):
+    match = re.search(r'(\d{4})$', naca_name)
+    if match:
+        # The thickness is the last two digits divided by 100
+        return int(match.group(1)[-2:]) / 100
+    else:
+        # Handle names that do not match the expected pattern
+        return None
+
 # Convert the list of lists into a pandas dataframe
 airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
@@ -44,15 +54,6 @@ for data in airfoil_data:
     }
     airfoils.append(airfoil_dict)
 
-# Function to extract the relative thickness from the NACA name
-def extract_thickness(naca_name):
-    match = re.search(r'(\d{4})$', naca_name)
-    if match:
-        # The thickness is the last two digits divided by 100
-        return int(match.group(1)[-2:]) / 100
-    else:
-        # Handle names that do not match the expected pattern
-        return None
 
 # Apply the function to the 'Name' column
 airfoil_df['Relative_Thickness'] = airfoil_df['Name'].apply(extract_thickness)
