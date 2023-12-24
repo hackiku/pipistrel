@@ -23,7 +23,6 @@ def display_airfoil_table(df):
 def main():
     st.title("Airfoil Selection Tool")
     
-
     # Load and preprocess data
     airfoil_df = pd.DataFrame(airfoil_data, columns=[
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
@@ -37,27 +36,32 @@ def main():
         st.write("All airfoils:", airfoil_df)
 
     # User interactions
-    emoji_header("1️⃣", "Thickness Ratio")
-    st.subheader("Select Thickness Ratios")
+    emoji_header("1️⃣", "Thickness Ratio", "")
     thickness_ratio = st.select_slider("Choose Thickness Ratio", options=["15:12", "12:10", "12:09", "09:06"])
     root_thickness, tip_thickness = (float(value) / 100 for value in thickness_ratio.split(':'))
 
-    emoji_header("2️⃣", "Lift coefficient")
+    spacer()
+
+    emoji_header("2️⃣", "Lift coefficient", r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
-    st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
+    # st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     cz_selector = st.number_input("Cruise Lift Coefficient", value=0.247, step=0.001, format="%.3f")
     c_z_krst = Variable("Cruise Lift Coefficient", cz_selector, r"C_{z_{krst}}", "")
-
-
+    airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst.value)
+    
+    spacer()
+   
+    emoji_header("3️⃣", "Drag coefficient", r"C_{x_{min}}")
+    st.write("Selecting airfoil by lowest drag coefficient.")
+    drag_importance = st.slider("Select the importance of minimal drag coefficient (0 - not important, 1 - very important)", 0.0, 1.0, 0.5)
 
     #==================== PROCESS DATA ====================#
-    # Find airfoils close to the selected cruise lift coefficient
-    airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - cz_selector)
+    # Calculate a combined score based on the closeness to the cruise lift coefficient and the drag coefficient
+    airfoil_df['Combined_Score'] = airfoil_df['Cz_Diff'] * (1 - drag_importance) + airfoil_df['Cd_min'] * drag_importance
 
-    # Filter for root airfoils by thickness and lift coefficient closeness
-    root_airfoils = airfoil_df[(airfoil_df['Thickness'] == root_thickness)].nlargest(5, 'Cz_op', 'all')
-    # Filter for tip airfoils by thickness and lift coefficient closeness
-    tip_airfoils = airfoil_df[(airfoil_df['Thickness'] == tip_thickness)].nlargest(5, 'Cz_op', 'all')
+    # Sort the airfoils by the combined score
+    root_airfoils = airfoil_df[airfoil_df['Thickness'] == root_thickness].nsmallest(5, 'Combined_Score')
+    tip_airfoils = airfoil_df[airfoil_df['Thickness'] == tip_thickness].nsmallest(5, 'Combined_Score')
 
     # Display tables
     st.markdown("***")
@@ -67,7 +71,6 @@ def main():
 
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
-    display_airfoil_table(tip_airfoils)
 
 # App Execution
 if __name__ == "__main__":
