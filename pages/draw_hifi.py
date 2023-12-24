@@ -227,7 +227,7 @@ def main():
 
     #==================== CANVAS TEXT ====================#
 
-    # draw & calc half wingspan
+    # calc & draw half wingspan
     half_wingspan_meters = abs(trapezoid.x_tip - trapezoid.x_root) * conversion_factor
     half_wingspan_line = Line([trapezoid.x_root, trapezoid.y_root + 180, trapezoid.x_tip, trapezoid.y_root + 180], line_color="red", line_width=1)
     half_wingspan_line.draw(draw)
@@ -239,7 +239,11 @@ def main():
     # Update the trapezoid area calculation
     trapezoid_area = 0.5 * half_wingspan_meters * (trapezoid.l_0 + trapezoid.l_1)* conversion_factor
     area_text_position = (pixel_canvas_width - 400, pixel_canvas_height - 250)
-    draw_text(draw, f"S = {trapezoid_area:.2f} m²", area_text_position, text_color="red", font_size=40)
+    # adjust subscript
+    s_text_position = (area_text_position[0] + 22, area_text_position[1] + 28)
+    subscript_position = (s_text_position[0], s_text_position[1])
+    draw_text(draw, "20", subscript_position, text_color="red", font_size=16)
+    draw_text(draw, f"S = {trapezoid_area:.2f} m²", area_text_position, text_color="red", font_size=36)
     
     # canvas legend
     canvas_info_position = (pixel_canvas_width - int(0.32 * pixel_canvas_width), pixel_canvas_height - int(0.12 * pixel_canvas_height))

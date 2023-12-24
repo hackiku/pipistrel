@@ -15,6 +15,11 @@ m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
 v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
 c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
 
+l0_m = Variable("Root Chord Length", draw_hifi.trapezoid.l_0 * 0.0084, "l_{0}", "m")
+l1_m = Variable("Tip Chord Length", draw_hifi.trapezoid.l_1 * 0.0084, "l_{1}", "m")
+b_m = Variable("Wingspan", 10.70, "b", "m")  # Use a Variable instance for the wingspan
+
+
 # use data points in calculations
 def get_specific_data(df, category):
     category_data = df[df['Specification'] == f"**{category}**"]
