@@ -38,9 +38,9 @@ def variables_three_columns(var, display_formula=False, emoji="1️⃣"):
 def emoji_header(emoji, text):
     col1, col2 = st.columns([1,8])
     with col1:
-        st.header(emoji)
+        st.subheader(emoji)
     with col2:
-        st.header(text)    
+        st.subheader(text)    
 
 def display_generic_table(data):
     # Assume the first row of data contains all the keys we need for headers

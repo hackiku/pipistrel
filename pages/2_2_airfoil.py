@@ -1,116 +1,33 @@
 import streamlit as st
 import pandas as pd
-from data import Variable
-from utils import spacer, variables_two_columns, variables_three_columns
+from data import Variable, airfoil_data
+from utils import spacer, emoji_header, variables_three_columns
+import re
 
-c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
+cz_selector = st.number_input("Cruise Lift Coefficient", value = 0.247, step = 0.001, format = "%.3f")
+c_z_krst = Variable("Cruise Lift Coefficient", cz_selector, r"C_{z_{krst}}", "")
 
-# d = Variable()
-airfoil_raw_data = [
-    # first pass not fully checked
-    ["NACA 63-006", 9.0, 0.0, 0.110, 0.87, "D", 10.0, 0.00, 7.7, 0.0042, 0.000, 0.258, -0.033],
-    ["NACA 63-009", 9.0, 0.0, 0.110, 1.15, "D", 11.0, 0.00, 10.0, 0.0041, 0.000, 0.258, 0.016],
-    ["NACA 63_1-012", 9.0, 0.0, 0.114, 1.45, "D", 14.0, 0.00, 12.8, 0.0043, 0.000, 0.265, -0.030],
-    ["NACA 63_2-015", 9.0, 0.0, 0.118, 1.50, "D", 15.0, 0.00, 10.5, 0.0049, 0.000, 0.271, -0.034],
-    ["NACA 63_3-018", 9.0, 0.0, 0.118, 1.52, "D", 15.0, 0.00, 11.0, 0.0049, 0.000, 0.271, -0.020],
-    ["NACA 63_4-021", 9.0, 0.0, 0.115, 1.39, "D", 17.0, 0.00, 10.5, 0.0052, 0.000, 0.273, -0.001],
-    ["NACA 63A010", 9.0, 0.0, 0.105, 1.19, "B", 13.0, 0.00, 10.0, 0.0046, 0.005, 0.254, -0.003],
-    ["NACA 63-206", 9.0, -2.0, 0.105, 1.08, "D", 10.5, 0.25, 6.0, 0.0040, -0.039, 0.254, -0.011],
-    ["NACA 63-209", 9.0, -1.2, 0.110, 1.41, "D", 12.0, 0.20, 10.8, 0.0048, -0.031, 0.262, -0.032],
-    ["NACA 63-210", 9.0, -1.2, 0.110, 1.56, "D", 14.5, 0.20, 9.6, 0.0045, -0.033, 0.261, -0.033],
-    ["NACA 63_2-212", 9.0, -2.0, 0.110, 1.62, "D", 14.5, 0.25, 11.4, 0.0045, -0.034, 0.263, -0.029],
-    ["NACA 63_2-215", 9.0, -1.2, 0.120, 1.61, "D", 15.0, 0.20, 11.0, 0.0046, -0.031, 0.267, -0.020],
-    ["NACA 63_2-218", 9.0, -1.2, 0.120, 1.50, "D", 16.0, 0.20, 11.0, 0.0049, -0.032, 0.271, -0.042],
-    ["NACA 63-221", 9.0, -1.3, 0.110, 1.46, "D", 15.0, 0.20, 11.0, 0.0053, -0.030, 0.269, -0.033],
-    ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073],
-    ["NACA 63_4-415", 9.0, -3.0, 0.115, 1.67, "D", 15.0, 0.35, 10.0, 0.0049, -0.071, 0.262, -0.036],
-    ["NACA 63_4-418", 9.0, -2.6, 0.118, 1.58, "D", 16.0, 0.22, 8.5, 0.0050, -0.071, 0.272, -0.051],
-    ["NACA 63_4-420", 9.0, -2.1, 0.110, 1.42, "D", 15.0, 0.05, 9.0, 0.0055, -0.060, 0.265, -0.054],
-    ["NACA 63_4-420, a=0.3", 9.0, -2.5, 0.108, 1.35, "D", 16.0, 0.45, 8.0, 0.0058, -0.036, 0.265, 0.000],
-    ["NACA 63_4-421", 9.0, -2.7, 0.120, 1.48, "D", 16.0, 0.28, 8.0, 0.0054, -0.063, 0.275, -0.027],
-    ["NACA 63_(420)-422", 9.0, -3.1, 0.110, 1.40, "D", 20.0, 0.12, 8.0, 0.0060, -0.064, 0.271, -0.043],
-    ["NACA 63_(420)-517", 9.0, -3.0, 0.110, 1.61, "D", 16.0, 0.35, 9.0, 0.0057, -0.085, 0.264, -0.059],
-    # page 79 (checked I think)
-["NACA 63_2-615", 9.0, -3.8, 0.120, 1.67, "D", 15.0, 0.42, 10.0, 0.0048, -0.110, 0.266, -0.040],
-["NACA 63_3-618", 9.0, -3.8, 0.118, 1.58, "D", 16.0, 0.45, 8.0, 0.0052, -0.098, 0.267, -0.016],
-["NACA 64-006", 9.0, 0.0, 0.110, 0.80, "D", 9.0, 0.00, 7.8, 0.0040, 0.000, 0.256, -0.014],
-["NACA 64-009", 9.0, 0.0, 0.110, 1.17, "D", 11.0, 0.00, 10.0, 0.0040, 0.000, 0.262, -0.027],
-["NACA 64A010", 9.0, 0.0, 0.110, 1.23, "D", 12.0, 0.00, 11.0, 0.0042, 0.000, 0.253, -0.017],
-["NACA 64_1-012", 9.0, 0.0, 0.110, 1.45, "B", 15.0, 0.00, 12.5, 0.0042, 0.000, 0.262, -0.002],
-["NACA 64_2-015", 9.0, 0.0, 0.111, 1.48, "D", 15.0, 0.00, 13.0, 0.0045, 0.000, 0.267, -0.007],
-["NACA 64_3-018", 9.0, 0.0, 0.111, 1.50, "D", 17.0, 0.00, 12.5, 0.0045, 0.000, 0.266, -0.044],
-["NACA 64-108", 9.0, -0.4, 0.110, 1.10, "D", 10.0, 0.00, 9.5, 0.0040, -0.021, 0.255, 0.029],
-["NACA 64-110", 9.0, -1.0, 0.110, 1.40, "B", 13.0, 0.10, 12.0, 0.0042, -0.021, 0.261, -0.022],
-["NACA 64_1-112", 9.0, -1.0, 0.115, 1.50, "D", 14.0, 12.5, 0.0042, -0.020, 0.267, -0.039],
-["NACA 64-206", 9.0, -1.0, 0.115, 1.03, "D", 12.0, 0.18, 9.0, 0.0040, -0.041, 0.253, -0.020],
-["NACA 64-208", 9.0, -1.0, 0.112, 1.50, "D", 10.0, 0.22, 9.0, 0.0041, -0.040, 0.267, -0.007],
-["NACA 64-209", 9.0, -1.3, 0.110, 1.40, "D", 13.5, 0.20, 12.5, 0.0040, -0.041, 0.261, -0.041],
-["NACA 64-210", 9.0, -1.7, 0.110, 1.54, "B", 14.0, 0.28, 12.0, 0.0040, -0.041, 0.258, -0.011],
-["NACA 64A210", 9.0, -1.5, 0.105, 1.44, "B", 13.0, 0.20, 11.5, 0.0040, -0.040, 0.251, -0.013],
-["NACA 64_1-212", 9.0, -1.2, 0.110, 1.54, "D", 15.0, 0.15, 12.5, 0.0041, -0.028, 0.262, -0.024],
-["NACA 64_1A212", 9.0, -1.9, 0.103, 1.53, "B", 14.0, 0.25, None, 0.0045, -0.040, 0.252, -0.021],
-["NACA 64_2-215", 9.0, -1.3, 0.110, 1.58, "D", 15.0, 0.12, 12, 0.0045, -0.032, 0.265, -0.014],
-["NACA 64_2-A215", 9.0, -2.5, 0.112, 1.49, "D", 15.0, 0.35, None, 0.0045, -0.070, 0.260, -0.025],
-["NACA 64_3-218", 9.0, -1.2, 0.114, 1.53, "D", 18.0, 0.20, 12.0, 0.0047, -0.030, 0.271, -0.053],
-["NACA 64A410", 9.0, -3.0, 0.108, 1.61, "B", 15.0, 0.45, 12.5, 0.0044, -0.050, 0.254, -0.033],
-["NACA 64_1-412", 9.0, -2.8, 0.112, 1.68, "C", 15.0, 0.30, 12.0, 0.0042, -0.073, 0.267, -0.034],
-["NACA 64_2-415", 9.0, -2.9, 0.112, 1.64, "D", 16.0, 0.35, 10.0, 0.0047, -0.070, 0.264, 0.040],
-["NACA 64_3-418", 9.0, -3.0, 0.117, 1.58, "D", 20.0, 0.23, 10.0, 0.0050, -0.064, 0.273, -0.049],
-["NACA 64_4-421", 9.0, -2.5, 0.115, 1.53, "D", 24.0, 0.40, 9.5, 0.0052, -0.065, 0.276, -0.047],
-["NACA 65-006", 9.0, 0.0, 0.105, 1.00, "D", 10.0, 0.00, 8.0, 0.0035, 0.000, 0.258, -0.033],
-["NACA 65-009", 9.0, 0.0, 0.110, 1.09, "D", 11.0, 0.00, 10.0, 0.0038, 0.000, 0.259, -0.034],
-["NACA 65_1-012", 9.0, 0.0, 0.105, 1.37, "D", 14.0, 0.00, 12.0, 0.0040, 0.000, 0.261, -0.012],
-["NACA 65_2-015", 9.0, 0.0, 0.110, 1.42, "D", 15.0, 0.00, 12.0, 0.0040, 0.000, 0.257, -0.014],
-# page 80
-["NACA 65_3-018", 9.0, 0.0, 0.105, 1.38, "D", 16.0, 0.00, 12.0, 0.0042, 0.000, 0.267, -0.013],
-["NACA 65_4-021", 9.0, 0.0, 0.115, 1.40, "D", 19.0, 0.00, 12.0, 0.0045, 0.000, 0.267, -0.025],
-["NACA 65_(215)-114", 9.0, -0.7, 0.110, 1.43, "D", 16.0, 0.10, 12.0, 0.0040, -0.022, 0.265, -0.027],
-["NACA 65-206", 9.0, -1.5, 0.102, 1.06, "D", 14.0, 0.18, 8.0, 0.0038, -0.032, 0.257, -0.045],
-["NACA 65-209", 9.0, -1.2, 0.110, 1.30, "B", 11.5, 0.20, 11.0, 0.0039, -0.032, 0.259, -0.004],
-["NACA 65-210", 9.0, -1.5, 0.110, 1.40, "B", 15.0, 0.20, 11.5, 0.0037, -0.034, 0.262, -0.020],
-["NACA 65_1-212", 9.0, -1.0, 0.110, 1.46, "D", 14.0, 0.25, 12.0, 0.0038, -0.033, 0.261, -0.026],
-["NACA 65_1-212, a=0.6", 9.0, -1.5, 0.108, 1.50, "D", 14.0, 0.25, 12.0, 0.0038, -0.030, 0.269, -0.019],
-["NACA 65_2-215", 9.0, -1.2, 0.112, 1.51, "D", 16.0, 0.25, 12.0, 0.0040, -0.032, 0.269, -0.033],
-["NACA 65_3-218", 9.0, -1.2, 0.102, 1.50, "D", 18.0, 0.25, 12.0, 0.0042, -0.029, 0.263, -0.027],
-["NACA 65_4-221", 9.0, -1.2, 0.110, 1.47, "C", 21.0, 0.28, 10.0, 0.0045, -0.030, 0.274, -0.050],
-["NACA 65-410", 9.0, -2.5, 0.110, 1.52, "C", 14.0, 0.35, 12.0, 0.0037, -0.066, 0.262, -0.035],
-["NACA 65_1-412", 9.0, -3.0, 0.110, 1.65, "C", 16.0, 0.38, 12.0, 0.0039, -0.072, 0.265, -0.038],
-["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062],
-["NACA 65_2-415, a=0.5", 9.0, -2.5, 0.112, 1.60, "D", 20.0, 0.40, 12.0, 0.0041, -0.056, 0.264, -0.032],
-["NACA 65_(216)-415", 9.0, -2.8, 0.114, 1.56, "D", None, 0.40, None, 0.0044, -0.057, 0.266, -0.020],
-["NACA 65_3-418", 9.0, -2.5, 0.110, 1.55, "D", 18.0, 0.35, 8.0, 0.0044, -0.061, 0.265, -0.060],
-["NACA 65_3-418, a=0.5", 9.0, -3.0, 0.100, 1.50, "D", 20.0, 0.35, 8.0, 0.0044, -0.056, 0.267, -0.047],
-["NACA 65_(421)-420", 9.0, -2.5, 0.116, 1.52, "D", 20.0, 0.26, 8.0, 0.0045, -0.063, 0.276, -0.046],
-["NACA 65_4-421, a=0.5", 9.0, -2.8, 0.110, 1.43, "D", 20.0, 0.30, 8.0, 0.0047, -0.055, 0.272, -0.004],
-["NACA 65_3-618", 9.0, -4.0, 0.115, 1.66, "D", 21.0, 0.50, 8.0, 0.0042, -0.104, 0.276, -0.022],
-["NACA 65_3-618, a=0.5", 9.0, -4.2, 0.105, 1.50, "D", 22.0, 0.42, 10.0, 0.0048, -0.079, 0.265, -0.026],
-["NACA 65_3-618", 9.0, -3.8, 0.116, 1.61, "D", 20.0, 0.57, 8.0, 0.0043, -0.100, 0.273, -0.093],
-["NACA 66-006", 9.0, 0.0, 0.100, 0.80, "D", 10.0, 0.00, 8.0, 0.0032, 0.000, 0.252, 0.000],
-["NACA 66-009", 9.0, 0.0, 0.107, 1.10, "C", 11.0, 0.00, 10.0, 0.0031, 0.000, 0.259, -0.025],
-["NACA 66-012", 9.0, 0.0, 0.105, 1.24, "C", 14.0, 0.00, 11.0, 0.0032, 0.000, 0.258, 0.000],
-["NACA 66_2-015", 9.0, 0.0, 0.102, 1.36, "C", 16.5, 0.00, 12.0, 0.0034, 0.000, 0.265, -0.005],
-["NACA 66(215)-016", 9.0, 0.0, 0.102, 1.36, "C", 15.0, 0.26, 0.0, 0.0032, 0.000, 0.260, -0.022],
-["NACA 66_3-018", 9.0, 0.0, 0.102, 1.33, "D", 17.0, 0.00, 12.0, 0.0034, 0.000, 0.264, -0.027],
-["NACA 66-206", 9.0, -1.5, 0.110, 1.00, "D", 11.0, 0.17, 8.0, 0.0030, -0.039, 0.257, -0.017],
-# page 81
-["NACA 66-209", 9.0, -1.0, 0.110, 1.18, "D", 11.5, 0.17, 9.0, 0.0030, -0.033, 0.257, -0.013],
-["NACA 66-210", 9.0, -1.2, 0.108, 1.28, "D", 11.5, 0.20, 10.0, 0.0030, -0.033, 0.261, -0.018],
-["NACA 66_1-212", 9.0, -1.4, 0.108, 1.46, "D", 15.0, 0.15, 12.0, 0.0032, -0.032, 0.259, -0.015],
-["NACA 66,1-212", 9.0, -1.2, 0.100, 1.37, "D", 14.0, 0.20, 11.5, 0.0032, -0.039, 0.259, -0.031],
-["NACA 66_2-215", 9.0, -1.2, 0.100, 1.50, "D", 16.0, 0.27, 13.0, 0.0032, -0.030, 0.260, -0.020],
+# Convert the list of lists into a pandas dataframe
+airfoil_df = pd.DataFrame(airfoil_data, columns=[
+    "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
+    "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
+])
 
-["NACA 66(215)-216", 9.0, -2.0, 0.102, 1.52, "C", 16.0, 0.10, 13.5, 0.0034, -0.045, 0.262, -0.076],
-["NACA 66(215)-216, a=0.6", 9.0, -1.2, 0.104, 1.48, "C", 16.5, 0.17, 14.0, 0.0034, -0.030, 0.257, -0.043],
-["NACA 66_3-218", 9.0, -1.5, 0.100, 1.49, "D", 17.0, 0.05, 12.0, 0.0033, -0.035, 0.260, -0.064],
-["NACA 66_2-415", 9.0, -2.5, 0.104, 1.60, "D", 18.0, 0.35, 12.0, 0.0036, -0.072, 0.260, -0.073],
-["NACA 66(215)-416", 9.0, -2.6, 0.112, 1.60, "D", 18.0, 0.30, 13.5, 0.0036, -0.070, 0.265, -0.105],
-["NACA 66_3-418", 9.0, -2.8, 0.106, 1.57, "D", 18.5, 0.35, 14.0, 0.0037, -0.070, 0.262, -0.090],
+def extract_airfoil_specs(naca_name):
+    thickness_match = re.search(r'-(\d{2})$', naca_name)
+    thickness = int(thickness_match.group(1)) / 100 if thickness_match else None
 
+    lift_coefficient_match = re.search(r'-(\d)', naca_name)
+    lift_coefficient = int(lift_coefficient_match.group(1)) / 10 if lift_coefficient_match else None
 
-]
+    return thickness, lift_coefficient
 
+# Apply the regex pattern to extract specs for each airfoil
+airfoil_df['Thickness'], airfoil_df['Design_Lift_Coefficient'] = zip(*airfoil_df['Name'].apply(extract_airfoil_specs))
+
+# -----------------------------
 airfoils = []
-for data in airfoil_raw_data:
+for data in airfoil_data:
     airfoil_dict = {
         "Name": data[0],
         "M_Re": Variable("MRe", data[1], "", ""),
@@ -127,10 +44,27 @@ for data in airfoil_raw_data:
     }
     airfoils.append(airfoil_dict)
 
-def calculate_relative_thickness(airfoil):
-    # Assuming the thickness to chord ratio is at the second index in airfoil data
-    return airfoil["M_Re"].value / 10  # This is a placeholder for the actual calculation
+# Function to extract the relative thickness from the NACA name
+def extract_thickness(naca_name):
+    match = re.search(r'(\d{4})$', naca_name)
+    if match:
+        # The thickness is the last two digits divided by 100
+        return int(match.group(1)[-2:]) / 100
+    else:
+        # Handle names that do not match the expected pattern
+        return None
 
+# Apply the function to the 'Name' column
+airfoil_df['Relative_Thickness'] = airfoil_df['Name'].apply(extract_thickness)
+
+def display_airfoil_table(df):
+    st.markdown(
+        f'<div style="height: 300px; overflow-y: scroll;">{df.to_html(index=False)}</div>', 
+        unsafe_allow_html=True
+    )
+
+
+"""
 def display_airfoil_table(airfoils_data):
     # Create the header row
     header_keys = list(next(iter(airfoils_data)).keys())[1:]  # Skip the first key which is "Name"
@@ -144,7 +78,7 @@ def display_airfoil_table(airfoils_data):
         row += " | ".join([f'<span style="font-size: 0.8em;">{str(var.value)}</span>' for var in list(airfoil.values())[1:]]) + " |\n"
         table += row
     return table
-
+"""
 def main():
     st.title("Airfoil Data")
     st.write("Prioritet parametara koje uzimamo u obzir pri izboru aeroprofila može varirati od jedne do druge kategorije letelica, pa se zato univerzalna metodologija teško može propisati. Pristup u izboru koji će biti prikazan u nastavku ima za cilj da ukaže na najbitnije parametre koji se uzimaju u obzir. Na osnovu relativne debljine aeroprofila i uslova da je cZopt ≈ cZkrst bira se po pet aeroprofila za koren i za kraj krila, a zatim se gleda koji su aeroprofili najpogodniji.")
@@ -157,25 +91,35 @@ def main():
 
     spacer()
 
-    st.subheader("Criteria")
+    st.subheader("Selection criteria")
 
-    c_z_op = Variable("", 0)
-
-    def calculate_c_z_op():
-        c_z_op.value = sorted(airfoils, key=lambda x: abs(x["Cz_op"].value - c_z_krst.value))
-        c_z_op.formula = f"{c_z_op.latex} \approx " + f"{c_z_krst.value}"
-
-    st.latex(f"{c_z_op.formula}")
-    calculate_c_z_op()
-    variables_three_columns(c_z_krst, emoji="1️⃣", display_formula=False)
+    emoji_header("1️⃣", "Relative thickness")
+    st.write("The relative thickness of the airfoil is extracted from NACA names using Regex")
     
-    sorted_airfoils = sorted(airfoils, key=lambda x: abs(x["Cz_op"].value - c_z_krst.value))        
-    top_airfoils = sorted_airfoils[:5]
-        
-    for i, airfoil in enumerate(top_airfoils, start=1):
-        st.write(f"#{i} Airfoil: {airfoil['Name']} with Cz_op = {airfoil['Cz_op'].value}")
+    thickness_ratios = {
+        "15:12": (0.15, 0.12),
+        "12:10": (0.12, 0.10),
+        "12:09": (0.12, 0.09),
+        "09:06": (0.09, 0.06),
+    }
 
-    
+    def sort_airfoils(df, thickness_root, thickness_tip, n=5):
+        # Filter based on thickness
+        root_airfoils = df[df['Thickness'] == thickness_root]
+        tip_airfoils = df[df['Thickness'] == thickness_tip]
+
+        # Sort based on other criteria (pseudo-code, replace with your actual logic)
+        # root_sorted = sort_based_on_criteria(root_airfoils)
+        # tip_sorted = sort_based_on_criteria(tip_airfoils)
+
+        # Select the top N airfoils
+        root_selection = root_airfoils.head(n)
+        tip_selection = tip_airfoils.head(n)
+
+        return root_selection, tip_selection
+
+
+    st.latex(r"\frac{M}{Re} = \frac{M}{\rho V_{\infty} c} = \frac{M}{\rho V_{\infty} \sqrt{\frac{S}{b}}} = \frac{M}{\rho V_{\infty} \sqrt{\frac{S}{b}}} = \frac{M}{\rho V_{\infty} \sqrt{\frac{S}{b}}} = \frac{M}{\rho V_{\infty} \sqrt{\frac{S}{b}}}")
     
 
 if __name__ == "__main__":
