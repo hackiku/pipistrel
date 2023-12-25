@@ -107,7 +107,7 @@ def main():
     m_sr.value = float (max_take_off_weight + design_empty_weight) / 2
     st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr.value:.2f} \\, \\text{{kg}}")
 
-    spacer('2em')
+    st.markdown('***')
 
 # ==================== ISA ====================#
 
@@ -140,7 +140,7 @@ def main():
         isa_conditions_code = inspect.getsource(get_ISA_conditions)
         st.code(isa_conditions_code, language='python')
 
-    spacer()
+    st.markdown('***')
 
 # ==================== CRUISE SPEED ====================#
     
@@ -172,7 +172,8 @@ def main():
     st.latex(f"v_{{\\text{{krst}}}} = \\frac{{\\text{{Vne}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_ne:.3f} \\times {percentage_of_vne}}}{{100}}")
     st.latex(f"v_{{\\text{{krst}}}} = {v_krst.value*3.6:.2f} \\, \\text{{Km/h}} = {v_krst.value:.2f} \\, \\text{{m/s}}")
 
-    spacer()
+    st.markdown('***')
+
 
 #==================== LIFT COEFF ====================#
 
@@ -224,7 +225,6 @@ def main():
 
     st.markdown('***')
 
-    st.header("Airfoil selection")
             
 if __name__ == "__main__":
     main()

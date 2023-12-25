@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image, ImageFont, ImageDraw
 from data import Variable
 import math
-from main import S
+# from main import S
 
 
 class Line:
@@ -221,7 +221,6 @@ def main():
     half_wingspan_meters = abs(trapezoid.x_tip - trapezoid.x_root) * conversion_factor
     half_wingspan_line = Line([trapezoid.x_root, trapezoid.y_root + 180, trapezoid.x_tip, trapezoid.y_root + 180], line_color="red", line_width=1)
     half_wingspan_line.draw(draw)
-
     midpoint = half_wingspan_line.midpoint()
     offset = (20, -20)
     draw_text(draw, f"{half_wingspan_meters:.2f} m", (midpoint[0] + offset[0], midpoint[1] + offset[1]), text_color="red", font_size=20)
@@ -244,14 +243,15 @@ def main():
     # render drawing
     draw_all_lines(draw, lines)
     st.image(img)
-
     l0 = Variable("Root Chord Length", trapezoid.l_0_px * conversion_factor, "l_{0}", "m")
     l1 = Variable("Tip Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
-    b = Variable("Wingspan", trapezoid_area*2, "b", "m")  # Use a Variable instance for the wingspan
+    b = Variable("Wingspan", half_wingspan_meters*2, "b", "m")  # Use a Variable instance for the wingspan
     S = trapezoid_area * 2
     
     st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")
     st.latex(f"S = S_{{20}} \\cdot 2 = {trapezoid_area*2:.3f} \\, \\text{{m}}^2")
+
+    st.code(half_wingspan_meters)
 
     with st.expander("Pixel to m conversion accuracy"):
         table_data = []
