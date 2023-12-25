@@ -4,7 +4,7 @@ import pandas as pd
 import inspect
 from data import Variable, aircraft_specs, create_specs_table
 from isa_lite import get_ISA_conditions
-from utils import spacer, variables_two_columns
+from utils import spacer
 from pages import draw_hifi
 
 m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
@@ -50,8 +50,8 @@ def main():
     spacer("5em")
 
     # 3D model
-    svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
-    components.iframe(svelte_app_url, width=400, height=400)
+    # svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
+    # components.iframe(svelte_app_url, width=400, height=400)
 
     st.markdown('***')
 
@@ -59,7 +59,7 @@ def main():
     
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.title("1. Aircraft Specs")
+        st.title("1. Aircraft Specs (POH)")
     with col2:
         unit_system = st.radio("", ('SI Units', 'Aviation Units'))
 
@@ -108,26 +108,20 @@ def main():
     st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr.value:.2f} \\, \\text{{kg}}")
 
     spacer('2em')
-    
-# ==================== ISA
 
-    rho = Variable("Air density at cruise altitude", 0.736116, r"\rho", "kg/m^3")
+# ==================== ISA ====================#
+
+    rho = Variable("Air density at altitude", 0.736116, r"\rho", "kg/m^3")
     g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
     
-    altitude = 4500
+    altitude = 2500
 
     # 2.3 ISA conditions
     st.subheader("2.3. ISA air conditions")
     col1, col2 = st.columns(2)
     with col1:
         # Altitude slider using session state
-        altitude_input = st.slider(
-            "Altitude (m)", 
-            min_value=0,
-            value = altitude,
-            max_value=50000, 
-            # value=st.session_state['altitude'], 
-            step=100)
+        altitude_input = st.slider("Altitude (m)", min_value=0, value = altitude, max_value=30000, step=100)
         altitude = altitude_input
 
         # get ISA conditions from isa_lite.py
@@ -184,7 +178,8 @@ def main():
 
     st.subheader("Lift coefficient at cruise (c_z_krst)")
 
-    with st.expander("Change parameters (m_sr, g, rho, v_krst) or lift coefficient value"):
+    with st.expander("Change all parameters"):
+        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
         def calculate_c_z_krst():
             c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
             # LaTeX string with variables
@@ -195,23 +190,38 @@ def main():
             # Formula in LaTeX format
             c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] {c_z_krst.latex} = {numbers}"
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         with col1:
+            S.value = st.number_input(f'{S.name} ({S.unit})', value=S.value, step=0.1, format="%.2f")        
+        with col2:
             m_sr.value = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
+        with col3:
+            v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
+
+
+        spacer()
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if planet == 'Earth':
+                altitude = st.number_input("Altitude (m)", value=altitude, min_value=0, step=100)
+                temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
+                rho.value = density
+            else:
+                rho.value = 0.020
+                g.value = 3.711
+                spacer('1em')
+                st.info(f"🪐 Mars")
         with col2:
             g.value = st.number_input(f'{g.name} ({g.unit})', value=g.value, step=0.01, format="%.3f")
         with col3:
             rho.value = st.number_input(f'{rho.name} ({rho.unit})', value=rho.value, step=0.001, format="%.5f")
-        with col4:
-            v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
 
         calculate_c_z_krst()
     
-    st.latex(f"""{c_z_krst.latex} = {c_z_krst.formula}""")
+    st.latex(f"{c_z_krst.latex} = {c_z_krst.formula}")
     st.latex(f"{c_z_krst.latex} = {c_z_krst.value:.3f}")
-    # st.latex(f"{c_z_krst.latex} = {c_z_krst.value:3f}")
 
-  
     st.markdown('***')
 
     st.header("Airfoil selection")

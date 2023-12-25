@@ -44,7 +44,7 @@ def main():
     emoji_header("2️⃣", "Lift coefficient", r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
     # st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
-    cz_selector = st.number_input("Cruise Lift Coefficient", value=0.247, step=0.001, format="%.3f")
+    cz_selector = st.number_input("Cruise Lift Coefficient", value=0.316, step=0.001, format="%.3f")
     c_z_krst = Variable("Cruise Lift Coefficient", cz_selector, r"C_{z_{krst}}", "")
     airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst.value)
     
