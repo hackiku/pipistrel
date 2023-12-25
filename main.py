@@ -7,18 +7,10 @@ from isa_lite import get_ISA_conditions
 from utils import spacer, variables_two_columns
 from pages import draw_hifi
 
-# b = Variable("Wingspan", 8.942, "b", "m")
-# b = Variable("Wingspan", aircraft_specs["Dimensions"]["Wingspan"]["value"], "b", aircraft_specs["Dimensions"]["Wingspan"]["unit"])
-S = Variable("Wing Area", 20.602, "S", "m²")
-
 m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
 v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
 c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
-
-l0_m = Variable("Root Chord Length", draw_hifi.trapezoid.l_0 * 0.0084, "l_{0}", "m")
-l1_m = Variable("Tip Chord Length", draw_hifi.trapezoid.l_1 * 0.0084, "l_{1}", "m")
-b_m = Variable("Wingspan", 10.70, "b", "m")  # Use a Variable instance for the wingspan
-
+S = Variable("Wing area", 1.00, "S", "m^2")
 
 # use data points in calculations
 def get_specific_data(df, category):
@@ -79,43 +71,22 @@ def main():
 
     st.markdown('***')
 
-# ====================
+# ==================== IMAGE ====================#
 
     st.title("2. Airfoil selection")
     spacer('2em')
     
     # 2.1. wing area
-
     st.subheader('2.1. Wing area calculator')
-    st.write("At early design stages we approximate the area geometrically to kickstart the airfoil selection process.")
+
+    S_value = draw_hifi.main()
+
+    # Create a Variable instance for S using the returned value
+    S = Variable("Wing Area", S_value, "S", "m²")
     
-    # image 
-
-    draw_hifi.main()
-
     st.markdown('***')
 
-    l0_m = Variable("Root Chord Length", draw_hifi.trapezoid.l_0 * 0.0084, "l_0", "m")
-    l1_m = Variable("Tip Chord Length", draw_hifi.trapezoid.l_1 * 0.0084, "l_1", "m")
-    b_m = Variable("Wingspan", 10.70, "b", "m")
-    
-    # st.write(f"l1 is {l1_poh} l0 is {l0_poh}")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        l0_m.value = st.number_input('Root Chord Length (l0_m) [m]', value=l0_m.value, step=0.5)
-    with col2:
-        l1_m.value = st.number_input('Tip Chord Length (l1_m) [m]', value=l1_m.value, step=0.5)
-    with col3:
-        b_m.value = st.number_input('Wingspan (b) [m]', value=b_m.value, step=0.5)
-
-    wing_area = 0.5 * b_m.value * (l0_m.value + l1_m.value)
-
-    # wing surface formula
-    st.latex(f"S = \\frac{{{l0_m.latex} + {l1_m.latex}}}{2} \\cdot {b_m.latex} = \\frac{{{l0_m.value:.3f} + {l1_m.value:.3f}}}{2} \\cdot {b_m.value:.3f}")
-    st.latex(f"S = {wing_area:.3f} \\, \\text{{m}}^2")
-
-    spacer()
-    
+        
 #==================== MASS ====================#
 
     st.subheader('2.2. Average mass')
@@ -177,10 +148,8 @@ def main():
 
     spacer()
 
-# ==================== SPEED
+# ==================== CRUISE SPEED ====================#
     
-    # cruise speed
-
     col1, col2 = st.columns([3,1])
     with col1:
         st.subheader("2.3. Define cruise speed")
@@ -211,11 +180,10 @@ def main():
 
     spacer()
 
-# ==================== LIFT COEFF
+#==================== LIFT COEFF ====================#
 
     st.subheader("Lift coefficient at cruise (c_z_krst)")
 
-    
     with st.expander("Change parameters (m_sr, g, rho, v_krst) or lift coefficient value"):
         def calculate_c_z_krst():
             c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
@@ -225,7 +193,7 @@ def main():
                 f"{{0.5 \\cdot {rho.value:.6f} \\cdot {v_krst.value:.2f}^2 \\cdot {S.value:.2f} }}"
             )
             # Formula in LaTeX format
-            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] = {numbers}"
+            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] {c_z_krst.latex} = {numbers}"
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -240,9 +208,9 @@ def main():
         calculate_c_z_krst()
     
     st.latex(f"""{c_z_krst.latex} = {c_z_krst.formula}""")
+    st.latex(f"{c_z_krst.latex} = {c_z_krst.value:.3f}")
     # st.latex(f"{c_z_krst.latex} = {c_z_krst.value:3f}")
 
-    variables_two_columns(c_z_krst, display_formula=False)
   
     st.markdown('***')
 

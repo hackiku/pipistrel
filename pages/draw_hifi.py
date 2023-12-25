@@ -1,6 +1,9 @@
 import streamlit as st
 from PIL import Image, ImageFont, ImageDraw
+from data import Variable
 import math
+from main import S
+
 
 class Line:
     # Default positions as a class variable
@@ -50,9 +53,9 @@ lines = {
 }
 
 class Trapezoid:
-    def __init__(self, l_0, l_1, x_root, x_tip, y_root, y_tip, line_color='red', line_width=2):
-        self.l_0 = l_0  # Tip length
-        self.l_1 = l_1  # Root length
+    def __init__(self, l_0_px, l_1_px, x_root, x_tip, y_root, y_tip, line_color='red', line_width=2):
+        self.l_0_px = l_0_px  # Tip length
+        self.l_1_px = l_1_px  # Root length
         self.x_root = x_root  # X position for the root line
         self.x_tip = x_tip  # X position for the tip line
         self.y_root = y_root  # Top y-coordinate for the root line
@@ -63,9 +66,9 @@ class Trapezoid:
     def draw(self, draw):
         # Calculate corner points for the trapezoid
         top_root = (self.x_root, self.y_root)
-        bottom_root = (self.x_root, self.y_root + self.l_1)
+        bottom_root = (self.x_root, self.y_root + self.l_1_px)
         top_tip = (self.x_tip, self.y_tip)
-        bottom_tip = (self.x_tip, self.y_tip + self.l_0)
+        bottom_tip = (self.x_tip, self.y_tip + self.l_0_px)
 
         # Draw the trapezoid
         draw.line([top_root, bottom_root], fill=self.line_color, width=self.line_width)  # Root line
@@ -74,7 +77,7 @@ class Trapezoid:
         draw.line([top_tip, top_root], fill=self.line_color, width=self.line_width)  # Top line
 
 # x root = 100: arbitrary, later uses average_x_root
-default_trapezoid_values = [90, 130, 100, 910, 320, 360]
+default_trapezoid_values = [94, 121, 0, 899, 328, 356]
 trapezoid = Trapezoid(*default_trapezoid_values)
 
 def update_line_positions(line, start_x, start_y, end_x, end_y):
@@ -174,7 +177,7 @@ def main():
     col1, col2, col3 = st.columns(3)
     with col1:
         st.text("dimensions")
-        trapezoid.l_0 = st.number_input('Tip Length (l_0)', value=trapezoid.l_0, step=1)
+        trapezoid.l_0_px = st.number_input('Tip Length (l_0_px)', value=trapezoid.l_0_px, step=1)
     with col2:
         st.text("vertical sides")
         trapezoid.x_root = st.number_input('Root X Position (x_root)', value=average_x_root, step=1)
@@ -184,7 +187,7 @@ def main():
 
     col4, col5, col6 = st.columns(3)
     with col4:
-        trapezoid.l_1 = st.number_input('Root Length (l_1)', value=trapezoid.l_1, step=1)
+        trapezoid.l_1_px = st.number_input('Root Length (l_1_px)', value=trapezoid.l_1_px, step=1)
     with col5:
         trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=1)
     with col6:
@@ -210,6 +213,7 @@ def main():
         line.annotate_length(draw, meter_length)
 
     trapezoid.draw(draw)
+    
 
     #==================== CANVAS TEXT ====================#
 
@@ -223,7 +227,7 @@ def main():
     draw_text(draw, f"{half_wingspan_meters:.2f} m", (midpoint[0] + offset[0], midpoint[1] + offset[1]), text_color="red", font_size=20)
 
     # Update the trapezoid area calculation
-    trapezoid_area = 0.5 * half_wingspan_meters * (trapezoid.l_0 + trapezoid.l_1)* conversion_factor
+    trapezoid_area = 0.5 * half_wingspan_meters * (trapezoid.l_0_px + trapezoid.l_1_px)* conversion_factor
     area_text_position = (pixel_canvas_width - 400, pixel_canvas_height - 250)
     # adjust subscript
     s_text_position = (area_text_position[0] + 22, area_text_position[1] + 28)
@@ -234,12 +238,20 @@ def main():
     # canvas legend
     canvas_info_position = (pixel_canvas_width - int(0.32 * pixel_canvas_width), pixel_canvas_height - int(0.12 * pixel_canvas_height))
     draw_text(draw, f"Pixel canvas = {pixel_canvas_width}x{pixel_canvas_height}px", canvas_info_position)
-    draw_text(draw, f"Convert to m: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 30))
-    draw_text(draw, f"Convert to px: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
+    draw_text(draw, f"1m  = {1/conversion_factor:.4f} px", (canvas_info_position[0], canvas_info_position[1] + 30))
+    draw_text(draw, f"1px = {conversion_factor:.4f} m", (canvas_info_position[0], canvas_info_position[1] + 60))
 
-    # begin
+    # render drawing
     draw_all_lines(draw, lines)
     st.image(img)
+
+    l0 = Variable("Root Chord Length", trapezoid.l_0_px * conversion_factor, "l_{0}", "m")
+    l1 = Variable("Tip Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
+    b = Variable("Wingspan", trapezoid_area*2, "b", "m")  # Use a Variable instance for the wingspan
+    S = trapezoid_area * 2
+    
+    st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")
+    st.latex(f"S = S_{{20}} \\cdot 2 = {trapezoid_area*2:.3f} \\, \\text{{m}}^2")
 
     with st.expander("Pixel to m conversion accuracy"):
         table_data = []
@@ -257,6 +269,7 @@ def main():
             table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
         st.markdown(table_markdown)
 
+    return S
 
 
 if __name__ == "__main__":
