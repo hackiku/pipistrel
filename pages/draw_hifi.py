@@ -121,10 +121,6 @@ def convert_px_to_m(lines):
     else:
         return None
 
-    # if conversion_factors:
-    #    return sum(conversion_factors) / len(conversion_factors)
-    # else:
-    #    return None
 
 # find center of 3x horizontal body lines
 def calculate_average_center(lines, line_keys):
@@ -140,21 +136,19 @@ def calculate_average_center(lines, line_keys):
 
 def main():
 
-    img_choice = st.radio("Choose image", ["Black", "White"])
+    img_choice = st.radio("Image format", ["Black", "White"])
     if img_choice == "Black":
         img_path = "./assets/wing_black.png"
     else:
         img_path = "./assets/wing_white.png"
 
     img = Image.open(img_path)
-    draw = ImageDraw.Draw(img)
-
+    
     # define canvas
     pixel_canvas_width, pixel_canvas_height = img.size
 
     line_keys = ['Fuselage Measurement', 'Cabin Measurement', 'Elevator Width']
     average_x_root = calculate_average_center(lines, line_keys)
-    st.write(average_x_root)
     # STATE
     for line_key in lines.keys():
         if line_key not in st.session_state:
@@ -175,40 +169,34 @@ def main():
         with col5:
             st.session_state[selected_line_key][3] = st.number_input('End Y', value=st.session_state[selected_line_key][3], max_value=pixel_canvas_height, step=1)
     
-    st.markdown("table")
-
     #==================== TRAPEZOID ====================#
     
     col1, col2, col3 = st.columns(3)
     with col1:
         st.text("dimensions")
-        trapezoid.l_0 = st.number_input('Tip Length (l_0)', value=trapezoid.l_0, step=10)
+        trapezoid.l_0 = st.number_input('Tip Length (l_0)', value=trapezoid.l_0, step=1)
     with col2:
         st.text("vertical sides")
-        trapezoid.x_root = st.number_input('Root X Position (x_root)', value=average_x_root, step=10)
+        trapezoid.x_root = st.number_input('Root X Position (x_root)', value=average_x_root, step=1)
     with col3:
         st.text("move up/down")
-        trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=10)
+        trapezoid.y_root = st.number_input('Root Y Position (y_root)', value=trapezoid.y_root, step=1)
 
     col4, col5, col6 = st.columns(3)
     with col4:
-        trapezoid.l_1 = st.number_input('Root Length (l_1)', value=trapezoid.l_1, step=10)
+        trapezoid.l_1 = st.number_input('Root Length (l_1)', value=trapezoid.l_1, step=1)
     with col5:
-        trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=10)
+        trapezoid.x_tip = st.number_input('Tip X Position (x_tip)', value=trapezoid.x_tip, step=1)
     with col6:
-        trapezoid.y_tip = st.number_input('Tip Y Position (y_tip)', value=trapezoid.y_tip, step=10)
+        trapezoid.y_tip = st.number_input('Tip Y Position (y_tip)', value=trapezoid.y_tip, step=1)
 
     # Update the selected line with the new positions
     selected_line = lines[selected_line_key]
     selected_line.start_x, selected_line.start_y, selected_line.end_x, selected_line.end_y = st.session_state[selected_line_key]
 
-    trapezoid.draw(draw)
-
     for key, line in lines.items():
         if key in st.session_state:
             line.start_x, line.start_y, line.end_x, line.end_y = st.session_state[key]
-
-    # update_line_positions(selected_line, start_x, start_y, end_x, end_y)
 
     conversion_factor = convert_px_to_m(lines)
 
@@ -222,8 +210,6 @@ def main():
         line.annotate_length(draw, meter_length)
 
     trapezoid.draw(draw)
-
-    draw_all_lines(draw, lines)
 
     #==================== CANVAS TEXT ====================#
 
@@ -251,6 +237,10 @@ def main():
     draw_text(draw, f"Convert to m: {1/conversion_factor:.4f} px/m", (canvas_info_position[0], canvas_info_position[1] + 30))
     draw_text(draw, f"Convert to px: {conversion_factor:.4f} m/px", (canvas_info_position[0], canvas_info_position[1] + 60))
 
+    # begin
+    draw_all_lines(draw, lines)
+    st.image(img)
+
     with st.expander("Pixel to m conversion accuracy"):
         table_data = []
         for line_key, line in lines.items():
@@ -267,7 +257,7 @@ def main():
             table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
         st.markdown(table_markdown)
 
-    st.image(img)
+
 
 if __name__ == "__main__":
     main()
