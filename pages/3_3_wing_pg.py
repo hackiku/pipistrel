@@ -52,19 +52,20 @@ def main():
     st.markdown("Proračun se u prvoj iteraciji u programu Trapezno krilo- Glauert obavlja pod pretpostavkom nultog konstruktivnog vitoperenja")
 
     # key variables 
-    variables_two_columns(c_z_max)
-    variables_two_columns(alpha_n)
+    # variables_two_columns(c_z_max)
+    # variables_two_columns(alpha_n)
     
     st.markdown("***")
 
     st.write("Za proračun uzgonskih karakteristika krila i dobijanje podataka za formiranje krive uzgona je korišćen program Trapezno krilo - Glauert, a ulazni parametri su:")
 
-    # # alpha crit 
-    variables_two_columns(c_z_krst)
-    variables_two_columns(v_krst) # = 224.37 m/s = 807.73 km/h
-    variables_two_columns(rho) # ρ
+    with st.expander("Edit / calculate input parameters"):
+        # # alpha crit 
+        variables_two_columns(c_z_krst)
+        variables_two_columns(v_krst) # = 224.37 m/s = 807.73 km/h
+        variables_two_columns(rho) # ρ
 
-    with st.expander("Calculate wing aspect ratio (λ)"):
+        st.code("Calculate wing aspect ratio (λ)")
         
         def calculate_lambda_wing():
             lambda_wing.value = b.value**2 / S.value
@@ -77,32 +78,47 @@ def main():
         with col2:
             S.value = st.number_input(f'{S.name} {S.unit}', value=S.value, step=0.1, format="%.3f")
         with col3:
-          st.latex(f"{b.latex} = {b.value:.3f} \ {b.unit}")
+            st.latex(f"{b.latex} = {b.value:.3f} \ {b.unit}")
         with col4:
-          st.latex(f"{S.latex} = {S.value:.3f} \ {S.unit}")
+            st.latex(f"{S.latex} = {S.value:.3f} \ {S.unit}")
             # st.latex = (S.latex)
         # st.latex(lambda_wing.formula)               
+        
+        calculate_lambda_wing()
+        variables_two_columns(lambda_wing, display_formula=True) # λ
+
+        st.code("Calculate wing taper ratio (n)")
+        def calculate_taper_ratio():
+            n.value = l_0.value / l_s.value
+            numbers = "=" + f"\\frac{{{l_0.value:.2f}}}{{{l_s.value:.2f}}}"
+            n.formula = f"n = \\frac{{{l_0.latex}}}{{{l_s.latex}}} {numbers}"
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            l_0.value = st.number_input(f'{l_0.name} {l_0.unit}', value=l_0.value, step=0.01, format="%.3f")
+        with col2:
+            l_s.value = st.number_input(f'{l_s.name} {l_s.unit}', value=l_s.value, step=0.01, format="%.3f")
+        with col3:
+            st.latex(f"{l_0.latex} = {l_0.value:.3f} \ {l_0.unit}")
+        with col4:
+            st.latex(f"{l_s.latex} = {l_s.value:.3f} \ {l_s.unit}")
+
+        calculate_taper_ratio()
+        variables_two_columns(n, display_formula=True)  # n
+
+    markdown_table = f"""
+    | # | Parameter | Symbol | Value |
+    |---|---|---|---|
+    | 1 | Max Lift Coefficient | $C_{{z_{{max}}}}$ | {c_z_max.value} |
+    | 2 | Wing Aspect Ratio | $\\lambda = \\frac{{b^2}}{{S}}$ | {lambda_wing.value:.3f} |
+    | 3 | Root Chord Length | $l_0$ | {l_0.value:.3f} m |
+    | 4 | Wing Taper Ratio | $n = \\frac{{l_0}}{{l_s}}$ | {n.value:.3f} |
+    | 5 | Cruising Speed | $v_{{krst}}$ | {v_krst.value:.2f} m/s |
+    | 6 | Air Density at Cruise Altitude | $\\rho$ | {rho.value:.5f} kg/m³ |
+    """
     
-    calculate_lambda_wing()
-    variables_two_columns(lambda_wing, display_formula=True) # λ
+    st.markdown(markdown_table)
 
-    with st.expander("Calculate wing taper ratio (n)"):
-      def calculate_taper_ratio():
-          n.value = l_0.value / l_s.value
-          numbers = "=" + f"\\frac{{{l_0.value:.2f}}}{{{l_s.value:.2f}}}"
-          n.formula = f"n = \\frac{{{l_0.latex}}}{{{l_s.latex}}} {numbers}"
-
-      col1, col2, col3 = st.columns(3)
-      with col1:
-          l_0.value = st.number_input(f'{l_0.name} {l_0.unit}', value=l_0.value, step=0.01, format="%.3f")
-      with col2:
-          l_s.value = st.number_input(f'{l_s.name} {l_s.unit}', value=l_s.value, step=0.01, format="%.3f")
-      with col3:
-          st.latex(f"{l_0.latex} = {l_0.value:.3f} \ {l_0.unit}")
-          st.latex(f"{l_s.latex} = {l_s.value:.3f} \ {l_s.unit}")
-
-    calculate_taper_ratio()
-    variables_two_columns(n, display_formula=True)  # n
 
     st.markdown("***")
 
@@ -128,7 +144,7 @@ def main():
     C              broj    vitkost suzenje   vitop.   brzina   gustina
     C            preseka                     [step.]  [km/h]   [kg/m^3]
         DATA      K,       LAM,   EN,       EPS_K,    V,        RO
-        &     /    16,      6.,   0.437,      0.0,    211.33,    0.77678 /
+        &     /    16,      {lambda_wing.value:.3f},   {n.value:.3f},      0.0,    {v_krst.value:.2f},    {rho.value:.6f} /
 
         DATA CZMAXAP_S / 1.5 / ! maks. koef. uzgona ap. u korenu krila
         DATA CZMAXAP_0 / 1.46 / ! maks. koef. uzgona ap. na kraju krila

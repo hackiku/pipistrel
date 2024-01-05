@@ -1,8 +1,9 @@
+## main.py
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import inspect
-from data import Variable, aircraft_specs, create_specs_table
+from data import Variable, save_variables_to_session, load_variables_from_session, aircraft_specs, create_specs_table 
 from isa_lite import get_ISA_conditions
 from utils import spacer
 from pages import draw_hifi
@@ -22,7 +23,6 @@ def get_specific_data(df, category):
 
         return df[start_index:end_index]
     return pd.DataFrame()
-
 
 # "Airfoil" preset manual filter
 def filter_data_for_preset(data, preset):
@@ -218,13 +218,25 @@ def main():
         with col3:
             rho.value = st.number_input(f'{rho.name} ({rho.unit})', value=rho.value, step=0.001, format="%.5f")
 
-        calculate_c_z_krst()
-    
+    calculate_c_z_krst()
     st.latex(f"{c_z_krst.latex} = {c_z_krst.formula}")
     st.latex(f"{c_z_krst.latex} = {c_z_krst.value:.3f}")
 
+    
     st.markdown('***')
+    #==================== SESSION STATE ====================#
 
+    st.text("variables saved to session state:")
+    variables_dict = {
+        'm_sr': m_sr, 
+        'v_krst': v_krst, 
+        'c_z_krst': c_z_krst, 
+        'S': S,
+        'rho': rho,
+        'g': g,
+    }
+    
+    save_variables_to_session(variables_dict)
             
 if __name__ == "__main__":
     main()

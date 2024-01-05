@@ -1,4 +1,5 @@
 # data.py
+import streamlit as st
 import pandas as pd
 
 class Variable:
@@ -10,6 +11,19 @@ class Variable:
         self.value2 = value2
         self.unit2 = unit2
         self.formula = formula
+    
+    def save_to_session(self):
+        st.session_state[self.latex] = self
+
+
+def save_variables_to_session(variables_dict):
+    for var_name, var_value in variables_dict.items():
+        if isinstance(var_value, Variable):
+            st.session_state[var_value.latex] = var_value
+            st.code(f"{var_value.latex} = {var_value.value} {var_value.unit} # {var_value.name}")
+    
+def load_variables_from_session(variable_name, default=None):
+    return st.session_state.get(variable_name, default)
 
 # grab specs from data.py
 def create_specs_table(aircraft_specs):
