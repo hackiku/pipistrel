@@ -8,16 +8,18 @@ from isa_lite import get_ISA_conditions
 from utils import spacer
 from pages import draw_hifi
 
-m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
-v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
-c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
+# wing geometry
+S = Variable("Wing Area", 30.00, "S", "S", "m²")
+l0 = Variable("Root Chord Length", 1.00, "l0", "l_{0}", "m")
+l1 = Variable("Tip Chord Length", 2.00, "l1", "l_{1}", "m")
+b = Variable("Wingspan", 40.00, "b", "b", "m")
 
-# Default values
-S = Variable("Wing Area", 30.00, "S", "m²")
-l0 = Variable("Root Chord Length", 1.00, "l_{0}", "m")
-l1 = Variable("Tip Chord Length", 2.00, "l_{1}", "m")
-b = Variable("Wingspan", 40.00, "b", "m")
-
+# mission parameters
+m_sr = Variable("Average mass", 100.00, "m_sr", "m_{sr}", "kg")
+v_krst = Variable("Cruising speed", 50.00, "v_krst", r"v_{krst}", "m/s")
+rho = Variable("Air density at altitude", 0.05, "rho", r"\rho", "kg/m^3")
+g = Variable("Gravity acceleration", 9.80665, "g", "g", "m/s²")
+c_z_krst = Variable("Cruise lift coefficient", 0.200, "c_z_krst", r"C_{z_{krst}}", "")
 
 
 # use data points in calculations
@@ -116,8 +118,6 @@ def main():
 
 # ==================== ISA ====================#
 
-    rho = Variable("Air density at altitude", 0.736116, r"\rho", "kg/m^3")
-    g = Variable("Gravity acceleration", 9.80665, "g", "m/s²")
     
     altitude = 2500
 
@@ -235,7 +235,7 @@ def main():
     variables_dict = {
         'm_sr': m_sr, 
         'v_krst': v_krst, 
-        'c_z_krst': c_z_krst, 
+        'c_z_krst': c_z_krst,
         'S': S,
         'l0': l0,
         'l1': l1,

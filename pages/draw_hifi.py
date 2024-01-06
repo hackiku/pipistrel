@@ -245,8 +245,8 @@ def main():
     st.image(img)
     
     
-    l0 = Variable("Root Chord Length", trapezoid.l_0_px * conversion_factor, "l_{0}", "m")
-    l1 = Variable("Tip Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
+    l0 = Variable("Tip Chord Length", trapezoid.l_0_px * conversion_factor, "l_{0}", "m")
+    l1 = Variable("Root Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
     b = Variable("Wingspan", half_wingspan_meters*2, "b", "m")  # Use a Variable instance for the wingspan
     
     st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")

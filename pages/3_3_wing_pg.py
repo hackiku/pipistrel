@@ -5,21 +5,26 @@ from data import Variable, save_variables_to_session, load_variables_from_sessio
 from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
-from main import c_z_krst, v_krst, rho, S, b
+from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
+v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home)
 
-# Instantiate variables using the Variable class
-# c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
-# c_z_max = Variable("Max Lift Coefficient", 1.46, r"C_{z_{max}}", "")  # Assuming max lift coefficient is from NACA 65-212
-# v_krst = Variable("Cruising Speed", 224.37, r"v_{krst}", "m/s")
-# alpha_n = Variable("Angle of Attack", -1.3, r"\alpha_n", "degrees")
-# lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
-# n = Variable("Wing Taper Ratio", 0.520, "n")
-# rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
+variables_dict = {
+    'v_krst': v_krst_home, 
+    'c_z_krst': c_z_krst_home,
+    'S': S_home,
+    'l0': l0_home,
+    'l1': l1_home,
+    'b': b_home,
+    'rho': rho_home,
+}
 
-l_s = Variable("Chord Length", 3.028, "l_s", "m")
-l_0 = Variable("Root Chord Length", 1.576, "l_0", "m")
-b = Variable("Wingspan", 8.942, "b", "m")
-S = Variable("Wing Area", 20.602, "S", "m²")
+save_variables_to_session(variables_dict)
+
+
+lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
+n = Variable("Wing Taper Ratio", 0.520, "n")
+alpha_n = Variable("Angle of Attack", -1.3, r"\alpha_n", "degrees")
+c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
 
 data = [
     {"y/(b/2)": "0.000", "Cz_max": "1.254", "Cz_max_aero-Cb_ca": "1.298", "Cz_lok": "1.109", "P_max [N/m]": "62222.17"},
@@ -40,22 +45,22 @@ data = [
     {"y/(b/2)": "0.995", "Cz_max": "1.202", "Cz_max_aero-Cb_ca": "4.716", "Cz_lok": "0.294", "P_max [N/m]": "8611.25"}
 ]
 
-
-
 def main():
     
-    # list variables to load
-    variable_names_to_load = ['m_sr', 'v_krst', 'c_z_krst', 'S', 'rho', 'g']
-    # Load the variables
-    variables = load_variables_from_session(variable_names_to_load)
-
-    # Access the variables
-    c_z_krst = variables.get('c_z_krst')
-    # m_sr = variables.get('m_sr')
-    v_krst = variables.get('v_krst')
-    # ... and so on for other variables ...
-   
+    # load variables from state
+    variable_names_to_load = ['S', 'l0', 'l1', 'b', 'v_krst', 'rho', 'g', 'm_sr', 'c_z_krst']
+    variables, code = load_variables_from_session(variable_names_to_load)
+    st.code(code)
     
+    S = variables.get('S', S_home)
+    l0 = variables.get('l0', l0_home)
+    l1 = variables.get('l1', l1_home)
+    b = variables.get('b', b_home)
+    v_krst = variables.get('v_krst', v_krst_home)
+    rho = variables.get('rho', rho_home)
+    c_z_krst = variables.get('c_z_krst', c_z_krst_home)
+        
+    st.code(f"S = {S.value}, l0 = {l0.value}, l1 = {l1.value}, b = {b.value}, v_krst = {v_krst.value}, rho = {rho.value}, c_z_krst = {c_z_krst.value}")
     st.title("3. Wing Design")
     st.write("""Da bismo formirali krivu uzgona krila, moramo odrediti četiri karakteristična parametra: - Maksimalni koeficijent uzgona krila cZmax
     - Ugaonultoguzgonakrilaαn
@@ -73,6 +78,7 @@ def main():
 
     st.write("Za proračun uzgonskih karakteristika krila i dobijanje podataka za formiranje krive uzgona je korišćen program Trapezno krilo - Glauert, a ulazni parametri su:")
 
+    #==================== EXPANDER ====================#
     with st.expander("Edit / calculate input parameters"):
         # # alpha crit 
         variables_two_columns(c_z_krst)
@@ -89,7 +95,7 @@ def main():
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             b.value = st.number_input(f'{b.name} {b.unit}', value=b.value, step=0.01, format="%.3f")
-        with col2:
+        with col2: 
             S.value = st.number_input(f'{S.name} {S.unit}', value=S.value, step=0.1, format="%.3f")
         with col3:
             st.latex(f"{b.latex} = {b.value:.3f} \ {b.unit}")
@@ -103,19 +109,19 @@ def main():
 
         st.code("Calculate wing taper ratio (n)")
         def calculate_taper_ratio():
-            n.value = l_0.value / l_s.value
-            numbers = "=" + f"\\frac{{{l_0.value:.2f}}}{{{l_s.value:.2f}}}"
-            n.formula = f"n = \\frac{{{l_0.latex}}}{{{l_s.latex}}} {numbers}"
+            n.value = l0.value / l1.value
+            numbers = "=" + f"\\frac{{{l0.value:.2f}}}{{{l1.value:.2f}}}"
+            n.formula = f"n = \\frac{{{l0.latex}}}{{{l1.latex}}} {numbers}"
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            l_0.value = st.number_input(f'{l_0.name} {l_0.unit}', value=l_0.value, step=0.01, format="%.3f")
+            l0.value = st.number_input(f'{l0.name} {l0.unit}', value=l0.value, step=0.01, format="%.3f")
         with col2:
-            l_s.value = st.number_input(f'{l_s.name} {l_s.unit}', value=l_s.value, step=0.01, format="%.3f")
+            l1.value = st.number_input(f'{l1.name} {l1.unit}', value=l1.value, step=0.01, format="%.3f")
         with col3:
-            st.latex(f"{l_0.latex} = {l_0.value:.3f} \ {l_0.unit}")
+            st.latex(f"{l0.latex} = {l0.value:.3f} \ {l0.unit}")
         with col4:
-            st.latex(f"{l_s.latex} = {l_s.value:.3f} \ {l_s.unit}")
+            st.latex(f"{l1.latex} = {l1.value:.3f} \ {l1.unit}")
 
         calculate_taper_ratio()
         variables_two_columns(n, display_formula=True)  # n
@@ -125,8 +131,8 @@ def main():
     |---|---|---|---|
     | 1 | Max Lift Coefficient | $C_{{z_{{max}}}}$ | {c_z_max.value} |
     | 2 | Wing Aspect Ratio | $\\lambda = \\frac{{b^2}}{{S}}$ | {lambda_wing.value:.3f} |
-    | 3 | Root Chord Length | $l_0$ | {l_0.value:.3f} m |
-    | 4 | Wing Taper Ratio | $n = \\frac{{l_0}}{{l_s}}$ | {n.value:.3f} |
+    | 3 | Root Chord Length | $l0$ | {l0.value:.3f} m |
+    | 4 | Wing Taper Ratio | $n = \\frac{{l0}}{{l1}}$ | {n.value:.3f} |
     | 5 | Cruising Speed | $v_{{krst}}$ | {v_krst.value:.2f} m/s |
     | 6 | Air Density at Cruise Altitude | $\\rho$ | {rho.value:.5f} kg/m³ |
     """
