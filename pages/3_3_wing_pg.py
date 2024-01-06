@@ -6,6 +6,7 @@ from data import Variable, save_variables_to_session, load_variables_from_sessio
 from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import os
 import re
 from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
@@ -241,52 +242,75 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     spacer()       
     st.markdown("***")
 
-    st.image('./pages/crop_black.png')
+    wing_trapezoid_image = st.image('./pages/crop_black.png')
+            
+
     #==================== PLOT ====================#
-    def draw_flow_separation():
-        fig, ax = plt.subplots(figsize=(12, 6))
+    
+    def find_image_with_conversion_factor(directory, pattern):
+        # Compile the regex pattern
+        regex = re.compile(pattern)
+        for filename in os.listdir(directory):
+            if regex.match(filename):
+                # Extract the conversion factor from the filename
+                conversion_factor = float(regex.findall(filename)[0])
+                return os.path.join(directory, filename), conversion_factor
+        return None, None
 
-        # Plot for Czmax - Airfoil
-        plt.plot(y_b2.value, c_z_max.value, label='Czmax - Airfoil', marker='o', linestyle='-')
+    
+    def draw_flow_separation(height_cz_ratio):
+        pattern = r"crop(\d+\.\d+).png"
+        directory = './pages'
+        img_path, conversion_factor = find_image_with_conversion_factor(directory, pattern)
 
-        # Plot for Czmax-Cb/Ca
-        plt.plot(y_b2.value, c_z_max_cb_ca.value, label='Czmax - Cb/Ca', marker='s', linestyle='--')
+        if img_path and conversion_factor:
+            img = mpimg.imread(img_path)
+            img_aspect_ratio = img.shape[0] / img.shape[1]
+            fig_width = 12
+            fig_height = fig_width * img_aspect_ratio * height_cz_ratio  # Adjust height based on the ratio
+            fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
-        # Plot for Czmax Local - Airfoil
-        plt.plot(y_b2.value, c_z_lok.value, label='Czmax Local - Airfoil', marker='^', linestyle='-.')
+            ax.imshow(img, extent=[0, 1, 0, height_cz_ratio], aspect='auto')
 
-        # Plot for Max Pressure (Optional: Normalize if required)
-        # Normalization can be done if the values of p_max are not in the same scale as Cz
-        p_max_normalized = [p / 100 for p in p_max.value]  # Example normalization
-        plt.plot(y_b2.value, p_max_normalized, label='Normalized Max Pressure', marker='x', linestyle=':')
+        # Plotting the variables
+        ax.plot(y_b2.value, c_z_max.value, label=c_z_max.latex, marker='o', linestyle='-')
+        ax.plot(y_b2.value, c_z_max_cb_ca.value, label=c_z_max_cb_ca.latex, marker='o', linestyle='-')
+        ax.plot(y_b2.value, c_z_lok.value, label=c_z_lok.latex, marker='o', linestyle='-')
+
+        # separation point
+        separation_point = (y_b2.value[1], czmax_final)
+        ax.scatter(*separation_point, color='black', s=120, zorder=6, label='Flow Separation Point')
+        st.code(separation_point)
+
+        ax.annotate(f'({separation_point[0]:.3f}, {separation_point[1]:.3f})',
+            xy=separation_point, xytext=(10, 10),
+            textcoords='offset points', ha='center',
+            bbox=dict(boxstyle="round,pad=0.3", alpha=0.5))
 
         # Set labels and title
-        plt.xlabel('y/(b/2)')
-        plt.ylabel('Cz and Normalized Pressure')
-        plt.title('Lift Coefficient and Pressure Distribution Along Wing Span')
+        ax.set_xlabel('y/(b/2)')
+        ax.set_ylabel('Cz')
+        ax.set_title('Cz distribution along wing span')
 
-        # Set axis limits
-        plt.xlim(0, 1)
-        plt.ylim(0, max(c_z_max.value + p_max_normalized) + 0.1)
+        # Set x-axis and y-axis limits
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 3)
+        # ax.set_ylim(0, max(df['Czmax ap.']) * height_cz_ratio)
 
-        # Add a legend and grid
-        plt.legend()
-        plt.grid(True)
-
-        # Show the plot in Streamlit
+        ax.legend()
+        ax.grid(True)
         st.pyplot(fig)
 
-    # Call the function to draw the plot with all datasets
-    draw_flow_separation()
-
-
+    # Call the draw function with a specified height-to-Cz ratio
+    draw_flow_separation(height_cz_ratio=2)
+    
+    
     #==================== ZERO LIFT ANGLE ====================#
     st.subheader("3.1.2. Zero Lift Angle")
     st.markdown("Ugao nultog uzgona aeroprofila smo dobili u programu „Trapezno krilo – Glauert“ kao izlazni parametar, ali se može odrediti i analitički na osnovu jednačine:")
     
     st.latex("\\alpha_n = \\alpha_{ns} + \\varepsilon \cdot f_a")
 
-    st.image('assets/geometrija_krila_inverted.png')
     st.markdown("""
     - $$ \\alpha_{ns} $$ is the angle of zero lift of the airfoil in the plane of symmetry, $$ \\alpha_{ns} = -1^\\circ $$
     - $$ \\varepsilon $$ is the total twist of the wing, $$ \\varepsilon = \\varepsilon_a + \\varepsilon_k = 0.3^\\circ + 0^\\circ - 0.3^\\circ $$

@@ -291,9 +291,11 @@ def main():
 
     bounding_box = trapezoid.get_bounding_box()
     cropped_img = img.crop(bounding_box)
-    cropped_img_path = './pages/crop_black.png'
+    cropped_img_path = f"./pages/crop{conversion_factor:.6f}.png"
     cropped_img.save(cropped_img_path)
-    
+    st.code(f"BOXXXX: {bounding_box}") 
+    st.code(f"conversion: {conversion_factor}")
+       
     return S_draw, l0_draw, l1_draw, b_draw
 
 
