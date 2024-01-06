@@ -227,7 +227,6 @@ def main():
     st.latex(f"{c_z_krst.latex} = {c_z_krst.formula}")
     st.latex(f"{c_z_krst.latex} = {c_z_krst.value:.3f}")
 
-    
     st.markdown('***')
     #==================== SESSION STATE ====================#
 
@@ -245,6 +244,6 @@ def main():
     }
     
     save_variables_to_session(variables_dict)
-            
+
 if __name__ == "__main__":
     main()

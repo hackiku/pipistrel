@@ -1,29 +1,36 @@
 # 3_wing_pg.py
 
 import streamlit as st
+from main import main as initialize_main
 from data import Variable, save_variables_to_session, load_variables_from_session
 from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
 v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home)
 
-variables_dict = {
-    'v_krst': v_krst_home, 
-    'c_z_krst': c_z_krst_home,
-    'S': S_home,
-    'l0': l0_home,
-    'l1': l1_home,
-    'b': b_home,
-    'rho': rho_home,
-}
+# initialize_main()
 
-save_variables_to_session(variables_dict)
+# Hardcoded Airfoil Data
+root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
+tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
 
+# Extracting specific values from airfoil data
+c_z_max_root = Variable("Max Lift Coefficient at Root", root_airfoil_data[4], "c_z_max_root", r"C_{z_{max}}", "")
+alpha_0_root = Variable("Angle of Zero Lift at Root", root_airfoil_data[2], "alpha_0_root", r"\alpha_{0}", "degrees")
+a_0_root = Variable("Lift Gradient at Root", root_airfoil_data[3], "a_0_root", r"a_{0}", "")
 
+c_z_max_tip = Variable("Max Lift Coefficient at Tip", tip_airfoil_data[4], "c_z_max_tip", r"C_{z_{max}}", "")
+alpha_0_tip = Variable("Angle of Zero Lift at Tip", tip_airfoil_data[2], "alpha_0_tip", r"\alpha_{0}", "degrees")
+a_0_tip = Variable("Lift Gradient at Tip", tip_airfoil_data[3], "a_0_tip", r"a_{0}", "")
+
+# geometry calcs
 lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
-n = Variable("Wing Taper Ratio", 0.520, "n")
-alpha_n = Variable("Angle of Attack", -1.3, r"\alpha_n", "degrees")
+n = Variable("Wing Taper Ratio", 0.520, "n", "n")
+phi = Variable("Sweep Angle", 27, "phi", r"\phi", "degrees")
+alpha_n = Variable("Angle of Attack", -1.3, "alpha_n", r"\alpha_n", "degrees")
+
 c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
 
 data = [
@@ -76,7 +83,7 @@ def main():
     
     st.markdown("***")
 
-    st.write("Za proračun uzgonskih karakteristika krila i dobijanje podataka za formiranje krive uzgona je korišćen program Trapezno krilo - Glauert, a ulazni parametri su:")
+    st.subheader("mission parameters")
 
     #==================== EXPANDER ====================#
     with st.expander("Edit / calculate input parameters"):
@@ -126,19 +133,34 @@ def main():
         calculate_taper_ratio()
         variables_two_columns(n, display_formula=True)  # n
 
-    markdown_table = f"""
-    | # | Parameter | Symbol | Value |
-    |---|---|---|---|
-    | 1 | Max Lift Coefficient | $C_{{z_{{max}}}}$ | {c_z_max.value} |
-    | 2 | Wing Aspect Ratio | $\\lambda = \\frac{{b^2}}{{S}}$ | {lambda_wing.value:.3f} |
-    | 3 | Root Chord Length | $l0$ | {l0.value:.3f} m |
-    | 4 | Wing Taper Ratio | $n = \\frac{{l0}}{{l1}}$ | {n.value:.3f} |
-    | 5 | Cruising Speed | $v_{{krst}}$ | {v_krst.value:.2f} m/s |
-    | 6 | Air Density at Cruise Altitude | $\\rho$ | {rho.value:.5f} kg/m³ |
+    wing_inputs = f"""
+    | # | Parameter Name                 | Symbol                                           | Value                                  | Unit     |
+    |---|--------------------------------|--------------------------------------------------|----------------------------------------|----------|
+    | 1 | Cruise Lift Coefficient        | ${c_z_krst.latex}$                               | {c_z_krst.value:.3f}                   |          |
+    | 2 | Wing Aspect Ratio (λ)          | ${lambda_wing.formula}$                    | {lambda_wing.value:.3f} |          |
+    | 3 | Tip Chord Length               | ${l0.latex}$                                     | {l0.value:.3f}                         | {l0.unit}|
+    | 4 | Root Chord Length              | ${l1.latex}$                                     | {l1.value:.3f}                         | {l1.unit}|
+    | 5 | Wing Taper Ratio (n)           | ${n.formula}$                          | {n.value:.3f}      |          |
+    | 6 | Cruising Speed                 | ${v_krst.latex}$                                 | {v_krst.value:.2f}                     | {v_krst.unit} |
+    | 7 | Air Density at Cruise Altitude | ${rho.latex}$                                    | {rho.value:.5f}                        | {rho.unit} |
     """
-    
-    st.markdown(markdown_table)
 
+    
+    st.markdown(wing_inputs)
+    st.markdown("***")
+
+    st.subheader("airfoil params")
+    
+    airfoil_inputs = f"""
+    | # | Parameter Name              | Symbol             | Tip           | Root          |
+    |---|-----------------------------|--------------------|---------------|---------------|
+    | 1 | Airfoil                     |                    | NACA 65_2-41  | NACA 63_4-412 |
+    | 2 | Max Lift Coefficient        | ${c_z_max_root.latex}$ | {c_z_max_root.value:.3f} | {c_z_max_tip.value:.3f} |
+    | 3 | Angle of Zero Lift          | ${alpha_0_root.latex}$ | {alpha_0_root.value:.2f}° | {alpha_0_tip.value:.2f}° |
+    | 4 | Lift Gradient               | ${a_0_root.latex}$  | {a_0_root.value:.3f} | {a_0_tip.value:.3f} |
+    """
+
+    st.markdown(airfoil_inputs)
 
     st.markdown("***")
 
@@ -147,39 +169,42 @@ def main():
     st.subheader("3.1.1. Max lift coefficient of wings")
     st.write("Proračun se u prvoj iteraciji u programu Trapezno krilo- Glauert obavlja pod pretpostavkom nultog konstruktivnog vitoperenja")
 
-    fortran_inputs = f"""
-    C     *************** UNOS ULAZNIH PODATAKA I OPCIJA *******************
+    fortran_inputs = f"""C     *************** UNOS ULAZNIH PODATAKA I OPCIJA *******************
 
-    C     IZBOR PRORACUNSKE OPCIJE: ZA VREDNOOST IZB=1 RACUNA SA UNAPRED
-    C     ZADATIM KOEFICIJENTOM UZGONA KRILA CZ; U SUPROTNOM, ZA SVAKI
-    C     DRUGI INTEGER (npr. IZB=0) CZ RACUNA NA OSNOVU SPECIFICNOG
-    C     OPTERECENJA KRILA, BRZINE I GUSTINE NA REZIMU KRSTARENJA
+C     IZBOR PRORACUNSKE OPCIJE: ZA VREDNOOST IZB=1 RACUNA SA UNAPRED
+C     ZADATIM KOEFICIJENTOM UZGONA KRILA CZ; U SUPROTNOM, ZA SVAKI
+C     DRUGI INTEGER (npr. IZB=0) CZ RACUNA NA OSNOVU SPECIFICNOG
+C     OPTERECENJA KRILA, BRZINE I GUSTINE NA REZIMU KRSTARENJA
 
-        IZB=1
-        DATA CZ / {c_z_krst.value} /  !ZADATI KOEFICIJENT UZGONA KRILA
-        DATA SPECOP /800. / !ZADATO SPECIFICNO OPTERECENJE KRILA [N/m^2]
+      IZB=1
+      DATA CZ / {c_z_krst.value:.3f} /  !ZADATI KOEFICIJENT UZGONA KRILA
+      DATA SPECOP /800. / !ZADATO SPECIFICNO OPTERECENJE KRILA [N/m^2]
 
-    C             PARAMETRI GEOMETRIJE KRILA I REZIMA KRSTARENJA:
-    C                                          konst.
-    C              broj    vitkost suzenje   vitop.   brzina   gustina
-    C            preseka                     [step.]  [km/h]   [kg/m^3]
-        DATA      K,       LAM,   EN,       EPS_K,    V,        RO
-        &     /    16,      {lambda_wing.value:.3f},   {n.value:.3f},      0.0,    {v_krst.value:.2f},    {rho.value:.6f} /
+C             PARAMETRI GEOMETRIJE KRILA I REZIMA KRSTARENJA:
+C                                          konst.
+C              broj    vitkost suzenje   vitop.   brzina   gustina
+C            preseka                     [step.]  [km/h]   [kg/m^3]
+      DATA      K,       LAM,   EN,       EPS_K,    V,        RO
+    &     /    16,      {lambda_wing.value:.0f},   {n.value:.3f},      0.0,    {v_krst.value:.2f},    {rho.value:.6f} /
 
-        DATA CZMAXAP_S / 1.5 / ! maks. koef. uzgona ap. u korenu krila
-        DATA CZMAXAP_0 / 1.46 / ! maks. koef. uzgona ap. na kraju krila
-        DATA AAAP_S / 0.100 / !grad. uzgona ap. u korenu [1/o]
-        DATA AAAP_0 / 0.110 / !grad. uzgona ap. na kraju [1/o]
-        !teorijska  vrednost gradijenta uzgona 2PI = 0.1096622 [1/o]
-        DATA ANAP_S / -1.2 / !ugao nultog uzgona ap. u korenu krila [o]
-        DATA ANAP_0 / -1.0 / !ugao nultog uzgona ap. na kraju krila [o]
-        DATA LS / 2.583 /  ! duzina tetive u korenu krila u metrima
+      DATA CZMAXAP_S / {c_z_max_root.value:.3f} / ! maks. koef. uzgona ap. u korenu krila
+      DATA CZMAXAP_0 / {c_z_max_tip.value:.3f} / ! maks. koef. uzgona ap. na kraju krila
+      DATA AAAP_S / {a_0_root.value:.3f} / !grad. uzgona ap. u korenu [1/o]
+      DATA AAAP_0 / {a_0_tip.value:.3f} / !grad. uzgona ap. na kraju [1/o]
+      !teorijska  vrednost gradijenta uzgona 2PI = 0.1096622 [1/o]
+      DATA ANAP_S / {alpha_0_root.value:.1f} / !ugao nultog uzgona ap. u korenu krila [o]
+      DATA ANAP_0 / {a_0_tip.value:.1f} / !ugao nultog uzgona ap. na kraju krila [o]
+      DATA LS / {l1.value:.3f} /  ! duzina tetive u korenu krila u metrima
 
-    C     ******************** KRAJ UNOSA PODATAKA *************************
-    """ 
+C     ******************** KRAJ UNOSA PODATAKA *************************"""
+
+
     st.code(fortran_inputs, language='fortran')
 
-    st.image('./assets/glauert_inverted.png')
+    with open('./fortran/IZLAZ.TXT', 'r') as file:
+        output = file.read()
+        
+    st.code(output, language='python')    
     
     st.markdown(r'''
     $$
@@ -242,3 +267,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
