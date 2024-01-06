@@ -195,18 +195,19 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         start_extracting = False
         for line in output.split('\n'):
             if start_extracting:
-                values = re.findall(r"-?\d+\.\d+", line)
+                # Adjusted regex to include the format '-.000'
+                values = re.findall(r"-?\d*\.\d+", line)
                 if len(values) == 5:
                     y_b2, czmax_ap, czmax_ap_cb_ca, cz_lok, pmax_n_m = map(float, values)
                     table_data.append({
                         "y/(b/2)": y_b2,
                         "Czmax ap.": czmax_ap,
-                        "Czmax ap.-Cb/Ca": czmax_ap_cb_ca,
-                        "Cz lok": cz_lok,
+                        "Czmax-Cb/Ca": czmax_ap_cb_ca,
+                        "Czlok": cz_lok,
                         "Pmax [N/m]": pmax_n_m
                     })
-            elif "y/(b/2)         Czmax ap." in line:
-                start_extracting = True
+            if "y/(b/2)         Czmax ap." in line:
+                start_extracting = True  # Begin capturing data from the next line
 
         # Part 2: Extract final CZmax value
         czmax_final_regex = r"Maksimalni koeficijent uzgona krila CZmax = (\d+\.\d+)"
@@ -215,6 +216,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
         return table_data, czmax_final_value
 
+
     # Example usage
     with open('./fortran/IZLAZ.TXT', 'r') as file:
         output = file.read()
@@ -222,36 +224,27 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         
     table_data, czmax_final = regex_fortran(output)
 
-    # Convert to DataFrame for display
+    #==================== dataframe ====================#
+    st.subheader("Flow separation")
     df = pd.DataFrame(table_data)
-
-    # Highlight the row corresponding to the final CZmax value
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
+    st.dataframe(df, width=1100, use_container_width=False)
 
-    st.dataframe(df)
+    # st.write(table_data)
     
+    c_z_max = Variable("Max Lift Coefficient", czmax_final, "c_z_max", r"C_{z_{max}}", "")
+    y_b2 = Variable("y/(b/2)", df['Czmax ap.'].tolist(), "y_b2", r"y/(b/2)", "")
+    c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
+    c_z_lok = Variable("Max Lift Coefficient", df["Czlok"].tolist(), "c_z_lok", r"C_{z_{max}}", "")
+    p_max = Variable("Max pressure", df["Pmax [N/m]"].tolist(), "p_max", r"C_{z_{max}}", "N/m")
 
-    # y_b2 = Variable("y/(b/2)", y_b2, "y_b2", r"y/(b/2)", "")
-    # c_z_max = Variable("Max Lift Coefficient", cz_max_ap, "c_z_max", r"C_{z_{max}}", "")
-    # cz_max_aero_cb_ca = Variable("Max Lift Coefficient", cz_max_aero_cb_ca, "cz_max_aero_cb_ca", r"C_{z_{max}}", "")
-    # c_z_lok = Variable("Max Lift Coefficient", cz_lok, "c_z_lok", r"C_{z_{max}}", "")
-    # p_max = Variable("Max pressure", p_max_n_m, "p_max", r"C_{z_{max}}", "N/m")
+    st.markdown(f"Max Lift Coefficient: ${c_z_max.latex} = $ {c_z_max.value:.3f}")
+    st.write(f"y/(b/2): {y_b2.value}")
+    st.write(f"Max Lift Coefficient - Cb/Ca: {c_z_max_cb_ca.value}")
+    st.write(f"Max Lift Coefficient: {c_z_lok.value}")
+    st.write(f"Max pressure: {p_max.value}")
     
     
-    # df = pd.DataFrame(data)
-
-    # Plotting the DataFrame
-    # fig, ax = plt.subplots()
-    # ax.plot(df['y/(b/2)'], df['Cz_max'], marker='o', label='Cz_max')
-    # ax.plot(df['y/(b/2)'], df['Cz_max_aero-Cb_ca'], marker='x', label='Cz_max_aero-Cb_ca')
-    # ax.plot(df['y/(b/2)'], df['Cz_lok'], marker='s', label='Cz_lok')
-    # ax.set_xlabel('y/(b/2)')
-    # ax.set_ylabel('Coefficients')
-    # ax.set_title('Airfoil Performance')
-    # ax.legend()
-    # ax.grid(True)
-    # st.pyplot(fig)
-
     spacer()
     
     st.markdown("""Na mestu gde je cZmax −cb =1.148 dolazi do otcepljenja strujanja i ta vrednost postaje ca
