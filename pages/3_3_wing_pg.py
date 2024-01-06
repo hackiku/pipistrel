@@ -32,7 +32,7 @@ n = Variable("Wing Taper Ratio", 0.520, "n", "n")
 phi = Variable("Sweep Angle", 27, "phi", r"\phi", "degrees")
 alpha_n = Variable("Angle of Attack", -1.3, "alpha_n", r"\alpha_n", "degrees")
 
-c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
+# c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
 
 def main():
     
@@ -232,27 +232,48 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     # st.write(table_data)
     
-    c_z_max = Variable("Max Lift Coefficient", czmax_final, "c_z_max", r"C_{z_{max}}", "")
-    y_b2 = Variable("y/(b/2)", df['Czmax ap.'].tolist(), "y_b2", r"y/(b/2)", "")
+    y_b2 = Variable("y/(b/2)", df['y/(b/2)'].tolist(), "y_b2", r"y/(b/2)", "")
+    c_z_max = Variable("Max Lift Coefficient", df['Czmax ap.'].tolist(), "c_z_max", r"C_{z_{max}}", "")
     c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
     c_z_lok = Variable("Max Lift Coefficient", df["Czlok"].tolist(), "c_z_lok", r"C_{z_{max}}", "")
     p_max = Variable("Max pressure", df["Pmax [N/m]"].tolist(), "p_max", r"C_{z_{max}}", "N/m")
 
-    st.markdown(f"Max Lift Coefficient: ${c_z_max.latex} = $ {c_z_max.value:.3f}")
+    # st.markdown(f"Max Lift Coefficient: = {c_z_max.value:.3f}")
     st.write(f"y/(b/2): {y_b2.value}")
+    st.write(f"czmax: {c_z_max.value}")
     st.write(f"Max Lift Coefficient - Cb/Ca: {c_z_max_cb_ca.value}")
     st.write(f"Max Lift Coefficient: {c_z_lok.value}")
     st.write(f"Max pressure: {p_max.value}")
     
-    
-    spacer()
-    
-    st.markdown("""Na mestu gde je cZmax −cb =1.148 dolazi do otcepljenja strujanja i ta vrednost postaje ca
-    c = 1.225 . Pošto do otcepljenja dolazi na y = 0.556 polurazmaha, što je Zmax ()
-    2 zahtevanih 0.7 nećemo konstruktivno vitoperiti krilo.""")
-    
+    spacer()    
     
     st.markdown("***")
+
+
+    #==================== PLOT ====================#
+    def draw_flow_separation():
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+        plt.plot(y_b2.value, c_z_max.value, label='Czmax - Airfoil', marker='o', linestyle='-')
+
+        # Set labels and title
+        plt.xlabel('y/(b/2)')
+        plt.ylabel('Czmax')
+        plt.title('Max Lift Coefficient Distribution Along Wing Span')
+
+        # Set axis limits
+        plt.xlim(0, 1)
+        plt.ylim(0, max(c_z_max.value) + 0.1)  # Adjust the y-axis limit to be slightly higher than max Czmax
+
+        # Add a grid
+        plt.grid(True)
+
+        # Show the plot
+        st.pyplot(fig)
+
+    # Plotting using your existing data
+    draw_flow_separation()
+
 
     #==================== ZERO LIFT ANGLE ====================#
     st.subheader("3.1.2. Zero Lift Angle")
