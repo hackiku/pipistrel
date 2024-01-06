@@ -237,41 +237,46 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
     c_z_lok = Variable("Max Lift Coefficient", df["Czlok"].tolist(), "c_z_lok", r"C_{z_{max}}", "")
     p_max = Variable("Max pressure", df["Pmax [N/m]"].tolist(), "p_max", r"C_{z_{max}}", "N/m")
-
-    # st.markdown(f"Max Lift Coefficient: = {c_z_max.value:.3f}")
-    st.write(f"y/(b/2): {y_b2.value}")
-    st.write(f"czmax: {c_z_max.value}")
-    st.write(f"Max Lift Coefficient - Cb/Ca: {c_z_max_cb_ca.value}")
-    st.write(f"Max Lift Coefficient: {c_z_lok.value}")
-    st.write(f"Max pressure: {p_max.value}")
     
-    spacer()    
-    
+    spacer()       
     st.markdown("***")
 
-
+    st.image('./pages/crop_black.png')
     #==================== PLOT ====================#
     def draw_flow_separation():
-
         fig, ax = plt.subplots(figsize=(12, 6))
+
+        # Plot for Czmax - Airfoil
         plt.plot(y_b2.value, c_z_max.value, label='Czmax - Airfoil', marker='o', linestyle='-')
+
+        # Plot for Czmax-Cb/Ca
+        plt.plot(y_b2.value, c_z_max_cb_ca.value, label='Czmax - Cb/Ca', marker='s', linestyle='--')
+
+        # Plot for Czmax Local - Airfoil
+        plt.plot(y_b2.value, c_z_lok.value, label='Czmax Local - Airfoil', marker='^', linestyle='-.')
+
+        # Plot for Max Pressure (Optional: Normalize if required)
+        # Normalization can be done if the values of p_max are not in the same scale as Cz
+        p_max_normalized = [p / 100 for p in p_max.value]  # Example normalization
+        plt.plot(y_b2.value, p_max_normalized, label='Normalized Max Pressure', marker='x', linestyle=':')
 
         # Set labels and title
         plt.xlabel('y/(b/2)')
-        plt.ylabel('Czmax')
-        plt.title('Max Lift Coefficient Distribution Along Wing Span')
+        plt.ylabel('Cz and Normalized Pressure')
+        plt.title('Lift Coefficient and Pressure Distribution Along Wing Span')
 
         # Set axis limits
         plt.xlim(0, 1)
-        plt.ylim(0, max(c_z_max.value) + 0.1)  # Adjust the y-axis limit to be slightly higher than max Czmax
+        plt.ylim(0, max(c_z_max.value + p_max_normalized) + 0.1)
 
-        # Add a grid
+        # Add a legend and grid
+        plt.legend()
         plt.grid(True)
 
-        # Show the plot
+        # Show the plot in Streamlit
         st.pyplot(fig)
 
-    # Plotting using your existing data
+    # Call the function to draw the plot with all datasets
     draw_flow_separation()
 
 

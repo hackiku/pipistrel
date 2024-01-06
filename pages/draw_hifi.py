@@ -76,6 +76,20 @@ class Trapezoid:
         draw.line([bottom_tip, top_tip], fill=self.line_color, width=self.line_width)  # Tip line
         draw.line([top_tip, top_root], fill=self.line_color, width=self.line_width)  # Top line
 
+    def get_bounding_box(self):
+        top_root = (self.x_root, self.y_root)
+        bottom_root = (self.x_root, self.y_root + self.l_1_px)
+        top_tip = (self.x_tip, self.y_tip)
+        bottom_tip = (self.x_tip, self.y_tip + self.l_0_px)
+
+        left = min(self.x_root, self.x_tip)
+        right = max(self.x_root, self.x_tip)
+        top = min(self.y_root, self.y_tip)
+        bottom = max(self.y_root + self.l_1_px, self.y_tip + self.l_0_px)
+
+        return (left, top, right, bottom)
+
+
 # x root = 100: arbitrary, later uses average_x_root
 default_trapezoid_values = [94, 121, 0, 899, 328, 356]
 trapezoid = Trapezoid(*default_trapezoid_values)
@@ -275,6 +289,11 @@ def main():
             table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
         st.markdown(table_markdown)
 
+    bounding_box = trapezoid.get_bounding_box()
+    cropped_img = img.crop(bounding_box)
+    cropped_img_path = './pages/crop_black.png'
+    cropped_img.save(cropped_img_path)
+    
     return S_draw, l0_draw, l1_draw, b_draw
 
 
