@@ -7,6 +7,7 @@ from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import re
 from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
 v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home)
 
@@ -32,25 +33,6 @@ phi = Variable("Sweep Angle", 27, "phi", r"\phi", "degrees")
 alpha_n = Variable("Angle of Attack", -1.3, "alpha_n", r"\alpha_n", "degrees")
 
 c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
-
-data = [
-    {"y/(b/2)": "0.000", "Cz_max": "1.254", "Cz_max_aero-Cb_ca": "1.298", "Cz_lok": "1.109", "P_max [N/m]": "62222.17"},
-    {"y/(b/2)": "0.098", "Cz_max": "1.249", "Cz_max_aero-Cb_ca": "1.247", "Cz_lok": "1.150", "P_max [N/m]": "61482.50"},
-    {"y/(b/2)": "0.195", "Cz_max": "1.244", "Cz_max_aero-Cb_ca": "1.210", "Cz_lok": "1.180", "P_max [N/m]": "59986.70"},
-    {"y/(b/2)": "0.290", "Cz_max": "1.239", "Cz_max_aero-Cb_ca": "1.184", "Cz_lok": "1.202", "P_max [N/m]": "58030.61"},
-    {"y/(b/2)": "0.383", "Cz_max": "1.234", "Cz_max_aero-Cb_ca": "1.164", "Cz_lok": "1.217", "P_max [N/m]": "55731.03"},
-    {"y/(b/2)": "0.471", "Cz_max": "1.229", "Cz_max_aero-Cb_ca": "1.152", "Cz_lok": "1.225", "P_max [N/m]": "53174.51"},
-    {"y/(b/2)": "0.556", "Cz_max": "1.225", "Cz_max_aero-Cb_ca": "1.148", "Cz_lok": "1.225", "P_max [N/m]": "50404.82"},
-    {"y/(b/2)": "0.634", "Cz_max": "1.221", "Cz_max_aero-Cb_ca": "1.153", "Cz_lok": "1.216", "P_max [N/m]": "47446.35"},
-    {"y/(b/2)": "0.707", "Cz_max": "1.217", "Cz_max_aero-Cb_ca": "1.169", "Cz_lok": "1.195", "P_max [N/m]": "44291.75"},
-    {"y/(b/2)": "0.773", "Cz_max": "1.214", "Cz_max_aero-Cb_ca": "1.202", "Cz_lok": "1.159", "P_max [N/m]": "40903.96"},
-    {"y/(b/2)": "0.831", "Cz_max": "1.211", "Cz_max_aero-Cb_ca": "1.260", "Cz_lok": "1.104", "P_max [N/m]": "37204.75"},
-    {"y/(b/2)": "0.882", "Cz_max": "1.208", "Cz_max_aero-Cb_ca": "1.358", "Cz_lok": "1.022", "P_max [N/m]": "33073.96"},
-    {"y/(b/2)": "0.924", "Cz_max": "1.206", "Cz_max_aero-Cb_ca": "1.527", "Cz_lok": "0.908", "P_max [N/m]": "28344.90"},
-    {"y/(b/2)": "0.957", "Cz_max": "1.204", "Cz_max_aero-Cb_ca": "1.842", "Cz_lok": "0.752", "P_max [N/m]": "22813.59"},
-    {"y/(b/2)": "0.981", "Cz_max": "1.203", "Cz_max_aero-Cb_ca": "2.527", "Cz_lok": "0.548", "P_max [N/m]": "16275.91"},
-    {"y/(b/2)": "0.995", "Cz_max": "1.202", "Cz_max_aero-Cb_ca": "4.716", "Cz_lok": "0.294", "P_max [N/m]": "8611.25"}
-]
 
 def main():
     
@@ -162,6 +144,12 @@ def main():
 
     st.markdown(airfoil_inputs)
 
+    spacer()
+    st.markdown(r'''
+    $$
+    \Delta k = \left(1 - 0.088 \cdot \cos^2 \phi\right)^{\frac{3}{4}} \cdot \cos^{\frac{4}{3}} \phi = \left(1 - 0.088 \cdot \cos^2 27^\circ\right)^{\frac{3}{4}} \cdot \cos^{\frac{4}{3}} 27^\circ = 0.85884 \approx 0.859
+    $$
+    ''')
     st.markdown("***")
 
     #  =============
@@ -201,38 +189,71 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     st.code(fortran_inputs, language='fortran')
 
+    def regex_fortran(output):
+        # Part 1: Extract table data
+        table_data = []
+        start_extracting = False
+        for line in output.split('\n'):
+            if start_extracting:
+                values = re.findall(r"-?\d+\.\d+", line)
+                if len(values) == 5:
+                    y_b2, czmax_ap, czmax_ap_cb_ca, cz_lok, pmax_n_m = map(float, values)
+                    table_data.append({
+                        "y/(b/2)": y_b2,
+                        "Czmax ap.": czmax_ap,
+                        "Czmax ap.-Cb/Ca": czmax_ap_cb_ca,
+                        "Cz lok": cz_lok,
+                        "Pmax [N/m]": pmax_n_m
+                    })
+            elif "y/(b/2)         Czmax ap." in line:
+                start_extracting = True
+
+        # Part 2: Extract final CZmax value
+        czmax_final_regex = r"Maksimalni koeficijent uzgona krila CZmax = (\d+\.\d+)"
+        czmax_final_match = re.search(czmax_final_regex, output)
+        czmax_final_value = float(czmax_final_match.group(1)) if czmax_final_match else None
+
+        return table_data, czmax_final_value
+
+    # Example usage
     with open('./fortran/IZLAZ.TXT', 'r') as file:
         output = file.read()
+        st.code(output, language='java')
         
-    st.code(output, language='python')    
+    table_data, czmax_final = regex_fortran(output)
+
+    # Convert to DataFrame for display
+    df = pd.DataFrame(table_data)
+
+    # Highlight the row corresponding to the final CZmax value
+    df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
+
+    st.dataframe(df)
     
-    st.markdown(r'''
-    $$
-    \Delta k = \left(1 - 0.088 \cdot \cos^2 \phi\right)^{\frac{3}{4}} \cdot \cos^{\frac{4}{3}} \phi = \left(1 - 0.088 \cdot \cos^2 27^\circ\right)^{\frac{3}{4}} \cdot \cos^{\frac{4}{3}} 27^\circ = 0.85884 \approx 0.859
-    $$
-    ''')
+
+    # y_b2 = Variable("y/(b/2)", y_b2, "y_b2", r"y/(b/2)", "")
+    # c_z_max = Variable("Max Lift Coefficient", cz_max_ap, "c_z_max", r"C_{z_{max}}", "")
+    # cz_max_aero_cb_ca = Variable("Max Lift Coefficient", cz_max_aero_cb_ca, "cz_max_aero_cb_ca", r"C_{z_{max}}", "")
+    # c_z_lok = Variable("Max Lift Coefficient", cz_lok, "c_z_lok", r"C_{z_{max}}", "")
+    # p_max = Variable("Max pressure", p_max_n_m, "p_max", r"C_{z_{max}}", "N/m")
+    
+    
+    # df = pd.DataFrame(data)
+
+    # Plotting the DataFrame
+    # fig, ax = plt.subplots()
+    # ax.plot(df['y/(b/2)'], df['Cz_max'], marker='o', label='Cz_max')
+    # ax.plot(df['y/(b/2)'], df['Cz_max_aero-Cb_ca'], marker='x', label='Cz_max_aero-Cb_ca')
+    # ax.plot(df['y/(b/2)'], df['Cz_lok'], marker='s', label='Cz_lok')
+    # ax.set_xlabel('y/(b/2)')
+    # ax.set_ylabel('Coefficients')
+    # ax.set_title('Airfoil Performance')
+    # ax.legend()
+    # ax.grid(True)
+    # st.pyplot(fig)
+
     spacer()
     
-    df = pd.DataFrame(data)
-
-    col1, col2 = st.columns([2,3])
-
-    with col1:
-        st.markdown(display_generic_table(data), unsafe_allow_html=True)
-    with col2:
-        fig, ax = plt.subplots()
-        ax.plot(df['y/(b/2)'], df['Cz_max'], marker='o', label='Cz_max')
-        ax.plot(df['y/(b/2)'], df['Cz_max_aero-Cb_ca'], marker='x', label='Cz_max_aero-Cb_ca')
-        ax.plot(df['y/(b/2)'], df['Cz_lok'], marker='s', label='Cz_lok')
-        ax.set_xlabel('y/(b/2)')
-        ax.set_ylabel('Coefficients')
-        ax.set_title('Airfoil Performance')
-        ax.legend()
-        ax.grid(True)
-
-        st.pyplot(fig)
-
-    spacer()
     st.markdown("""Na mestu gde je cZmax −cb =1.148 dolazi do otcepljenja strujanja i ta vrednost postaje ca
     c = 1.225 . Pošto do otcepljenja dolazi na y = 0.556 polurazmaha, što je Zmax ()
     2 zahtevanih 0.7 nećemo konstruktivno vitoperiti krilo.""")
@@ -240,7 +261,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     st.markdown("***")
 
-    st.subheader("3.1.2. Angle of Zero Lift of the Wing")
+    #==================== ZERO LIFT ANGLE ====================#
+    st.subheader("3.1.2. Zero Lift Angle")
     st.markdown("Ugao nultog uzgona aeroprofila smo dobili u programu „Trapezno krilo – Glauert“ kao izlazni parametar, ali se može odrediti i analitički na osnovu jednačine:")
     
     st.latex("\\alpha_n = \\alpha_{ns} + \\varepsilon \cdot f_a")
