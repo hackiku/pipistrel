@@ -1,19 +1,20 @@
 # 3_wing_pg.py
 
 import streamlit as st
-from data import Variable
+from data import Variable, save_variables_to_session, load_variables_from_session
 from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
+from main import c_z_krst, v_krst, rho, S, b
 
 # Instantiate variables using the Variable class
-c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
-c_z_max = Variable("Max Lift Coefficient", 1.46, r"C_{z_{max}}", "")  # Assuming max lift coefficient is from NACA 65-212
-v_krst = Variable("Cruising Speed", 224.37, r"v_{krst}", "m/s")
-alpha_n = Variable("Angle of Attack", -1.3, r"\alpha_n", "degrees")
-lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
-n = Variable("Wing Taper Ratio", 0.520, "n")
-rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
+# c_z_krst = Variable("Cruise Lift Coefficient", 0.247, r"C_{z_{krst}}", "")
+# c_z_max = Variable("Max Lift Coefficient", 1.46, r"C_{z_{max}}", "")  # Assuming max lift coefficient is from NACA 65-212
+# v_krst = Variable("Cruising Speed", 224.37, r"v_{krst}", "m/s")
+# alpha_n = Variable("Angle of Attack", -1.3, r"\alpha_n", "degrees")
+# lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
+# n = Variable("Wing Taper Ratio", 0.520, "n")
+# rho = Variable("Air Density at Cruise Altitude", 0.736116, r"\rho", "kg/m^3")
 
 l_s = Variable("Chord Length", 3.028, "l_s", "m")
 l_0 = Variable("Root Chord Length", 1.576, "l_0", "m")
@@ -42,6 +43,19 @@ data = [
 
 
 def main():
+    
+    # list variables to load
+    variable_names_to_load = ['m_sr', 'v_krst', 'c_z_krst', 'S', 'rho', 'g']
+    # Load the variables
+    variables = load_variables_from_session(variable_names_to_load)
+
+    # Access the variables
+    c_z_krst = variables.get('c_z_krst')
+    # m_sr = variables.get('m_sr')
+    v_krst = variables.get('v_krst')
+    # ... and so on for other variables ...
+   
+    
     st.title("3. Wing Design")
     st.write("""Da bismo formirali krivu uzgona krila, moramo odrediti četiri karakteristična parametra: - Maksimalni koeficijent uzgona krila cZmax
     - Ugaonultoguzgonakrilaαn

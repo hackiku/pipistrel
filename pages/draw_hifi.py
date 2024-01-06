@@ -243,13 +243,19 @@ def main():
     # render drawing
     draw_all_lines(draw, lines)
     st.image(img)
+    
+    
     l0 = Variable("Root Chord Length", trapezoid.l_0_px * conversion_factor, "l_{0}", "m")
     l1 = Variable("Tip Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
     b = Variable("Wingspan", half_wingspan_meters*2, "b", "m")  # Use a Variable instance for the wingspan
-    S = trapezoid_area * 2
     
     st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")
     st.latex(f"S = S_{{20}} \\cdot 2 = {trapezoid_area*2:.3f} \\, \\text{{m}}^2")
+
+    l0_draw = l0.value
+    l1_draw = l1.value
+    b_draw = b.value
+    S_draw = trapezoid_area * 2
 
     st.code(half_wingspan_meters)
 
@@ -269,7 +275,7 @@ def main():
             table_markdown += f"| {data[0]} | {data[1]:.2f}px | {data[2]:.3f}m | {data[3]:.3f}m | {data[4]:.2f}% |\n"
         st.markdown(table_markdown)
 
-    return S
+    return S_draw, l0_draw, l1_draw, b_draw
 
 
 if __name__ == "__main__":

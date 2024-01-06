@@ -11,7 +11,14 @@ from pages import draw_hifi
 m_sr = Variable("Average mass", 535.50, "m_{sr}", "kg")
 v_krst = Variable("Cruising speed", 224.37, r"v_{krst}", "m/s")
 c_z_krst = Variable("Cruise lift coefficient", 0.247, r"C_{z_{krst}}", "")
-S = Variable("Wing area", 1.00, "S", "m^2")
+
+# Default values
+S = Variable("Wing Area", 30.00, "S", "m²")
+l0 = Variable("Root Chord Length", 1.00, "l_{0}", "m")
+l1 = Variable("Tip Chord Length", 2.00, "l_{1}", "m")
+b = Variable("Wingspan", 40.00, "b", "m")
+
+
 
 # use data points in calculations
 def get_specific_data(df, category):
@@ -79,11 +86,9 @@ def main():
     # 2.1. wing area
     st.subheader('2.1. Wing area calculator')
 
-    S_value = draw_hifi.main()
-
-    # Create a Variable instance for S using the returned value
-    S = Variable("Wing Area", S_value, "S", "m²")
+    S.value, l0.value, l1.value, b.value = draw_hifi.main()
     
+    # Create a Variable instance for S using the returned value
     st.markdown('***')
 
         
@@ -232,6 +237,9 @@ def main():
         'v_krst': v_krst, 
         'c_z_krst': c_z_krst, 
         'S': S,
+        'l0': l0,
+        'l1': l1,
+        'b': b,
         'rho': rho,
         'g': g,
     }

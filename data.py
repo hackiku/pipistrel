@@ -22,8 +22,15 @@ def save_variables_to_session(variables_dict):
             st.session_state[var_value.latex] = var_value
             st.code(f"{var_value.latex} = {var_value.value} {var_value.unit} # {var_value.name}")
     
-def load_variables_from_session(variable_name, default=None):
-    return st.session_state.get(variable_name, default)
+def load_variables_from_session(variable_names):
+    loaded_variables = {}
+    for name in variable_names:
+        variable = st.session_state.get(name)
+        if variable:
+            loaded_variables[name] = variable
+            # Display the variable for debugging
+            st.code(f"{name}: {variable.value} {variable.unit} #### {variable.name}")
+    return loaded_variables
 
 # grab specs from data.py
 def create_specs_table(aircraft_specs):
