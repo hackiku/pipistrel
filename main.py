@@ -245,5 +245,8 @@ def main():
     
     save_variables_to_session(variables_dict)
 
+    if st.button("render latex and save pics"):
+        st.write("WIP")
+
 if __name__ == "__main__":
     main()
