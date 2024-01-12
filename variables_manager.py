@@ -44,12 +44,21 @@ def initialize_session_state_all():
         st.session_state['variables_data'] = load_variables()
 """
 
-def update_variables(page_values):
+def update_variables(page_values, local_vars):
     variables_data = st.session_state['variables_data']
     for var_name in page_values:
-        new_value = st.session_state.get(var_name)
-        if var_name in variables_data and new_value is not None:
+        if var_name in st.session_state:
+            # Update from session state if it's a user input variable
+            new_value = st.session_state[var_name]
+        elif var_name in local_vars:
+            # Update from local variables if it's a calculated variable
+            new_value = local_vars[var_name]
+        else:
+            continue  # Skip if variable is neither in session state nor local_vars
+
+        if var_name in variables_data:
             variables_data[var_name]['value'] = new_value
+
     save_variables(variables_data)
 
 def get_variable_value(var_name):

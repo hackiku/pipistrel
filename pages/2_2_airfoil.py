@@ -80,12 +80,9 @@ def main():
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
 
-    variables_to_update = {}
-    for var in page_values:
-        variables_to_update[var] = st.session_state.get(var)
 
     # Update variables at the end of the function
-    update_variables(variables_to_update)
+    update_variables(page_values)
 
     # debug
     log_changed_variables()
