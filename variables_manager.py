@@ -1,3 +1,4 @@
+### variables_manager.py
 import json
 import streamlit as st
 
@@ -22,10 +23,12 @@ def initialize_session_state():
     else:
         st.session_state['variables_data'] = load_variables()
 
-def update_variable(var_name, new_value):
-    if var_name in st.session_state['variables_data']:
-        st.session_state['variables_data'][var_name]['value'] = new_value
-        save_variables(st.session_state['variables_data'])
+def update_variables(variable_updates):
+    variables_data = st.session_state['variables_data']
+    for var_name, new_value in variable_updates.items():
+        if var_name in variables_data:
+            variables_data[var_name]['value'] = new_value
+    save_variables(variables_data)
 
 def get_variable_value(var_name):
     return st.session_state['variables_data'].get(var_name, {}).get('value', None)
