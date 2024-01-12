@@ -1,26 +1,34 @@
 {
     "lambda_wing": {
         "name": "Wing Aspect Ratio",
-        "default": 4.000,
-        "value": 4.000,
+        "default": 4.0,
+        "value": 4.0,
         "latex": "\\lambda",
         "unit": "",
         "formula": "\\lambda = \\frac{{b^2}}{{S}}"
     },
     "S": {
         "name": "Wing Area",
-        "default": 20.000,
-        "value": 20.000,
+        "default": 30.0,
+        "value": 30.0,
         "latex": "S",
-        "unit": "m^2",
-        "formula": ""
-    },
-    "S_f": {
-        "name": "Flaps Wing Area",
-        "value": 5.00,
-        "latex": "S_{flaps}",
-        "python": "S_flaps",
         "unit": "m^2",
         "formula": "S_{flaps} = {value}"
     },
+    "S_f": {
+        "name": "Flaps Wing Area",
+        "default": 20.160000000000025,
+        "value": 20.160000000000025,
+        "latex": "S_{f}",
+        "unit": "m^2",
+        "formula": "S_{flaps} = {value}"
+    },
+    "S_f_relative": {
+        "name": "Relative flaps Wing Area",
+        "default": 0.1,
+        "value": 0.1,
+        "latex": "S_{f_{rel}}",
+        "unit": "m^2",
+        "formula": "S_{flaps} = {value}"
+    }
 }
