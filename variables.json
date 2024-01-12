@@ -10,7 +10,7 @@
     "S": {
         "name": "Wing Area",
         "default": 30.0,
-        "value": 30.0,
+        "value": 30.07000000000001,
         "latex": "S",
         "unit": "m^2",
         "formula": "S_{flaps} = {value}"
@@ -26,7 +26,7 @@
     "S_f_relative": {
         "name": "Relative flaps Wing Area",
         "default": 0.1,
-        "value": 0.6720000000000008,
+        "value": 0.6704356501496515,
         "latex": "S_{f_{rel}}",
         "unit": "m^2",
         "formula": "S_{flaps} = {value}"
