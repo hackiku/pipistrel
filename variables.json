@@ -1,4 +1,11 @@
 {
+    "c_z_krst": {
+        "name": "Cruise Lift Coefficient",
+        "default": 0.1,
+        "value": 0.1,
+        "latex": "C_{z_{krst}}",
+        "unit": ""
+    },
     "lambda_wing": {
         "name": "Wing Aspect Ratio",
         "default": 4.0,
@@ -10,7 +17,7 @@
     "S": {
         "name": "Wing Area",
         "default": 30.0,
-        "value": 30.07000000000001,
+        "value": 30.0,
         "latex": "S",
         "unit": "m^2",
         "formula": "S_{flaps} = {value}"
@@ -26,7 +33,7 @@
     "S_f_relative": {
         "name": "Relative flaps Wing Area",
         "default": 0.1,
-        "value": 0.6704356501496515,
+        "value": 0.1,
         "latex": "S_{f_{rel}}",
         "unit": "m^2",
         "formula": "S_{flaps} = {value}"

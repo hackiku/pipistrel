@@ -4,15 +4,10 @@ import streamlit as st
 import pandas as pd
 import re
 from data import airfoil_data
-from variables import Variable, save_variables_to_session, load_variables_from_session
+from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
+from utils import spacer, emoji_header
 
-from utils import spacer, emoji_header, variables_three_columns
-
-
-
-
-
-# Data Preparation Functions
+# data preparation
 def extract_airfoil_specs(naca_name):
     # Regex to capture the thickness pattern after 'NACA'
     thickness_match = re.search(r'NACA.*?-\d(\d{2})', naca_name)
@@ -22,15 +17,24 @@ def extract_airfoil_specs(naca_name):
     else:
         return None
 
-# Utility Functions
+# show table
 def display_airfoil_table(df):
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
 
-# Main App Logic
+# ======================== main ======================== #
 def main():
     st.title("Airfoil Selection Tool")
     
-    # Load and preprocess data
+    initialize_session_state()
+
+    page_values = [
+        'c_z_krst'
+    ]
+    
+    
+    c_z_krst = st.number_input("Lift coefficient at cruise", value=get_variable_value('c_z_krst'), key='c_z_krst')
+
+    # load and preprocess data
     airfoil_df = pd.DataFrame(airfoil_data, columns=[
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
         "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
@@ -52,9 +56,7 @@ def main():
     emoji_header("2️⃣", "Lift coefficient", r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
     # st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
-    cz_selector = st.number_input("Cruise Lift Coefficient", value=0.316, step=0.001, format="%.3f")
-    c_z_krst = Variable("Cruise Lift Coefficient", cz_selector, r"C_{z_{krst}}", "")
-    airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst.value)
+    airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst)
     
     spacer()
    
@@ -78,6 +80,9 @@ def main():
 
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
+
+    # debug
+    log_changed_variables()
 
 # App Execution
 if __name__ == "__main__":

@@ -3,7 +3,6 @@
 
 import streamlit as st
 import pandas as pd
-from variables import Variable, save_variables_to_session, load_variables_from_session
 
 # grab specs from data.py
 def create_specs_table(aircraft_specs):
