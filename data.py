@@ -1,37 +1,9 @@
-# data.py
+### data.py
+### raw data, specs, dataframes and table manipulation functions
+
 import streamlit as st
 import pandas as pd
-
-class Variable:
-    def __init__(self, name, value, python, latex='', unit='', value2=None, unit2='', formula=''):
-        self.name = name
-        self.value = value
-        self.python = python
-        self.latex = latex or name  # Fallback to name if no latex is provided
-        self.unit = unit
-        self.value2 = value2
-        self.unit2 = unit2
-        self.formula = formula
-    
-    def save_to_session(self):
-        st.session_state[self.latex] = self
-
-
-def save_variables_to_session(variables_dict):
-    for var_name, var_value in variables_dict.items():
-        if isinstance(var_value, Variable):
-            st.session_state[var_value.python] = var_value  # Use python attribute for session state key
-            st.code(f"{var_value.python} = {var_value.value} {var_value.unit} # {var_value.name}")
-    
-def load_variables_from_session(variable_names):
-    loaded_variables = {}
-    code_display = "" 
-    for name in variable_names:
-        variable = st.session_state.get(name)
-        if variable:
-            loaded_variables[name] = variable
-            code_display += f"{name}: {variable.value} {variable.unit} # {variable.name} \n"
-    return loaded_variables, code_display
+from variables import Variable, save_variables_to_session, load_variables_from_session
 
 # grab specs from data.py
 def create_specs_table(aircraft_specs):

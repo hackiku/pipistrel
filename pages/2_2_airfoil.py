@@ -1,8 +1,16 @@
+### 2_airfoil.py ###
+
 import streamlit as st
 import pandas as pd
 import re
-from data import Variable, airfoil_data
+from data import airfoil_data
+from variables import Variable, save_variables_to_session, load_variables_from_session
+
 from utils import spacer, emoji_header, variables_three_columns
+
+
+
+
 
 # Data Preparation Functions
 def extract_airfoil_specs(naca_name):

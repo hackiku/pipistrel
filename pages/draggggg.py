@@ -1,4 +1,4 @@
-# 4_drag_calculation.py
+### draggggg.py
 
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -27,8 +27,7 @@ def main():
 - Definisatisvedimenzijeelemenatakonstrukcijeavionapotrebnezaproračunotpora; - Odreditijednačinupolareaviona;
 - IzračunatimaksimalnufinesuavionaiCZprikomeseonaostvaruje;
 - Odreditifinesuavionaipotrebnuvučnusiluelisenarežimukrstarenja;
-- DijagramskipokazatipolaruavionaifinesuavionaufunkcijiodCZ."
-    st.header(4.1. Određivanje polare aviona""")
+- DijagramskipokazatipolaruavionaifinesuavionaufunkcijiodCZ.""")
 
     st.markdown("***")    
     st.header("4.1. Određivanje polare aviona")

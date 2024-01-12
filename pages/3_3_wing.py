@@ -1,8 +1,8 @@
-# 3_wing_pg.py
+### 3_wing.py ###
 
 import streamlit as st
 from main import main as initialize_main
-from data import Variable, save_variables_to_session, load_variables_from_session
+from variables import Variable, save_variables_to_session, load_variables_from_session
 from utils import spacer, variables_two_columns, display_generic_table
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,6 +12,9 @@ import re
 from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
 v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home, main as run_hompeage)
 
+imported_variables = ['S', 'l0', 'l1', 'b', 'v_krst', 'rho', 'g', 'm_sr', 'c_z_krst']
+
+new_variables = ['lambda_wing', 'n', 'phi', 'alpha_n', 'c_z_max_root', 'alpha_0_root', 'a_0_root', 'c_z_max_tip', 'alpha_0_tip', 'a_0_tip']
 
 # run_hompeage()
 
