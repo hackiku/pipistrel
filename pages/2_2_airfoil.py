@@ -25,14 +25,11 @@ def display_airfoil_table(df):
 def main():
     st.title("Airfoil Selection Tool")
     
-    initialize_session_state()
-
     page_values = [
         'c_z_krst'
     ]
     
-    
-    c_z_krst = st.number_input("Lift coefficient at cruise", value=get_variable_value('c_z_krst'), key='c_z_krst')
+    initialize_session_state(page_values)
 
     # load and preprocess data
     airfoil_df = pd.DataFrame(airfoil_data, columns=[
@@ -55,7 +52,9 @@ def main():
 
     emoji_header("2️⃣", "Lift coefficient", r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
-    # st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
+    c_z_krst = st.number_input("Lift coefficient at cruise", value=get_variable_value('c_z_krst'), key='c_z_krst')
+
+    st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
     airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst)
     
     spacer()
@@ -81,8 +80,16 @@ def main():
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
 
+    variables_to_update = {}
+    for var in page_values:
+        variables_to_update[var] = st.session_state.get(var)
+
+    # Update variables at the end of the function
+    update_variables(variables_to_update)
+
     # debug
     log_changed_variables()
+    
 
 # App Execution
 if __name__ == "__main__":
