@@ -10,9 +10,10 @@ import matplotlib.image as mpimg
 import os
 import re
 from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
-v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home)
+v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home, main as run_hompeage)
 
-# initialize_main()
+
+# run_hompeage()
 
 # Hardcoded Airfoil Data
 root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
