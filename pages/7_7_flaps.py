@@ -1,3 +1,5 @@
+### 7_flaps.py
+
 import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 
@@ -5,7 +7,7 @@ def main():
     st.title("7. Flaps Lift Calculation")
     
     initialize_session_state()
-    
+
     page_values = [
         'S', 
         'S_f', 
