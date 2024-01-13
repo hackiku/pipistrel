@@ -9,7 +9,7 @@ def main():
         'S', 'S_20', 'S_21', 'S_wet_kr', 'lT', 'l0', 'nT', 
         'l_sat_kr', 'Re', 'v_krst', 'Cf_kr', 'dl_eff_kr', 'K_kr', 'C_X_min_krilo'
     ]
-    initialize_session_state(page_values)
+    initialize_session_state()
     
     
     #==================== drag ====================#

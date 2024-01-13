@@ -1,4 +1,5 @@
 import streamlit as st
+import inspect
 import os
 import re
 
@@ -21,9 +22,6 @@ def inspect_pages_variables():
                         st.code("\n".join(variable_lines), language='python')
                     else:
                         st.write("No `Variable` instances found.")
-
-def extract_locals():
-    
 
 def main():
     st.title("Session State Management")

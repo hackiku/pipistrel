@@ -4,22 +4,10 @@ import streamlit.components.v1 as components
 import pandas as pd
 import inspect
 from data import aircraft_specs, create_specs_table 
-from isa_lite import get_ISA_conditions
 from utils import spacer
-from pages import draw_hifi
-
-# wing geometry
-S = Variable("Wing Area", 30.00, "S", "S", "m²")
-l0 = Variable("Root Chord Length", 1.00, "l0", "l_{0}", "m")
-l1 = Variable("Tip Chord Length", 2.00, "l1", "l_{1}", "m")
-b = Variable("Wingspan", 40.00, "b", "b", "m")
-
-# mission parameters
-m_sr = Variable("Average mass", 100.00, "m_sr", "m_{sr}", "kg")
-v_krst = Variable("Cruising speed", 50.00, "v_krst", r"v_{krst}", "m/s")
-rho = Variable("Air density at altitude", 0.05, "rho", r"\rho", "kg/m^3")
-g = Variable("Gravity acceleration", 9.80665, "g", "g", "m/s²")
-c_z_krst = Variable("Cruise lift coefficient", 0.200, "c_z_krst", r"C_{z_{krst}}", "")
+from modules.isa_lite import get_ISA_conditions
+# from modules.draw.draw import draw
+from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 
 
 # use data points in calculations
@@ -54,13 +42,22 @@ def filter_data_for_preset(data, preset):
 # ============================================================
 
 def main():
+    
+    page_values = [
+        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'rho', 
+        'g', 'Re', 'c_z_krst'
+    ]
+    
+    initialize_session_state()
+
+
     st.markdown("<h1 style='text-align: center;'>Aircalcs</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
     spacer("5em")
 
     # 3D model
-    svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
-    components.iframe(svelte_app_url, width=400, height=400)
+    # svelte_app_url = "https://pipewriter.vercel.app/pipistrel"
+    # components.iframe(svelte_app_url, width=400, height=400)
 
     st.markdown('***')
 
@@ -88,7 +85,7 @@ def main():
     # 2.1. wing area
     st.subheader('2.1. Wing area calculator')
 
-    S.value, l0.value, l1.value, b.value = draw_hifi.main()
+    # S.value, l0.v alue, l1.value, b.value = draw_hifi.main()
     
     # Create a Variable instance for S using the returned value
     st.markdown('***')
@@ -111,8 +108,9 @@ def main():
         step=20)
 
     # Calculate average mass
-    m_sr.value = float (max_take_off_weight + design_empty_weight) / 2
-    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr.value:.2f} \\, \\text{{kg}}")
+    m_sr = get_variable_value('m_sr')
+    m_sr = (max_take_off_weight + design_empty_weight) / 2
+    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
 
     st.markdown('***')
 
@@ -121,29 +119,30 @@ def main():
     
     altitude = 2500
 
-    # 2.3 ISA conditions
+    # 2.3 ISA conditions (from isa_lite.py)
     st.subheader("2.3. ISA air conditions")
+    temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
+    rho = density
     col1, col2 = st.columns(2)
+
     with col1:
         # Altitude slider using session state
-        altitude_input = st.slider("Altitude (m)", min_value=0, value = altitude, max_value=30000, step=100)
+        altitude_input = st.slider("Altitude (m)", min_value=0, value=altitude, max_value=30000, step=100)
         altitude = altitude_input
+        max_operating_altitude = aircraft_specs["Performance"]["Maximum Operating Altitude"]["value"]
+        if altitude < max_operating_altitude:
+            st.success(f"👍 Under max operating altitude ({format(max_operating_altitude, ',')} m)")
+        else:
+            st.error(f"⚠️ Over max operating altitude ({format(max_operating_altitude, ',')} m)")
+        st.write("You are in the...")
+        st.info(f"🌍 {zone}")
 
-        # get ISA conditions from isa_lite.py
-        temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-        rho.value = density
-
+    with col2:
         # Displaying the values and zone using LaTeX
         st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")
         st.latex(f"P = {pressure:.2f} \, \ {{Pa}}")
         st.latex(f"\\rho = {density:.5f} \, \ {{kg/m}}^3")
         st.latex(f"c = {sound_speed:.2f} \, \ {{m/s}}")
-        st.info(f"🌍 {zone}")
-        
-    with col2:
-        # Displaying source code for ISA conditions calculation
-        isa_conditions_code = inspect.getsource(get_ISA_conditions)
-        st.code(isa_conditions_code, language='python')
 
     st.markdown('***')
 
@@ -187,7 +186,7 @@ def main():
     with st.expander("Change all parameters"):
         planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
         def calculate_c_z_krst():
-            c_z_krst.value = (m_sr.value * g.value) / (0.5 * rho.value * v_krst.value**2 * S.value)
+            c_z_krst.value = (m_sr * g) / (0.5 * rho.value * v_krst**2 * S)
             # LaTeX string with variables
             numbers = (
                 f"\\frac{{ {m_sr.value:.2f} \\cdot {g.value:.2f} }}"
