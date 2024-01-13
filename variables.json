@@ -23,7 +23,7 @@
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
         "default": 0.1,
-        "value": 0.1,
+        "value": 0.032089987475036115,
         "latex": "C_{z_{krst}}",
         "unit": ""
     },
@@ -149,7 +149,7 @@
     "rho": {
         "name": "Air Density at Altitude",
         "default": 0.05,
-        "value": 0.05,
+        "value": 0.9568639890727465,
         "latex": "\\rho",
         "unit": "kg/m^3"
     },

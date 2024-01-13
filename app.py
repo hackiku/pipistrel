@@ -9,7 +9,6 @@ from modules.isa_lite import get_ISA_conditions
 # from modules.draw.draw import draw
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 
-
 # use data points in calculations
 def get_specific_data(df, category):
     category_data = df[df['Specification'] == f"**{category}**"]
@@ -65,7 +64,7 @@ def main():
     
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.title("1. Aircraft Specs (POH)")
+        st.title("1. Aircraft Specs")
     with col2:
         unit_system = st.radio("", ('SI Units', 'Aviation Units'))
 
@@ -108,7 +107,6 @@ def main():
         step=20)
 
     # Calculate average mass
-    m_sr = get_variable_value('m_sr')
     m_sr = (max_take_off_weight + design_empty_weight) / 2
     st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
 
@@ -134,11 +132,12 @@ def main():
             st.success(f"👍 Under max operating altitude ({format(max_operating_altitude, ',')} m)")
         else:
             st.error(f"⚠️ Over max operating altitude ({format(max_operating_altitude, ',')} m)")
-        st.write("You are in the...")
+        st.write("You are flying in the:")
         st.info(f"🌍 {zone}")
 
     with col2:
         # Displaying the values and zone using LaTeX
+        spacer()
         st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")
         st.latex(f"P = {pressure:.2f} \, \ {{Pa}}")
         st.latex(f"\\rho = {density:.5f} \, \ {{kg/m}}^3")
@@ -168,40 +167,32 @@ def main():
     with col3:
         if unit == 'Km/h':
             v_ne = st.number_input("Never Exceed Speed (Km/h)", value=v_ne_poh, min_value=0.00, step=10.00)
-            v_krst.value = percentage_of_vne / 100.0 * (v_ne / 3.6)  # Convert to m/s
+            v_krst = percentage_of_vne / 100.0 * (v_ne / 3.6)  # Convert to m/s
         else:
             v_ne = st.number_input("Never Exceed Speed (m/s)", value=v_ne_poh / 3.6, min_value=0.00, step=1.00)
-            v_krst.value = percentage_of_vne / 100.0 * v_ne  # Already in m/s
+            v_krst = percentage_of_vne / 100.0 * v_ne  # Already in m/s
 
     st.latex(f"v_{{\\text{{krst}}}} = \\frac{{\\text{{Vne}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_ne:.3f} \\times {percentage_of_vne}}}{{100}}")
-    st.latex(f"v_{{\\text{{krst}}}} = {v_krst.value*3.6:.2f} \\, \\text{{Km/h}} = {v_krst.value:.2f} \\, \\text{{m/s}}")
+    st.latex(f"v_{{\\text{{krst}}}} = {v_krst*3.6:.2f} \\, \\text{{Km/h}} = {v_krst:.2f} \\, \\text{{m/s}}")
 
     st.markdown('***')
 
 
 #==================== LIFT COEFF ====================#
 
-    st.subheader("Lift coefficient at cruise (c_z_krst)")
+    st.subheader("Lift coefficient at cruise conditions")
 
-    with st.expander("Change all parameters"):
+    with st.expander("Manually change all parameters to recalculate Cz_krst"):
         planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
-        def calculate_c_z_krst():
-            c_z_krst.value = (m_sr * g) / (0.5 * rho.value * v_krst**2 * S)
-            # LaTeX string with variables
-            numbers = (
-                f"\\frac{{ {m_sr.value:.2f} \\cdot {g.value:.2f} }}"
-                f"{{0.5 \\cdot {rho.value:.6f} \\cdot {v_krst.value:.2f}^2 \\cdot {S.value:.2f} }}"
-            )
-            # Formula in LaTeX format
-            c_z_krst.formula = f"\\frac{{G}}{{q \\cdot S}} = \\frac{{m_{{sr}} \\cdot g}}{{0.5 \\cdot \\rho \\cdot v_{{krst}}^2 \\cdot S}} \\\\ [2em] {c_z_krst.latex} = {numbers}"
-
         col1, col2, col3 = st.columns(3)
         with col1:
-            S.value = st.number_input(f'{S.name} ({S.unit})', value=S.value, step=0.1, format="%.2f")        
+            S = st.number_input(f'Wing area', value=get_variable_value('S'), step=0.1, format="%.2f")
         with col2:
-            m_sr.value = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
+            m_sr = st.number_input('Average mass (kg)', value=get_variable_value('m_sr'), step=100.0, format="%.2f")
+            # m_sr = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
         with col3:
-            v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
+            v_krst = st.number_input('Mass at cruise (kg)', value=get_variable_value('v_krst'), step=100.0, format="%.2f")
+            # v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
 
 
         spacer()
@@ -211,39 +202,30 @@ def main():
             if planet == 'Earth':
                 altitude = st.number_input("Altitude (m)", value=altitude, min_value=0, step=100)
                 temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-                rho.value = density
+                rho = density
             else:
-                rho.value = 0.020
-                g.value = 3.711
+                # rho = 0.020
+                g = st.number_input('Gravity', value=3.711, step=0.01, format="%.5f")
                 spacer('1em')
                 st.info(f"🪐 Mars")
         with col2:
-            g.value = st.number_input(f'{g.name} ({g.unit})', value=g.value, step=0.01, format="%.3f")
+            g = st.number_input('Gravity', value=9.80665, step=0.01, format="%.5f")
         with col3:
-            rho.value = st.number_input(f'{rho.name} ({rho.unit})', value=rho.value, step=0.001, format="%.5f")
+            st.write('rho TODO')
+            # rho = st.number_input(f'Density', value=rho.value, step=0.001, format="%.5f")
 
-    calculate_c_z_krst()
-    st.latex(f"{c_z_krst.latex} = {c_z_krst.formula}")
-    st.latex(f"{c_z_krst.latex} = {c_z_krst.value:.3f}")
-
+    c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
+    st.latex(r"C_{Z_{krst}} = \frac{G}{q \cdot S} = \frac{m_{sr} \cdot g}{0.5 \cdot \rho \cdot v_{krst}^2 \cdot S}")
+    st.latex(f"C_{{Z_{{krst}}}} = \\frac{{ {m_sr:.2f} \\cdot {g:.2f} }}{{ 0.5 \\cdot {rho:.4f} \\cdot {v_krst:.2f}^2 \\cdot {S:.2f} }}")
+    st.latex(f"C_{{Z_{{krst}}}} = {c_z_krst:.3f}")
+    
     st.markdown('***')
     #==================== SESSION STATE ====================#
 
-    st.text("variables saved to session state:")
-    variables_dict = {
-        'm_sr': m_sr, 
-        'v_krst': v_krst, 
-        'c_z_krst': c_z_krst,
-        'S': S,
-        'l0': l0,
-        'l1': l1,
-        'b': b,
-        'rho': rho,
-        'g': g,
-    }
-    
-    save_variables_to_session(variables_dict)
+    update_variables(page_values, locals())
+    log_changed_variables()
 
+    
     if st.button("render latex and save pics"):
         st.write("WIP")
 
