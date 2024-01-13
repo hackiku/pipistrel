@@ -22,6 +22,9 @@ def inspect_pages_variables():
                     else:
                         st.write("No `Variable` instances found.")
 
+def extract_locals():
+    
+
 def main():
     st.title("Session State Management")
     inspect_pages_variables()

@@ -83,48 +83,20 @@ def main():
 
     update_variables(page_values, locals())
     log_changed_variables()
-
-    st.markdown("***")
-
-    # Additional calculations for drag, lift, etc., can follow a similar format.
-
-
-    st.markdown("***")
-
-    def calculate_aerodynamics(l0_value, lT_value, v_krst, nu):
-        # Taper ratio (nT)
-        nT = l0_value / lT_value
-        nT_latex = rf"n_T = \frac{{l_0}}{{l_T}} = \frac{{{l0_value:.3f}}}{{{lT_value:.3f}}} = {nT:.3f}"
-        st.latex(nT_latex)
-
-        # Mean aerodynamic chord (lSATKR)
-        lSATKR = (2/3) * l0_value * ((1 + nT + nT**2) / (1 + nT))
-        lSATKR_latex = rf"l_{{SATKR}} = \frac{{2}}{{3}} \cdot \frac{{1 + n_T + n_T^2}}{{1 + n_T}} \cdot l_T = \frac{{2}}{{3}} \cdot \frac{{1 + {nT:.3f} + {nT:.3f}^2}}{{1 + {nT:.3f}}} \cdot {lT_value:.3f} = {lSATKR:.3f} \, m"
-        st.latex(lSATKR_latex)
-
-        # Reynolds number (Re)
-        Re = v_krst * lSATKR / nu
-        Re_latex = rf"Re = \frac{{v_{{krst}} \cdot l_{{SATKR}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lSATKR:.3f}}}{{{nu:.2e}}} \approx {Re:.2e}"
-        st.latex(Re_latex)
-
-        return nT, lSATKR, Re
     
-    l0_value = 1.574  # Root chord length in meters
-    lT_value = 2.689  # Tip chord length in meters
-    v_krst = 224.28  # Cruising speed in m/s
     nu = 2.21e-5     # Kinematic viscosity in m^2/s
-
-    calculate_aerodynamics(l0_value, lT_value, v_krst, nu)
     
     # graph
     st.markdown("""<div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
     spacer()
 
     # ==================== cx wing ==================== #
+
     
     st.write("Iz gore priloženog dijagrama očitava se koeficijent otpora trenja Cf")
-    c_fkr = 0.0026
+    c_fkr = 0.0026 # TODO add to json
     st.latex(rf"C_{{fKR}} = {c_fkr:.4f}")
+    
     st.markdown("***")
 
     l0 = 1.574  # Root chord length in meters
@@ -138,8 +110,6 @@ def main():
     st.write("Efektivna relativna debljina se dobija osrednjavanjem relativnih debljina u korenu i na kraju krila jer su različite:")
     st.latex(rf"(d/l)_{{effekKR}} = \frac{{l_0 \cdot (d/l)_0 + l_T \cdot (d/l)_T}}{{l_0 + l_T}} = \frac{{{l0:.3f} \cdot {dl0} + {lT:.3f} \cdot {dlT}}}{{{l0:.3f} + {lT:.3f}}} = {dl_effekKR:.3f}")
     
-    S_WETKR = 30.877  # Wetted area of the wing in m^2
-    
     spacer()
     col1, col2 = st.columns(2)
     with col1:
@@ -149,11 +119,10 @@ def main():
         st.latex(rf"(d/l)_{{effekKR}} = {dl:.3f}")
         st.latex(rf"\phi = {phi:.3f}")
         s = 20.602  # Reference area in square meters
-        k_kr = Variable("Wing shape drag", 1.21, "KKR", "K_{KR}", "")
-        variables_two_columns(k_kr)
-        c_x_min_krilo = (k_kr.value * c_fkr * S_WETKR) / s
+        K_kr = st.number_input("Shape drag factor of the wing", value=get_variable_value('K_kr'), key='K_kr')
+        c_x_min_krilo = (K_kr * c_fkr * S_wet_kr) / s
         st.write("Koeficijent minimalnog otpora krila")
-        st.latex(rf"C_{{X min krilo}} = \frac{{K_{{KR}} \cdot C_{{fKR}} \cdot S_{{WET_{{KR}}}}}}{{S}} = \frac{{{k_kr.value:.2f} \cdot {c_fkr:.4f} \cdot {S_WETKR:.3f}}}{{{s:.3f}}} = {c_x_min_krilo:.6f}")
+        st.latex(rf"C_{{X min krilo}} = \frac{{K_{{KR}} \cdot C_{{fKR}} \cdot S_{{WET_{{KR}}}}}}{{S}} = \frac{{{K_kr:.2f} \cdot {c_fkr:.4f} \cdot {S_wet_kr:.3f}}}{{{s:.3f}}} = {c_x_min_krilo:.6f}")
 
     with col2:
         st.image('./assets/tmp_assets/koef_min_otpora.png', )
@@ -312,6 +281,7 @@ def main():
 
     update_variables(page_values, locals())
     log_changed_variables()
+    st.markdown("***")
 
 if __name__ == "__main__":
     main()

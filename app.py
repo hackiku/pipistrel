@@ -4,7 +4,6 @@ import streamlit.components.v1 as components
 import pandas as pd
 import inspect
 from data import aircraft_specs, create_specs_table 
-from variables import Variable, save_variables_to_session, load_variables_from_session
 from isa_lite import get_ISA_conditions
 from utils import spacer
 from pages import draw_hifi
