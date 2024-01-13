@@ -81,8 +81,8 @@ def main():
     st.write("Tip airfoils:", tip_airfoils)
 
 
-    # Update variables at the end of the function
-    update_variables(page_values)
+    update_variables(page_values, locals())
+    log_changed_variables()
 
     # debug
     log_changed_variables()

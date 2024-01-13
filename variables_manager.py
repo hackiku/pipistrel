@@ -61,9 +61,26 @@ def update_variables(page_values, local_vars):
 
     save_variables(variables_data)
 
+#=================== extract variable data ===================
 def get_variable_value(var_name):
     return st.session_state['variables_data'].get(var_name, {}).get('value', None)
+# def get_variable_value(*var_names):
+#     return tuple(st.session_state['variables_data'].get(var_name, {}).get('value', None) for var_name in var_names)
 
+def get_variable_props(var_key):
+    var_data = st.session_state['variables_data'].get(var_key, {})
+    return var_data.get('value'), var_data.get('latex'), var_data.get('unit')
+
+def display_variable(var_key, help=None):
+    value, latex, unit = get_variable_props(var_key)
+    if latex and unit:
+        st.latex(rf"{latex} = {value} \, {unit}")
+    elif latex:
+        st.latex(rf"{latex} = {value}")
+    else:
+        st.text(f"{var_key}: {value}")
+
+#=================== extract variable data ===================
 def log_changed_variables():
     variable_details = ["Changed Variables:"]
     for var_name, var_value in st.session_state['variables_data'].items():

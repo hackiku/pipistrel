@@ -1,63 +1,93 @@
 ### 4_4_drag_incompressible.py ###
-
 import streamlit as st
-import matplotlib.pyplot as plt
-from data import Variable, save_variables_to_session, load_variables_from_session
-from utils import spacer, emoji_header, variables_two_columns, variables_three_columns
-
-S = Variable("Wing Area", 30.00, "S", "S", "m²")
-S_20 = Variable("Aerodynamic reference area", 10.301, "S_20", "S_{20}", "m²")
-S_21 = Variable("Area of the wing exposed to airflow", 7.568, "S_21", "S_{21}", "m²")
-SWETKR = Variable("Wetted area of the wing", 30.877, "SWETKR", "S_{WETKR}", "m²")
-l0 = Variable("Root chord length", 1.574, "l0", "l_{0}", "m")
-lT = Variable("Tip chord length", 2.689, "lT", "l_{T}", "m")
-nT = Variable("Taper ratio", 0.585, "nT", "n_{T}", "")
-lSATKR = Variable("Mean aerodynamic chord of the exposed wing area", 2.179, "lSATKR", "l_{SATKR}", "m")
-Re = Variable("Reynolds number", 2.211 * 10**7, "Re", "Re", "")
-CfKR = Variable("Friction drag coefficient", 0.0026, "CfKR", "C_{fKR}", "")
-dl_effekKR = Variable("Effective relative thickness", 0.109, "dl_effekKR", "(d/l)_{effekKR}", "")
-KKR = Variable("Wing shape drag factor", 1.21, "KKR", "K_{KR}", "")
-C_X_min_krilo = Variable("Minimum drag coefficient of the wing", 0.004715, "C_X_min_krilo", "C_{X min krilo}", "")
+from variables_manager import initialize_session_state, get_variable_value, get_variable_props, display_variable, update_variables, log_changed_variables
+from utils import spacer, emoji_header  # Assuming these are utility functions you've defined
 
 
 def main():
-
+    page_values = [
+        'S', 'S_20', 'S_21', 'S_wet_kr', 'lT', 'l0', 'nT', 
+        'l_sat_kr', 'Re', 'v_krst', 'Cf_kr', 'dl_eff_kr', 'K_kr', 'C_X_min_krilo'
+    ]
+    initialize_session_state(page_values)
+    
+    
+    #==================== drag ====================#
     st.title("4. Drag calculation")
+    
     st.write("""Proračun otpora aviona (za nestišljivo strujanje. Za ovaj proračun proračun potrebno je:
-- Definisatisvedimenzijeelemenatakonstrukcijeavionapotrebnezaproračunotpora; - Odreditijednačinupolareaviona;
-- IzračunatimaksimalnufinesuavionaiCZprikomeseonaostvaruje;
-- Odreditifinesuavionaipotrebnuvučnusiluelisenarežimukrstarenja;
-- DijagramskipokazatipolaruavionaifinesuavionaufunkcijiodCZ.""")
+- Definisati sve dimenzije elemenata konstrukcije aviona potrebne za proračun otpora;
+- Odrediti jednačinu polare aviona;
+- Izračunati maksimalnu finesu aviona i CZ pri kome se ona ostvaruje;
+- Odrediti finesu aviona i potrebnu vučnu silu elise na režimu krstarenja;
+- Dijagramski pokazati polaru aviona i finesu aviona u funkciji od CZ.""")
 
     st.markdown("***")    
+
     st.header("4.1. Određivanje polare aviona")
 
     # ==================== wing ==================== #
     st.subheader("4.1.1. Krilo (Wing)")
     
-    # Aerodynamic reference area (S_20)
-    st.write(f"Aerodynamic reference area: {S_20.value} {S_20.unit}")
-    st.latex(rf"{S_20.latex} = {S_20.value} \, {S_20.unit}")
+    spacer()
+    
+    st.text('– aerodynamic reference area')
+    
+    S_20 = get_variable_value('S_20')    
+    S = 2 * S_20
+    display_variable('S_20')
+    st.latex(r"S = 2 \cdot S_{20} = 2 \cdot 10.301 = 20.602 \, m^2")
+    
+    st.text('– exposed area')
+    S_21 = get_variable_value('S_21')
+    S_exp_kr = 2 * S_21
+    st.latex(rf"S_{{21}} = {S_21} \, m^2")
+    st.latex(rf"S_{{expKR}} = 2 \cdot S_{{21}} = 2 \cdot {S_21} = {S_exp_kr} \, m^2")
+    
+    st.text('– wetted area')
+    S_wet_kr = S_exp_kr * 2 * 1.02
+    st.latex(rf"S_{{wetKR}} = S_{{expKR}} \cdot 2 \cdot 1.02 = {S_exp_kr} \cdot 2 \cdot 1.02 = {S_wet_kr:.3f} \, m^2")
 
-    def calculate_wing_areas():
-        # Total wing area (S)
-        S = 2 * S_20.value
-        st.write(f"Total wing area: {S} {S_20.unit}")
-        st.latex(rf"S = 2 \cdot {S_20.latex} = {S} \, {S_20.unit}")
+    update_variables(page_values, locals())
+    log_changed_variables()
 
-        # Area of the wing exposed to airflow (S_exp_kr)
-        S_exp_kr = 2 * S_21.value
-        st.write(f"Area of the wing exposed to airflow: {S_exp_kr} {S_21.unit}")
-        st.latex(rf"S_{{exp_{{KR}}}} = 2 \cdot {S_21.latex} = {S_exp_kr} \, {S_21.unit}")
+    
+    spacer()
 
-        # Wetted area of the wing (S_WETKR)
-        S_WETKR = S_exp_kr * 1.02
-        st.write(f"Wetted area of the wing: {S_WETKR} {S_21.unit}")
-        st.latex(rf"S_{{WET_{{KR}}}} = {S_exp_kr} \cdot 1.02 = {S_WETKR} \, {S_21.unit}")
+    # dimensions =========
+    
+    st.text('– taper ratio')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        l0 = st.number_input("Trapezoid chord length", value=get_variable_value('l0'), key='l0')
+        st.latex(rf"l_0 = {l0:.3f} \, m")
+    with col2:
+        lT = st.number_input("Tip chord length", value=get_variable_value('lT'), key='lT')
+        st.latex(rf"l_T = {lT:.3f} \, m")
+    nT = lT / l0
+    st.latex(rf"n_T = \frac{{l_1}}{{l_0}} = \frac{{{lT:.3f}}}{{{l0:.3f}}} = {nT:.3f}")
 
-        return S, S_exp_kr, S_WETKR
+    # Mean aerodynamic chord (l_sat_kr)
+    st.text('– mean aerodynamic chord')
+    l_sat_kr = (2/3) * lT * ((1 + nT + nT**2) / (1 + nT))
+    st.latex(rf"l_{{satKR}} = \frac{{2}}{{3}} \cdot l_0 \cdot \frac{{1 + n_T + n_T^2}}{{1 + n_T}}")
+    st.latex(rf"l_{{satKR}} = \frac{{2}}{{3}} \cdot {l0:.3f} \cdot \frac{{1 + {nT:.3f} + {nT:.3f}^2}}{{1 + {nT:.3f}}} = {l_sat_kr:.3f} \, m")
 
-    calculate_wing_areas()
+    # Reynolds number (Re)
+    st.text('– Reynolds number')
+    v_krst = 224.28  # Cruising speed in m/s (assuming constant or obtained elsewhere)
+    nu = 2.21e-5     # Kinematic viscosity in m^2/s (assuming constant or obtained elsewhere)
+    Re = v_krst * l_sat_kr / nu
+    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{satKR}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {l_sat_kr:.3f}}}{{{nu:.2e}}} \approx {Re:.2e}")
+
+    update_variables(page_values, locals())
+    log_changed_variables()
+
+    st.markdown("***")
+
+    # Additional calculations for drag, lift, etc., can follow a similar format.
+
 
     st.markdown("***")
 
@@ -190,7 +220,7 @@ def main():
 
     # Drag coefficient from diagram
     st.write("Iz prethodno datih dijagrama koeficijent otpora trenja trupa " + r"C_{fT} = " + str(CfKR.value))
-    st.latex(r"C_{fT} = " + str(CfKR.latex))
+    st.latex(rf"C_{{fT}} = {CfKR}")
 
     # Minimum drag coefficient of the fuselage
     st.write("Koeficijent minimalnog otpora trupa")
@@ -280,7 +310,8 @@ def main():
 
     st.subheader("4.2.2. Proračunska polara aviona (Aircraft Polar Calculation)")
 
-
+    update_variables(page_values, locals())
+    log_changed_variables()
 
 if __name__ == "__main__":
     main()
