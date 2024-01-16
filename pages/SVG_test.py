@@ -1,11 +1,12 @@
 import streamlit as st
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import xml.etree.ElementTree as ET
 import math
 
 # Path to the base image and SVG file
 base_image = "./modules/draw/base_image.png"
 svg_lines = "./modules/draw/measurement_lines.svg"
+# st.image(svg_lines)
 
 def parse_svg_for_lines(svg_file):
     tree = ET.parse(svg_file)
@@ -26,13 +27,15 @@ def parse_svg_for_lines(svg_file):
 def draw_measurements_on_image(image_path, lines):
     with Image.open(image_path) as img:
         draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=24)
+
         for line in lines:
             start, end = line['start'], line['end']
             real_length_m = line['real_length_m']
             draw.line([start, end], fill='red', width=2)
             midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
             text = f"{real_length_m:.2f}m"
-            draw.text(midpoint, text, fill='red')
+            draw.text(midpoint, text, fill='red', font=font)
         st.image(img)
 
 def main():
