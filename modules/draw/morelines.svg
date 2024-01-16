@@ -6,15 +6,15 @@
 <path d="M750 870L750 1152" stroke="#FF0000"/>
 <path d="M417 2516L417 2706" stroke="#FF0000"/>
 <path d="M1694 2417L1694 2793" stroke="#FF0000"/>
-<path d="M928 2461H1514" stroke="#FF0000"/>
+<path d="M1514 2461H928" stroke="#DB00FF"/>
 <path d="M624 1698L624 2516" stroke="#FF0000"/>
 <path d="M336 2505L336 2706" stroke="#FF0000"/>
-<path d="M1347 402H1500" stroke="#FF0000"/>
-<path d="M1315 797H1491" stroke="#FF0000"/>
-<path d="M889 1279H1089" stroke="#FF0000"/>
-<path d="M1513 2948H1638" stroke="#FF0000" stroke-miterlimit="9.56677"/>
-<path d="M845 1351H1133" stroke="#FF0000"/>
-<path d="M1398 66.5H1504" stroke="#FF0000"/>
+<path d="M1500 402H1347" stroke="#DB00FF"/>
+<path d="M1491 797H1315" stroke="#DB00FF"/>
+<path d="M1089 1279H889" stroke="#DB00FF"/>
+<path d="M1638 2948H1513" stroke="#DB00FF" stroke-miterlimit="9.56677"/>
+<path d="M1133 1351H845" stroke="#DB00FF"/>
+<path d="M1504 66.5L1398 66.5" stroke="#FF0000"/>
 <path d="M1584 326L1584 133" stroke="#FF0000"/>
 <path d="M1641 430L1641 117" stroke="#FF0000"/>
 <path d="M1584 430L1584 326" stroke="#FF0000"/>
