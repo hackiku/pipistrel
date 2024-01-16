@@ -3,8 +3,8 @@ from PIL import Image, ImageDraw, ImageFont
 from svgpathtools import svg2paths
 
 # Path to the base image and SVG file
-base_image = "./modules/draw/base_image.png"
-svg_lines = "./modules/draw/morelines.svg"
+base_image = "./modules/draw/drawing.png"
+svg_lines = "./modules/draw/lines.svg"
 
 def parse_svg_for_lines(svg_file):
     paths, attributes = svg2paths(svg_file)
@@ -43,7 +43,7 @@ def parse_svg_for_lines(svg_file):
 def draw_measurements_on_image(image_path, lines, conversion_factor):
     with Image.open(image_path) as img:
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=26)
+        font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=22)
 
         for line in lines:
             start, end = line['start'], line['end']
@@ -51,7 +51,7 @@ def draw_measurements_on_image(image_path, lines, conversion_factor):
             computed_length_m = line['length_pixels'] * conversion_factor
             error_percentage = ((computed_length_m - real_length_m) / real_length_m) * 100
             st.write(f"Line Real Length: {real_length_m}m, Computed Length: {computed_length_m}m, Error: {error_percentage}%")
-            draw.line([start, end], fill='red', width=3)
+            draw.line([start, end], fill='blue', width=3)
             midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
             text = f"{real_length_m:.2f}m ({line['length_pixels']:.2f}px, {error_percentage:.1f}%)"
             draw.text(midpoint, text, fill='red', font=font)

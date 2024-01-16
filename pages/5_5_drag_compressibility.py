@@ -45,7 +45,6 @@ def calculate_drag_coefficient(C_X_min, k, lambda_wing, u, s):
 def main():
     st.title("4.2 Određivanje otpora zavisno od uzgona")
 
-
     # Input variables
     C_X_min = st.number_input("Minimum drag coefficient (C_X_min)", value=0.01869, format="%.5f")
     k = st.number_input("Factor from wing sweep angle (k)", value=0.00791, format="%.5f")
