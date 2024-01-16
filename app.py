@@ -16,7 +16,6 @@ def get_specific_data(df, category):
         start_index = category_data.index[0] + 1
         end_index = df[df['Specification'].str.startswith('**', na=False)].index
         end_index = end_index[end_index > start_index].min()
-
         return df[start_index:end_index]
     return pd.DataFrame()
 
@@ -43,14 +42,14 @@ def filter_data_for_preset(data, preset):
 def main():
     
     page_values = [
-        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'rho', 
+        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
         'g', 'Re', 'c_z_krst'
     ]
     
     initialize_session_state()
 
 
-    st.markdown("<h1 style='text-align: center;'>Aircalcs</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>AircraftDesign.app</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
     spacer("5em")
 
@@ -108,41 +107,44 @@ def main():
 
     # Calculate average mass
     m_sr = (max_take_off_weight + design_empty_weight) / 2
-    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
+    st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
 
     st.markdown('***')
 
 # ==================== ISA ====================#
 
-    
-    altitude = 2500
-
     # 2.3 ISA conditions (from isa_lite.py)
     st.subheader("2.3. ISA air conditions")
-    temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-    rho = density
-    col1, col2 = st.columns(2)
 
+    col1, col2 = st.columns(2)
     with col1:
-        # Altitude slider using session state
-        altitude_input = st.slider("Altitude (m)", min_value=0, value=altitude, max_value=30000, step=100)
-        altitude = altitude_input
+        H = st.slider("Altitude (m)", min_value=0, value=get_variable_value('H'), max_value=30000, step=100)
+        T, P, rho, c, zone = get_ISA_conditions(H)
+        # rho = density
         max_operating_altitude = aircraft_specs["Performance"]["Maximum Operating Altitude"]["value"]
-        if altitude < max_operating_altitude:
-            st.success(f"👍 Under max operating altitude ({format(max_operating_altitude, ',')} m)")
+        max_altitude_percentage = H / max_operating_altitude * 100
+        if max_altitude_percentage <= 100:
+            st.success(f"👍 {max_altitude_percentage:.2f}% max operating altitude ({format(max_operating_altitude, ',')} m)")
         else:
-            st.error(f"⚠️ Over max operating altitude ({format(max_operating_altitude, ',')} m)")
+            st.error(f"⚠️ Above max operating altitude ({format(max_operating_altitude, ',')} m)")
         st.write("You are flying in the:")
         st.info(f"🌍 {zone}")
 
     with col2:
         # Displaying the values and zone using LaTeX
-        spacer()
-        st.latex(f"T = {temperature:.2f} \, \ {{K}} \, ({temperature - 273.15:.2f} \ {{°C}})")
-        st.latex(f"P = {pressure:.2f} \, \ {{Pa}}")
-        st.latex(f"\\rho = {density:.5f} \, \ {{kg/m}}^3")
-        st.latex(f"c = {sound_speed:.2f} \, \ {{m/s}}")
+        st.latex(f"H = {H} \, \ {{m}} \, \ ({H * 3.28084:.0f} \, \ {{ft}})")
+        st.latex(f"T = {T:.2f} \, \ {{K}} \, ({T - 273.15:.2f} \ {{°C}})")
+        st.latex(f"P = {P:.2f} \, \ {{Pa}}")
+        st.latex(f"\\rho = {rho:.5f} \, \ {{kg/m}}^3")
+        st.latex(f"c = {c:.2f} \, \ {{m/s}}")
 
+    spacer()
+    st.write('Kinematic viscosity calculated with the Sutherland formula')
+    nu = (1.458e-6 * T**1.5) / (T + 110.4) / rho
+    st.latex(r'\nu = \frac{\mu}{\rho} = \frac{1.458 \times 10^{-6} \cdot T^{1.5}}{T + 110.4} \cdot \frac{1}{\rho}')
+    st.latex(f'\\nu = {nu:.2e} \\, \\text{{m}}^2/\\text{{s}}')
+    
+    
     st.markdown('***')
 
 # ==================== CRUISE SPEED ====================#
@@ -183,7 +185,7 @@ def main():
     st.subheader("Lift coefficient at cruise conditions")
 
     with st.expander("Manually change all parameters to recalculate Cz_krst"):
-        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
+        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=1)
         col1, col2, col3 = st.columns(3)
         with col1:
             S = st.number_input(f'Wing area', value=get_variable_value('S'), step=0.1, format="%.2f")
@@ -193,21 +195,18 @@ def main():
         with col3:
             v_krst = st.number_input('Mass at cruise (kg)', value=get_variable_value('v_krst'), step=100.0, format="%.2f")
             # v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
-
-
         spacer()
 
         col1, col2, col3 = st.columns(3)
         with col1:
             if planet == 'Earth':
-                altitude = st.number_input("Altitude (m)", value=altitude, min_value=0, step=100)
+                altitude = st.number_input("Altitude (m)", value=H, min_value=0, step=100)
                 temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-                rho = density
             else:
                 # rho = 0.020
                 g = st.number_input('Gravity', value=3.711, step=0.01, format="%.5f")
                 spacer('1em')
-                st.info(f"🪐 Mars")
+                st.warning(f"🪐 Mars")
         with col2:
             g = st.number_input('Gravity', value=9.80665, step=0.01, format="%.5f")
         with col3:

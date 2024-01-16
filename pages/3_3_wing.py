@@ -1,59 +1,33 @@
 ### 3_wing.py ###
 
 import streamlit as st
-from main import main as initialize_main
-from variables import Variable, save_variables_to_session, load_variables_from_session
-from utils import spacer, variables_two_columns, display_generic_table
+from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
+from utils import spacer
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
 import re
-from main import (S as S_home, l0 as l0_home, l1 as l1_home, b as b_home, 
-v_krst as v_krst_home, rho as rho_home, c_z_krst as c_z_krst_home, main as run_hompeage)
-
-imported_variables = ['S', 'l0', 'l1', 'b', 'v_krst', 'rho', 'g', 'm_sr', 'c_z_krst']
-
-new_variables = ['lambda_wing', 'n', 'phi', 'alpha_n', 'c_z_max_root', 'alpha_0_root', 'a_0_root', 'c_z_max_tip', 'alpha_0_tip', 'a_0_tip']
-
-# run_hompeage()
 
 # Hardcoded Airfoil Data
 root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
 tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
 
-# Extracting specific values from airfoil data
-c_z_max_root = Variable("Max Lift Coefficient at Root", root_airfoil_data[4], "c_z_max_root", r"C_{z_{max}}", "")
-alpha_0_root = Variable("Angle of Zero Lift at Root", root_airfoil_data[2], "alpha_0_root", r"\alpha_{0}", "degrees")
-a_0_root = Variable("Lift Gradient at Root", root_airfoil_data[3], "a_0_root", r"a_{0}", "")
-
-c_z_max_tip = Variable("Max Lift Coefficient at Tip", tip_airfoil_data[4], "c_z_max_tip", r"C_{z_{max}}", "")
-alpha_0_tip = Variable("Angle of Zero Lift at Tip", tip_airfoil_data[2], "alpha_0_tip", r"\alpha_{0}", "degrees")
-a_0_tip = Variable("Lift Gradient at Tip", tip_airfoil_data[3], "a_0_tip", r"a_{0}", "")
-
-# geometry calcs
-lambda_wing = Variable("Wing Aspect Ratio", 3.888, r"\lambda")
-n = Variable("Wing Taper Ratio", 0.520, "n", "n")
-phi = Variable("Sweep Angle", 27, "phi", r"\phi", "degrees")
-alpha_n = Variable("Angle of Attack", -1.3, "alpha_n", r"\alpha_n", "degrees")
-
-# c_z_max = Variable("Max Lift Coefficient", 1.148, r"C_{z_{max}}", "")
 
 def main():
     
-    # load variables from state
-    variable_names_to_load = ['S', 'l0', 'l1', 'b', 'v_krst', 'rho', 'g', 'm_sr', 'c_z_krst']
-    variables, code = load_variables_from_session(variable_names_to_load)
-    st.code(code)
+    page_values = [
+        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
+        'g', 'Re', 'c_z_krst',
+        'lambda_wing', 'n', 'phi', 'alpha_n', 'c_z_max_root', 'alpha_0_root', 
+        'a_0_root', 'c_z_max_tip', 'alpha_0_tip', 'a_0_tip'
+    ]
     
-    S = variables.get('S', S_home)
-    l0 = variables.get('l0', l0_home)
-    l1 = variables.get('l1', l1_home)
-    b = variables.get('b', b_home)
-    v_krst = variables.get('v_krst', v_krst_home)
-    rho = variables.get('rho', rho_home)
-    c_z_krst = variables.get('c_z_krst', c_z_krst_home)
-        
+    initialize_session_state()
+
+    # load variables from state
+    st.code(code)
+            
     st.code(f"S = {S.value}, l0 = {l0.value}, l1 = {l1.value}, b = {b.value}, v_krst = {v_krst.value}, rho = {rho.value}, c_z_krst = {c_z_krst.value}")
     st.title("3. Wing Design")
     st.write("""Da bismo formirali krivu uzgona krila, moramo odrediti četiri karakteristična parametra: - Maksimalni koeficijent uzgona krila cZmax
@@ -170,7 +144,7 @@ C     DRUGI INTEGER (npr. IZB=0) CZ RACUNA NA OSNOVU SPECIFICNOG
 C     OPTERECENJA KRILA, BRZINE I GUSTINE NA REZIMU KRSTARENJA
 
       IZB=1
-      DATA CZ / {c_z_krst.value:.3f} /  !ZADATI KOEFICIJENT UZGONA KRILA
+      DATA CZ / {c_z_krst:.3f} /  !ZADATI KOEFICIJENT UZGONA KRILA
       DATA SPECOP /800. / !ZADATO SPECIFICNO OPTERECENJE KRILA [N/m^2]
 
 C             PARAMETRI GEOMETRIJE KRILA I REZIMA KRSTARENJA:
@@ -336,5 +310,3 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
 if __name__ == "__main__":
     main()
-
-

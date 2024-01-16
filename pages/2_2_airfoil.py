@@ -84,8 +84,6 @@ def main():
     update_variables(page_values, locals())
     log_changed_variables()
 
-    # debug
-    log_changed_variables()
     
 
 # App Execution

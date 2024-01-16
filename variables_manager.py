@@ -85,9 +85,8 @@ def log_changed_variables():
     variable_details = ["Changed Variables:"]
     for var_name, var_value in st.session_state['variables_data'].items():
         if var_value['value'] != var_value['default']:
-            detail = (f" - {var_value['name']} (Key: '{var_name}'): "
-                      f"Current Value = {var_value['value']} | "
-                      f"Default Value = {var_value['default']}")
+            detail = (f""" - {var_value['name']} (Key: '{var_name}'):
+        "Current = {var_value['value']:.5f} | Default = {var_value['default']}""")
             variable_details.append(detail)
     
     if len(variable_details) > 1:

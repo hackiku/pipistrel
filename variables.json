@@ -2,7 +2,7 @@
     "S": {
         "name": "Wing Area",
         "default": 25.55,
-        "value": 25.55,
+        "value": 25.560000000000002,
         "latex": "S",
         "unit": "m^2"
     },
@@ -16,14 +16,14 @@
     "b": {
         "name": "Wingspan",
         "default": 9.262,
-        "value": 9.262,
+        "value": 9.282,
         "latex": "b",
         "unit": "m"
     },
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
         "default": 0.1,
-        "value": 0.032089987475036115,
+        "value": 0.1,
         "latex": "C_{z_{krst}}",
         "unit": ""
     },
@@ -146,12 +146,47 @@
         "latex": "v_{krst}",
         "unit": "m/s"
     },
+    "H": {
+        "name": "Altitude",
+        "default": 2500,
+        "value": 2500,
+        "latex": "H",
+        "unit": "m"
+    },
+    "T": {
+        "name": "Temperature",
+        "default": 0.0,
+        "value": 0.0,
+        "latex": "T",
+        "unit": "K"
+    },
+    "P": {
+        "name": "Pressure",
+        "default": 0.0,
+        "value": 0.0,
+        "latex": "P",
+        "unit": "Pa"
+    },
     "rho": {
         "name": "Air Density at Altitude",
         "default": 0.05,
-        "value": 0.9568639890727465,
+        "value": 0.060000000000000005,
         "latex": "\\rho",
         "unit": "kg/m^3"
+    },
+    "c": {
+        "name": "Speed of Sound",
+        "default": 0.0,
+        "value": 0.0,
+        "latex": "c",
+        "unit": "m/s"
+    },
+    "nu": {
+        "name": "Kinematic viscosity",
+        "default": 1.79e-05,
+        "value": 1.79e-05,
+        "latex": "\\nu",
+        "unit": "m^2/s"
     },
     "g": {
         "name": "Gravity Acceleration",
