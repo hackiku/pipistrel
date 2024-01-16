@@ -21,9 +21,42 @@ tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.
 c_z_max_root = root_airfoil_data[4]
 alpha_0_root = root_airfoil_data[2] # Angle of Zero Lift at Root
 a_0_root = root_airfoil_data[3] # Lift Gradient at Root
-c_z_max_tip tip_airfoil_data[4]
+c_z_max_tip = tip_airfoil_data[4]
 alpha_0_tip = tip_airfoil_data[2]
 a_0_tip = tip_airfoil_data[3]
+
+
+
+def regex_fortran(output):
+    # Part 1: Extract table data
+    table_data = []
+    start_extracting = False
+    for line in output.split('\n'):
+        if start_extracting:
+            # Adjusted regex to include the format '-.000'
+            values = re.findall(r"-?\d*\.\d+", line)
+            if len(values) == 5:
+                y_b2, czmax_ap, czmax_ap_cb_ca, cz_lok, pmax_n_m = map(float, values)
+                table_data.append({
+                    "y/(b/2)": y_b2,
+                    "Czmax ap.": czmax_ap,
+                    "Czmax-Cb/Ca": czmax_ap_cb_ca,
+                    "Czlok": cz_lok,
+                    "Pmax [N/m]": pmax_n_m
+                })
+        if "y/(b/2)         Czmax ap." in line:
+            start_extracting = True  # Begin capturing data from the next line
+
+    # Part 2: Extract final CZmax value
+    czmax_final_regex = r"Maksimalni koeficijent uzgona krila CZmax = (\d+\.\d+)"
+    czmax_final_match = re.search(czmax_final_regex, output)
+    czmax_final_value = float(czmax_final_match.group(1)) if czmax_final_match else None
+
+    return table_data, czmax_final_value
+
+# ======================================================================#
+# ================================ MAIN ================================#
+# ======================================================================#
 
 def main():
     
@@ -177,34 +210,6 @@ C            preseka                     [step.]  [km/h]   [kg/m^3]
 C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
 
-    st.code(fortran_inputs, language='fortran')
-
-    def regex_fortran(output):
-        # Part 1: Extract table data
-        table_data = []
-        start_extracting = False
-        for line in output.split('\n'):
-            if start_extracting:
-                # Adjusted regex to include the format '-.000'
-                values = re.findall(r"-?\d*\.\d+", line)
-                if len(values) == 5:
-                    y_b2, czmax_ap, czmax_ap_cb_ca, cz_lok, pmax_n_m = map(float, values)
-                    table_data.append({
-                        "y/(b/2)": y_b2,
-                        "Czmax ap.": czmax_ap,
-                        "Czmax-Cb/Ca": czmax_ap_cb_ca,
-                        "Czlok": cz_lok,
-                        "Pmax [N/m]": pmax_n_m
-                    })
-            if "y/(b/2)         Czmax ap." in line:
-                start_extracting = True  # Begin capturing data from the next line
-
-        # Part 2: Extract final CZmax value
-        czmax_final_regex = r"Maksimalni koeficijent uzgona krila CZmax = (\d+\.\d+)"
-        czmax_final_match = re.search(czmax_final_regex, output)
-        czmax_final_value = float(czmax_final_match.group(1)) if czmax_final_match else None
-
-        return table_data, czmax_final_value
 
 
     # Example usage

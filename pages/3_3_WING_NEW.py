@@ -23,6 +23,36 @@ alpha_0_tip = tip_airfoil_data[2]
 a_0_tip = tip_airfoil_data[3]
 
 
+def regex_fortran(output):
+    table_data = []
+    start_extracting = False
+    for line in output.split('\n'):
+        if start_extracting:
+            # Adjusted regex to include the format '-.000'
+            values = re.findall(r"-?\d*\.\d+", line)
+            if len(values) == 5:
+                y_b2, czmax_ap, czmax_ap_cb_ca, cz_lok, pmax_n_m = map(float, values)
+                table_data.append({
+                    "y/(b/2)": y_b2,
+                    "Czmax ap.": czmax_ap,
+                    "Czmax-Cb/Ca": czmax_ap_cb_ca,
+                    "Czlok": cz_lok,
+                    "Pmax [N/m]": pmax_n_m
+                })
+        if "y/(b/2)         Czmax ap." in line:
+            start_extracting = True  # Begin capturing data from the next line
+
+    # Part 2: Extract final CZmax value
+    czmax_final_regex = r"Maksimalni koeficijent uzgona krila CZmax = (\d+\.\d+)"
+    czmax_final_match = re.search(czmax_final_regex, output)
+    czmax_final_value = float(czmax_final_match.group(1)) if czmax_final_match else None
+
+    return table_data, czmax_final_value
+
+# ======================================================================#
+# ================================ MAIN ================================#
+# ======================================================================#
+
 def main():
     
     page_values = [
@@ -43,7 +73,7 @@ def main():
 """)
     
     
-    st.header("3.1 Lift characteristics of wing")
+    st.header("FORTRAN input values")
     st.write("The following values are used in the FORTRAN program below. Values are default unless you calculated them on other pages, and you can change them here as well.")
 
     # ==================== INPUT PARAMETERS ====================
@@ -75,42 +105,32 @@ def main():
     st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0}}} {{{ls}}} = {n:.3f}")
 
 
-    update_variables(page_values, locals())
-    log_changed_variables()
-
-
-    # Display wing inputs
+    st.markdown('#### Mission parameters & wing geometry')
     wing_inputs = f"""
-    | # | Parameter Name                         | Symbol                 | Value                                 | Unit        |
-    |---|----------------------------------------|------------------------|---------------------------------------|-------------|
-    | 1 | Cruise Lift Coefficient                | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}                        |             |
-    | 2 | Wing Aspect Ratio (λ)                  | $\\lambda$             | {lmbda:.3f}                           |             |
-    | 3 | Tip Chord Length                       | $l_0$                  | {l0:.3f}                              | m           |
-    | 4 | Root Chord Length                      | $l_s$                  | {ls:.3f}                              | m           |
-    | 5 | Wing Taper Ratio (n)                   | $n$                    | {n:.3f}                               |             |
-    | 6 | Cruising Speed                         | $v_{{krst}}$           | {v_krst:.2f}                          | m/s         |
-    | 7 | Air Density at Cruise Altitude         | $\\rho$                | {rho:.5f}                             | kg/m³       |
+    | # | Parameter                           | Symbol                 | Value                       | Unit    |
+    |---|-------------------------------------|------------------------|-----------------------------|---------|
+    |1️⃣ | **_Mission Parameters_**            |                        |                             |         |
+    | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
+    | 6 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.2f}                | m/s     |
+    | 7 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
+    |2️⃣ | **_Wing Geometry_**                 |                        |                             | -       |
+    | 2 | Wing Aspect Ratio (λ)               | $\\lambda$             | {lmbda:.3f}                 | -       |
+    | 3 | Tip Chord Length                    | $l_0$                  | {l0:.3f}                    | m       |
+    | 4 | Root Chord Length                   | $l_s$                  | {ls:.3f}                    | m       |
+    | 5 | Wing Taper Ratio (n)                | $n$                    | {n:.3f}                     | -       |
     """
     st.markdown(wing_inputs)
 
-    st.markdown("***")
+    spacer()
     
-    # c_z_max_root = root_airfoil_data[4]
-    # alpha_0_root = root_airfoil_data[2] # Angle of Zero Lift at Root
-    # a_0_root = root_airfoil_data[3] # Lift Gradient at Root
-    
-    # c_z_max_tip = tip_airfoil_data[4]
-    # alpha_0_tip = tip_airfoil_data[2]
-    # a_0_tip = tip_airfoil_data[3]
-
-
+    st.markdown('#### Airfoil data inputs')
     airfoil_inputs = f"""
-    | # | Parameter Name           | Symbol                | Tip Value        | Root Value      |
+    | # | Parameter Name           | Symbol                | Tip         | Root       |
     |---|--------------------------|-----------------------|------------------|-----------------|
-    | 1 | Airfoil                  |                       | NACA 65_2-415    | NACA 63_4-412   |
-    | 2 | Max Lift Coefficient     | $C_{{z_{{max}}}}$     | {c_z_max_tip:.3f}| {c_z_max_root:.3f} |
-    | 3 | Angle of Zero Lift       | $\\alpha_0$           | {alpha_0_tip:.2f}° | {alpha_0_root:.2f}° |
-    | 4 | Lift Gradient            | $a_0$                 | {a_0_tip:.3f}    | {a_0_root:.3f}   |
+    | 1 | Airfoil name             |                       | NACA 65_2-415    | NACA 63_4-412   |
+    | 2 | Max lift coefficient     | $C_{{z_{{max}}}}$     | {c_z_max_tip:.3f}| {c_z_max_root:.3f} |
+    | 3 | Angle of zero lift       | $\\alpha_0$           | {alpha_0_tip:.2f}° | {alpha_0_root:.2f}° |
+    | 4 | Lift gradient            | $a_0$                 | {a_0_tip:.3f}    | {a_0_root:.3f}   |
     """
     st.markdown(airfoil_inputs)
 
@@ -144,9 +164,37 @@ C            preseka                     [step.]  [km/h]   [kg/m^3]
       DATA LS / {ls:.3f} /  ! duzina tetive u korenu krila u metrima
 
 C     ******************** KRAJ UNOSA PODATAKA *************************"""
-
-
     st.code(fortran_inputs, language='fortran')
+
+    st.markdown("***")
+    
+    # ==================== FORTRAN OUTPUT ====================
+
+    with open('./modules/fortran/IZLAZ.TXT', 'r') as file:
+        output = file.read()
+        st.code(output, language='java')
+        
+    table_data, czmax_final = regex_fortran(output)
+
+    #==================== dataframe ====================#
+    st.subheader("Flow separation")
+    df = pd.DataFrame(table_data)
+    df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
+    st.dataframe(df, width=1100, use_container_width=False)
+
+    # st.write(table_data)
+    
+    # y_b2 = Variable("y/(b/2)", df['y/(b/2)'].tolist(), "y_b2", r"y/(b/2)", "")
+    # c_z_max = Variable("Max Lift Coefficient", df['Czmax ap.'].tolist(), "c_z_max", r"C_{z_{max}}", "")
+    # c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
+    # c_z_lok = Variable("Max Lift Coefficient", df["Czlok"].tolist(), "c_z_lok", r"C_{z_{max}}", "")
+    # p_max = Variable("Max pressure", df["Pmax [N/m]"].tolist(), "p_max", r"C_{z_{max}}", "N/m")
+    
+    spacer()       
+    st.markdown("***")
+
+    wing_trapezoid_image = st.image('./modules/draw/crop_white.png')
+
 
     # Update variables at the end of the session
     update_variables(page_values, locals())
