@@ -1,10 +1,16 @@
 # utils.py
 import streamlit as st
+from variables_manager import get_variable_value, get_variable_props
 
 def spacer(height='2em'):
     """Inserts vertical space in the layout."""
     spacer_html = f'<div style="margin: {height};"></div>'
     st.markdown(spacer_html, unsafe_allow_html=True)
+
+# TODO create 2-col variable
+# def input_latex_columns(latex=False):
+#     col1, col2 = st.columns([2,3])
+#     with col1:
     
 def variables_two_columns(var, display_formula=False):
     col1, col2 = st.columns([2,3])

@@ -1,3 +1,4 @@
+
 ### 3_wing.py ###
 
 import streamlit as st
@@ -12,7 +13,17 @@ import re
 # Hardcoded Airfoil Data
 root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
 tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
+# Hardcoded Airfoil Data
+root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
+tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
 
+# Extracting specific values from airfoil data
+c_z_max_root = root_airfoil_data[4]
+alpha_0_root = root_airfoil_data[2] # Angle of Zero Lift at Root
+a_0_root = root_airfoil_data[3] # Lift Gradient at Root
+c_z_max_tip tip_airfoil_data[4]
+alpha_0_tip = tip_airfoil_data[2]
+a_0_tip = tip_airfoil_data[3]
 
 def main():
     
