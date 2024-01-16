@@ -4,6 +4,7 @@ import math
 # from main import S
 
 base_image = "./modules/draw/base_image.png"
+svg_lines = "./modules/draw/svg_full_canvas.svg"
 
 # st.image(base_image)
 
