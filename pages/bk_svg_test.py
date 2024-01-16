@@ -1,24 +1,30 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-from svgpathtools import svg2paths
+import xml.etree.ElementTree as ET
+import math
 
 # Path to the base image and SVG file
 base_image = "./modules/draw/base_image.png"
+# svg_lines = "./modules/draw/measurement_lines.svg"
 svg_lines = "./modules/draw/morelines.svg"
 
+
 def parse_svg_for_lines(svg_file):
-    paths, attributes = svg2paths(svg_file)
+    tree = ET.parse(svg_file)
+    root = tree.getroot()
     lines = []
 
-    for path in paths:
-        for line in path:
-            start = (line.start.real, line.start.imag)
-            end = (line.end.real, line.end.imag)
-            real_length_m = abs(line.length())
-            line_info = {'start': start, 'end': end, 'real_length_m': real_length_m}
-            lines.append(line_info)
-            st.code(line_info)  # Log the parsed line information
-
+    for element in root.iter():
+        if element.tag.endswith('path'):
+            d = element.attrib.get('d', '')
+            if d.startswith('M') and 'L' in d:
+                m, l = d[1:].split('L')
+                start = tuple(map(float, m.split()))
+                end = tuple(map(float, l.split()))
+                real_length_m = math.sqrt((end[0] - start[0])**2 + (end[1] - start[1])**2)
+                line_info = {'start': start, 'end': end, 'real_length_m': real_length_m}
+                lines.append(line_info)
+                st.code(line_info)  # Log the parsed line information
     return lines
 
 def draw_measurements_on_image(image_path, lines):
