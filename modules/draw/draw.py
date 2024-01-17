@@ -57,3 +57,24 @@ def draw_measurements_on_image(image_path, lines, conversion_factor):
 lines, conversion_factor = parse_svg_for_lines(svg_lines)
 
 draw_measurements_on_image(base_image, lines, conversion_factor)
+
+
+def draw_trapezoid(image_path, lines, conversion_factor):
+    with Image.open(image_path) as img:
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=22)
+
+        for line in lines:
+            start, end = line['start'], line['end']
+            real_length_m = line['length_pixels'] * conversion_factor
+            draw.line([start, end], fill='red', width=5)
+            midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
+            text = f"{real_length_m:.2f}m"
+            draw.text(midpoint, text, fill='red', font=font)
+            st.code(line)
+
+        # Crop the image to the bottom 1300px height
+        width, height = img.size
+        img = img.crop((0, height - 1500, width, height))
+
+        return img

@@ -6,7 +6,7 @@ import inspect
 from data import aircraft_specs, create_specs_table 
 from utils import spacer
 from modules.isa_lite import get_ISA_conditions
-# from modules.draw.draw import draw
+from modules.draw.draw import draw_measurements_on_image, parse_svg_for_lines, draw_trapezoid
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 
 # use data points in calculations
@@ -77,15 +77,13 @@ def main():
 
 # ==================== IMAGE ====================#
 
-    st.title("2. Airfoil selection")
+    st.title("Wing area")
     spacer('2em')
     
     # 2.1. wing area
     st.subheader('2.1. Wing area calculator')
 
-    # S.value, l0.v alue, l1.value, b.value = draw_hifi.main()
-    
-    # Create a Variable instance for S using the returned value
+    S = st.number_input("Wing Area (m^2)", value=get_variable_value('S'), step=0.1, format="%.2f")
     st.markdown('***')
 
         
@@ -107,6 +105,7 @@ def main():
 
     # Calculate average mass
     m_sr = (max_take_off_weight + design_empty_weight) / 2
+    update_variables(page_values, locals())
     st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
 
     st.markdown('***')
@@ -213,6 +212,7 @@ def main():
             st.write('rho TODO')
             # rho = st.number_input(f'Density', value=rho.value, step=0.001, format="%.5f")
 
+    st.code(m_sr)
     c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
     st.latex(r"C_{Z_{krst}} = \frac{G}{q \cdot S} = \frac{m_{sr} \cdot g}{0.5 \cdot \rho \cdot v_{krst}^2 \cdot S}")
     st.latex(f"C_{{Z_{{krst}}}} = \\frac{{ {m_sr:.2f} \\cdot {g:.2f} }}{{ 0.5 \\cdot {rho:.4f} \\cdot {v_krst:.2f}^2 \\cdot {S:.2f} }}")
