@@ -51,7 +51,6 @@ def regex_extract_values(output):
     return extracted_values
 
 
-
 def regex_fortran(output):
     table_data = []
     start_extracting = False
@@ -221,10 +220,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     extracted_values = regex_extract_values(output)
     st.write(extracted_values)
+    st.table(extracted_values)
 
-    # ==================== GRAB VALUES ====================
-    st.markdown("***")
-    st.markdown(f"#### 1️⃣ Max lift coefficient – $C_{{z_{{max}}}}$ `c_z_max`")
+    st.markdown(f"##### 1️⃣ Max lift coefficient `c_z_max`")
+    
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
+
     
     #==================== dataframe ====================#
     st.subheader("Flow separation")
@@ -247,17 +248,20 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     st.markdown("***")
     # ==================== 2. alpha_0 ============================================================
-    st.markdown(r"### 2️⃣ Zero-lift angle of attack – $\\alpha_0$ `alpha_0`")
+    st.markdown(r"#### 2️⃣ Zero-lift angle of attack – $\\alpha_0$ `alpha_0`")
     
-    st.latex(r"\\alpha_n = \\alpha_{ns} + \\varepsilon \cdot f_a")
+    st.write("The zero lift angle of attack, is a specific angle at which an airfoil or wing generates no lift. It is an aerodynamic characteristic of the airfoil's shape and is determined by its geometry. ")
+    st.latex(f"\\alpha_n = {extracted_values['AlfaN']}°")
+    
+    st.write("Analytical calculation of angle of zero lift:")
+    st.latex(f"\\alpha_n = \\alpha_{{ns}} + \\epsilon \cdot f_a")
+    st.latex(r"\alpha_n = \alpha_{ns} + \epsilon \cdot f_a")
 
-    st.markdown(r"""
+    st.markdown("""
     - $$ \\alpha_{ns} $$ is the angle of zero lift of the airfoil in the plane of symmetry, $$ \\alpha_{ns} = -1^\\circ $$
     - $$ \\varepsilon $$ is the total twist of the wing, $$ \\varepsilon = \\varepsilon_a + \\varepsilon_k = 0.3^\\circ + 0^\\circ - 0.3^\\circ $$
     - $$ \\varepsilon_a $$ is the aerodynamic twist, $$ \\varepsilon_a = \\alpha_{ns} - \\alpha_{n0} = -1^\\circ - (-1.3^\\circ) \cdot 0.3^\\circ $$
     - $$ \\varepsilon_k $$ is the constructive twist, $$ \\varepsilon_k = 0^\\circ $$ (as there is no constructive twist)
-
-    This is followed by an explanation that at the location where $$ cZ_{max} - cb = 1.148 $$, flow separation occurs, and that value becomes $$ ca $$.
     """)
 
     
