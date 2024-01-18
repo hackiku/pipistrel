@@ -5,7 +5,9 @@ from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
 def invert_color(image):
+    
     img = Image.open(image)
+    
     inverted_img = ImageOps.invert(img) 
     return inverted_img
 
