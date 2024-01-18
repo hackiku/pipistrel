@@ -21,8 +21,9 @@ airfoil_df = pd.DataFrame(airfoil_data, columns=[
 # airfoil_name_tip = "NACA 65-206"
 
 # select airfoil
-airfoil_name_root = "NACA 65_1-212"
-airfoil_name_tip = "NACA 64-209"
+airfoil_name_root = "NACA 64-209"
+airfoil_name_tip = "NACA 65-206"
+
 
 
 root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
@@ -110,6 +111,37 @@ def regex_fortran(output):
     czmax_final_value = float(czmax_final_match.group(1)) if czmax_final_match else None
 
     return table_data, czmax_final_value
+
+
+def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column):
+    # Load the wing image
+    img = mpimg.imread(wing_image_path)
+    
+    # Determine the highest value of Czmax ap. for flow separation
+    czmax_final = df[czmax_ap_column].max()
+
+    # Create a figure with an appropriate size
+    fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the size as needed
+
+    # Display the wing image
+    ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')  # Adjust extent if needed
+
+    # Overlay the aerodynamic curves
+    ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
+    
+    # Highlight the flow separation point
+    separation_point = df[df[czmax_ap_column] == czmax_final]
+    ax.scatter(separation_point[y_b2_column], separation_point[czmax_ap_column], color='red', s=100, label='Flow Separation Point')
+
+    # Set labels and title
+    ax.set_xlabel('y/(b/2)')
+    ax.set_ylabel('Cz')
+    ax.set_title('Cz distribution along wing span')
+
+    # Add grid, legend, and show the plot
+    ax.legend()
+    ax.grid(True)
+    st.pyplot()
 
 # ======================================================================#
 # ================================ MAIN ================================#
@@ -234,7 +266,7 @@ C            preseka                     [step.]  [km/h]   [kg/m^3]
       DATA AAAP_0 / {a_0_tip:.3f} / !grad. uzgona ap. na kraju [1/o]
       !teorijska  vrednost gradijenta uzgona 2PI = 0.1096622 [1/o]
       DATA ANAP_S / {alpha_0_root:.1f} / !ugao nultog uzgona ap. u korenu krila [o]
-      DATA ANAP_0 / {a_0_tip:.1f} / !ugao nultog uzgona ap. na kraju krila [o]
+      DATA ANAP_0 / {alpha_0_tip:.1f} / !ugao nultog uzgona ap. na kraju krila [o]
       DATA LS / {ls:.3f} /  ! duzina tetive u korenu krila u metrima
 
 C     ******************** KRAJ UNOSA PODATAKA *************************"""
@@ -264,33 +296,23 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     #==================== PLOT ====================#
     
     st.subheader("Flow separation")
+    
     df = pd.DataFrame(table_data)
+    
+    czmax_final = 1.599
+    
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
     # df['Highlight'] = np.where(df['Czmax ap.'] == czmax_final, 'Yes', 'No')
+    
+    st.write(df)
 
-    st.dataframe(df, width=1100, use_container_width=False)
-    st.dataframe(df.style.apply(lambda x: ['background: yellow' if x.Highlight == 'Yes' else '' for _ in x], axis=1))
+    wing_image_path = './modules/draw/wing_cutout.png'  # Adjust path as necessary
+    y_b2_column = 'y/(b/2)'
+    czmax_ap_column = 'Czmax ap.'
+    draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column)
 
-    st.subheader("Cz distribution along wing span")
-    fig, ax = plt.subplots()
 
-    ax.plot(df['y/(b/2)'], df['Czmax ap.'], label='Czmax ap.', marker='o', linestyle='-')
-    ax.scatter(df[df['Highlight'] == 'Yes']['y/(b/2)'], df[df['Highlight'] == 'Yes']['Czmax ap.'], color='red', s=120, label='Flow Separation Point')
-
-    # Annotate the flow separation point
-    for _, row in df[df['Highlight'] == 'Yes'].iterrows():
-        ax.annotate(f"({row['y/(b/2)']:.3f}, {row['Czmax ap.']:0.3f})", (row['y/(b/2)'], row['Czmax ap.']), textcoords="offset points", xytext=(10,-10), ha='center')
-
-    # Set labels and title
-    ax.set_xlabel('y/(b/2)')
-    ax.set_ylabel('Cz')
-    ax.set_title('Cz distribution along wing span')
-    ax.legend()
-    ax.grid(True)
-
-    # Show the plot
-    st.pyplot(fig)
-
+    # st.image(wing_image_path)
     # y_b2 = Variable("y/(b/2)", df['y/(b/2)'].tolist(), "y_b2", r"y/(b/2)", "")
     # c_z_max = Variable("Max Lift Coefficient", df['Czmax ap.'].tolist(), "c_z_max", r"C_{z_{max}}", "")
     # c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
