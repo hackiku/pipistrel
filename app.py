@@ -9,6 +9,25 @@ from modules.isa_lite import get_ISA_conditions
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 from modules.draw.wing_area.s20 import draw_wing_area
 
+# TODO abstract wingspan
+def calculate_wingspan(shapes):
+
+    conversion_hardcoded = 0.00584518884292006
+    
+    min_y = float('inf')
+    max_y = float('-inf')
+
+    # Iterate through each shape and update min and max y-coordinates
+    for shape in shapes:
+        for line in shape.lines:
+            start_y, end_y = line['start'][1], line['end'][1]
+            min_y = min(min_y, start_y, end_y)
+            max_y = max(max_y, start_y, end_y)
+        # st.code(f"min_y: {min_y}, max_y: {max_y}")
+    # Calculate wingspan as the difference between max and min y-coordinates
+    wingspan = (max_y - min_y) * conversion_hardcoded
+    return wingspan
+
 
 # aircraft specs from POH
 def get_specific_data(df, category):
@@ -37,18 +56,17 @@ def filter_data_for_preset(data, preset):
 
     return filtered_data
 
-# ============================================================
-# ============================================================
-
+# ==========================================================
+# ========================== main ==========================
+# ==========================================================
 def main():
     
     page_values = [
-        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
+        'S', 'l0', 'ls', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
         'g', 'Re', 'c_z_krst'
     ]
     
     initialize_session_state()
-
 
     st.markdown("<h1 style='text-align: center;'>AircraftDesign.app</h1>", unsafe_allow_html=True)
     st.markdown("<h5 style='text-align: center;'>Pipistrel Virus SW 121</h5>", unsafe_allow_html=True)
@@ -83,14 +101,33 @@ def main():
     
     shapes = draw_wing_area('./modules/draw/wing_area/s20.svg')
 
-    l0 = 0.72
-    ls = 1.04
-    b = 2* 5.00
-    S = 10.00
-    st.latex(f"S_{{20}} = \\frac{{{l0} + {ls}}}{2} \\cdot \\frac{{{b}}}{2} = \\frac{{{l0:.3f} + {ls:.3f}}}{2} \\cdot \\frac{{{b:.3f}}}{2} = {S:.3f} \\, \\text{{m}}^2")
-    st.latex(f"S = S_{{20}} \\cdot 2 = {S*2:.3f} \\, \\text{{m}}^2")
+    S0 = shapes[0].area
+    S1 = shapes[1].area
+    Spr = S0 + S1
+    S = Spr * 2
+    l0 = shapes[0].lines[1]['length_meters']
+    ls = shapes[0].lines[3]['length_meters']
+    wing_length = calculate_wingspan(shapes)
+    b = wing_length * 2
 
-    st.code(shapes)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
+    with col2:
+        st.latex(f"l_s = {ls:.3f}  \\, \\text{{m}}")
+    with col3:
+        st.latex(f"b = {wing_length:.3f} \\cdot 2 = {b:.3f}  \\, \\text{{m}}")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.latex(f"S_0 = {S0:.3f}  \\, \\text{{m}}^2")
+    with col2:
+        st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
+    with col3:
+        st.latex(f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
+    
+    st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
     
 #==================== MASS ====================#
 
@@ -192,13 +229,15 @@ def main():
         planet = st.radio("Select Planet", ['Earth', 'Mars'], index=1)
         col1, col2, col3 = st.columns(3)
         with col1:
-            S = st.number_input(f'Wing area', value=get_variable_value('S'), step=0.1, format="%.2f")
+            S_manual = st.number_input(f'Wing area', value=S, step=0.1, format="%.3f")
+            S = S_manual
         with col2:
-            m_sr = st.number_input('Average mass (kg)', value=get_variable_value('m_sr'), step=100.0, format="%.2f")
+            m_sr_manual = st.number_input('Average mass (kg)', value=m_sr, step=100.0, format="%.3f")
+            m_sr = m_sr_manual
             # m_sr = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
         with col3:
-            v_krst = st.number_input('Mass at cruise (kg)', value=get_variable_value('v_krst'), step=100.0, format="%.2f")
-            # v_krst.value = st.number_input(f'{v_krst.name} ({v_krst.unit})', value=v_krst.value, step=0.1, format="%.2f")
+            v_krst_manual = st.number_input('Mass at cruise (kg)', value=v_krst, step=1.0, format="%.3f")
+            v_krst = v_krst_manual
         spacer()
 
         col1, col2, col3 = st.columns(3)

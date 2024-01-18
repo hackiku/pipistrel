@@ -7,7 +7,7 @@ from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_ar
 def invert_color(image):
     
     img = Image.open(image)
-    
+
     inverted_img = ImageOps.invert(img) 
     return inverted_img
 
@@ -19,24 +19,13 @@ def draw_wing_area(svg_file_path):
 
     # Display cropped (and possibly inverted) image
     cropped_img = crop_image(img, 1500, invert=invert_color)
-    st.image(cropped_img, caption='Cropped Image')
+    st.image(cropped_img, caption='Wing areas')
 
 
-    # Use Streamlit widgets to modify shape properties
-    with st.expander("Edit shape lengths (sliders)"):
-        for i, shape in enumerate(shapes):
-            st.subheader(f"Shape {i+1} {shape.area:.2f} m²")
-
-            # Creating a markdown table for line lengths
-            st.markdown("| Line | Length (m) |")
-            st.markdown("| ---- | ----------- |")
-            for j, line_dict in enumerate(shape.lines):
-                length = line_dict['length_meters']
-                st.markdown(f"| Line {j+1} | {length:.2f} |") 
-
-            # Recompute area if lines are adjusted
-            shape.area = calculate_area(shape.lines)
-            st.write(f"Updated Area: {shape.area:.2f} square meters")
+    # recalculatre area with st.sliders
+    # with st.expander("Edit shape lengths (sliders)"):
+        # shape.area = calculate_area(shape.lines)
+        # st.code(f"Updated Area: {shape.area:.2f} square meters")
 
     return shapes
 
