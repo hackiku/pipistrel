@@ -11,16 +11,54 @@ import os
 import re
 
 # TODO hardcoded airfoil array
-root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
-tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
+# root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
+# tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
 
-# TODO hardcoded airfoil values
-c_z_max_root = root_airfoil_data[4]
-alpha_0_root = root_airfoil_data[2] # Angle of Zero Lift at Root
-a_0_root = root_airfoil_data[3] # Lift Gradient at Root
-c_z_max_tip = tip_airfoil_data[4]
-alpha_0_tip = tip_airfoil_data[2]
-a_0_tip = tip_airfoil_data[3]
+airfoil_df = pd.DataFrame(airfoil_data, columns=[
+    "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
+    "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
+])
+
+root_airfoil_data = airfoil_df[airfoil_df['Name'] == 'NACA 65-209']
+tip_airfoil_data = airfoil_df[airfoil_df['Name'] == 'NACA 65-206']
+
+st.write(root_airfoil_data)
+st.write(tip_airfoil_data)
+
+# actual data
+airfoil_name_root = "NACA 64-209"
+airfoil_name_tip = "NACA 65-206"
+
+root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
+tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
+
+col1, col2 = st.columns(2)
+with col1:
+    st.text("root_airfoil_row")
+    st.code(root_airfoil_row)
+with col2:
+    st.text("tip airfoil row")
+    st.code(tip_airfoil_row)
+
+
+# airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)
+c_z_max_root = root_airfoil_row['Cz_max']
+alpha_0_root = root_airfoil_row['alpha_n']
+a_0_root = root_airfoil_row['a0']
+
+# And for the tip airfoil
+c_z_max_tip = tip_airfoil_row['Cz_max']
+alpha_0_tip = tip_airfoil_row['alpha_n']
+a_0_tip = tip_airfoil_row['a0']
+
+# Display the extracted values
+st.write(f"Root airfoil max lift coefficient (Cz_max): `{c_z_max_root}`")
+st.write(f"Root airfoil zero-lift angle of attack (alpha_0): `{alpha_0_root}`")
+st.write(f"Root airfoil lift curve slope (a_0): `{a_0_root}`")
+
+st.write(f"Tip airfoil max lift coefficient (Cz_max): `{c_z_max_tip}`")
+st.write(f"Tip airfoil zero-lift angle of attack (alpha_0): `{alpha_0_tip}`")
+st.write(f"Tip airfoil lift curve slope (a_0): `{a_0_tip}`")
 
 def regex_extract_values(output):
     # Dictionary to hold the extracted values
@@ -164,7 +202,7 @@ def main():
     airfoil_inputs = f"""
     | # | Parameter Name           | Symbol                | Tip         | Root       |
     |---|--------------------------|-----------------------|------------------|-----------------|
-    | 1 | Airfoil name             |                       | NACA 65_2-415    | NACA 63_4-412   |
+    | 1 | Airfoil name             |                       | {airfoil_name_tip}    | {airfoil_name_root}   |
     | 2 | Max lift coefficient     | $C_{{z_{{max}}}}$     | {c_z_max_tip:.3f}| {c_z_max_root:.3f} |
     | 3 | Angle of zero lift       | $\\alpha_0$           | {alpha_0_tip:.2f}° | {alpha_0_root:.2f}° |
     | 4 | Lift gradient            | $a_0$                 | {a_0_tip:.3f}    | {a_0_root:.3f}   |
@@ -264,7 +302,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     - $$ \\varepsilon_k $$ is the constructive twist, $$ \\varepsilon_k = 0^\\circ $$ (as there is no constructive twist)
     """)
 
-    
     st.markdown("***")
     # ==================== 3. a_0 ============================================================
     
@@ -272,13 +309,66 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(r"a = \frac{a_0 \cdot \lambda}{2 + \sqrt{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{\tan^2(\phi)}{\beta^2}\right)}} = \frac{0.110 \cdot 3.888}{2 + \sqrt{4 + (3.888)^2 \cdot (0.71)^2 \cdot \left(1 + \frac{\tan^2(27^\circ)}{(0.71)^2}\right)}} = 0.07197 \approx 0.072")
     
     st.markdown("***")
+    
+    
+    
     # ==================== 4. alpha_krst ============================================================
     st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
 
+    st.code("NACA 65-206 # tip")
+    st.code("NACA 64-209 # root")
+    # Definitions in Markdown
+    st.markdown("""
+        The critical angle of attack is used to determine the angle at which the wing will stall. It is calculated using the following formula:
+
+    - $ \\alpha_{kr} $ critical airfoil angle of attack at flow separation
+    - $ \\alpha_{nm} $ is the zero-lift angle of attack at the wing's mid-span.
+    - $ \\alpha_{ns} $ is the zero-lift angle of attack at the root (in the plane of symmetry).
+    - $ \\alpha_{n0} $ is the zero-lift angle of attack at the wingtip.
+    - $ \\alpha_{im} $ is the induced angle of attack at the wing's mid-span.
+    - $ C_{z_{max}} $ is the maximum lift coefficient.
+    - $ \\lambda $ is the wing aspect ratio.
+    - $ \\epsilon_{m} $ is the washout angle at the wing's mid-span.
+    - $ \\alpha_{kr} $ is the critical angle of attack of the wing.
+
+    The formulas are as follows:
+    """)
+
+    # alpha krm
+    alpha_kr0 = 14.0 # airfoil table
+    alpha_krs = 13.5
+    y_b = 0.634
+    
+    alpha_krm = alpha_krs*(1 - (1 - alpha_krs/alpha_kr0)*y_b)
+    
+    # Alpha nm calculation
+    alpha_ns = -1.3  # Angle of zero lift at root
+    alpha_n0 = -1.5  # Angle of zero lift at tip
+    y_over_b = 0.634  # y/b value
+    alpha_nm = -1.427  # The calculated value for alpha_nm, replace with the actual computed value if needed
+
+    # Alpha im calculation
+    cz_max = 0.922  # Maximum lift coefficient
+    lambda_wing = 3.358  # Wing aspect ratio
+    alpha_im = 5.008  # The calculated value for alpha_im, replace with the actual computed value if needed
+
+    # Epsilon m calculation
+    epsilon_k = -5  # Geometric washout angle
+    epsilon_m = -3.17  # The calculated value for epsilon_m, replace with the actual computed value if needed
+
+    # Alpha kr calculation
+    alpha_kr = 22.122  # The calculated value for alpha_kr, replace with the actual computed value if needed
+    
+    # Insert the calculated values into the LaTeX string
+    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_krs} \\left( 1 - \\left(1 - \\frac{{{alpha_kr0}}}{{{alpha_krs}}}\\right)\\frac{{{y_b}}}{{2}}\\right) = {alpha_krm}°")
+    st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {-1.3} \\left( 1 - \\left(1 - \\frac{{{-1.5}}}{{{-1.3}}}\\right){y_over_b}\\right) = {alpha_nm}°")
+    st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lambda_wing}}} \\cdot 57.3 = {alpha_im}°")
+    st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_over_b} = {epsilon_m}°")
+    st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_ns}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
 
 
 
-
+    st.markdown("***")
     # Update variables at the end of the session
     update_variables(page_values, locals())
     log_changed_variables()
