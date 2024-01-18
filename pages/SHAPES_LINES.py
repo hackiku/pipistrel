@@ -20,10 +20,10 @@ def draw_lines_and_display_lengths(image_path, lines, conversion_factor):
     img = Image.open(image_path)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=22)
+    lengths = []  # List to store lengths of all lines
 
     for line in lines:
         start, end = line
-        # Use the SVG coordinates directly for the line drawing
         start_pixels = (start[0], start[1])
         end_pixels = (end[0], end[1])
 
@@ -33,6 +33,7 @@ def draw_lines_and_display_lengths(image_path, lines, conversion_factor):
         # Calculate the length of the line in meters
         length_pixels = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
         length_meters = length_pixels * conversion_factor
+        lengths.append(length_meters)  # Append length to the list
 
         # Find the midpoint for the text label using the SVG coordinates
         midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
@@ -41,7 +42,7 @@ def draw_lines_and_display_lengths(image_path, lines, conversion_factor):
         # Display the length of the line on the image using the SVG's coordinate system
         draw.text(midpoint, length_text, fill='blue', font=font)
 
-    return img
+    return img, lengths
 
 
 
@@ -74,7 +75,11 @@ def main():
     lines = extract_lines_from_svg(svg_file_path)
 
     # Draw lines and display lengths
-    img = draw_lines_and_display_lengths(base_image, lines, conversion_factor)
+    # img = draw_lines_and_display_lengths(base_image, lines, conversion_factor)
+    img, line_lengths = draw_lines_and_display_lengths(base_image, lines, conversion_factor)
+
+    for length in line_lengths:
+        st.write(f"Line length: {length:.2f}m")
 
     # Display the image with drawn lines and lengths
     st.image(img, caption='Wing with line lengths displayed')
