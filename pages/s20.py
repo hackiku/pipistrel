@@ -21,15 +21,14 @@ def extract_shapes_from_svg(svg_file_path):
 
 
 def draw_shapes_and_calculate_areas(image_path, shapes, conversion_factor):
-    img = Image.open(image_path)  # We'll use a fresh image object to draw on
+    img = Image.open(image_path)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=22)
     area_data = {}
 
-    # Since we're now only dealing with trapezoids (general polygons), we'll simplify this loop.
     for i, shape_points in enumerate(shapes['trapezoids']):
-        # Convert the points to the image's coordinate system
-        points_pixels = [(p[0], img.size[1] - p[1]) for p in shape_points]
+        # Use the SVG coordinates directly for the polygon points
+        points_pixels = [(p[0], p[1]) for p in shape_points]
 
         # Calculate the area in pixels, then convert to square meters
         area_pixels = calculate_polygon_area(points_pixels)
@@ -38,11 +37,15 @@ def draw_shapes_and_calculate_areas(image_path, shapes, conversion_factor):
         # Draw the shape on the image
         draw.polygon(points_pixels, outline='purple', width=3)
 
-        # Label the area inside the shape
+        # Calculate the centroid for the text label
         centroid = tuple(map(sum, zip(*points_pixels)))  # Simple centroid calculation
         centroid = (centroid[0] / len(points_pixels), centroid[1] / len(points_pixels))
+        
+        # Flip the y-coordinate of the centroid for text placement
+        text_centroid = (centroid[0], img.size[1] - centroid[1])
+        
         area_text = f"{area_meters:.2f} m²"
-        draw.text(centroid, area_text, fill='red', font=font)
+        draw.text(text_centroid, area_text, fill='red', font=font)
 
         # Store the area data
         area_data[f"trapezoid_{i}"] = area_meters
@@ -68,6 +71,7 @@ def main():
     base_image = "./modules/draw/drawing.png"
     svg_file_path = './modules/draw/s20.svg'
     
+    # st.image(svg_file_path)
     # Get conversion factor from draw.py
     _, conversion_factor = parse_svg_for_lines(svg_file_path)
 
