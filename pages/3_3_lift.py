@@ -1,4 +1,4 @@
-### 3_wing.py ###
+### 3_lift.py ###
 
 import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
@@ -72,38 +72,47 @@ def main():
 - $\alpha_{krst}$ - Angle of attack at cruise
 """)
     
-    
-    st.header("FORTRAN input values")
+    st.markdown("***")    
+    st.subheader("FORTRAN program")
+
     st.write("The following values are used in the FORTRAN program below. Values are default unless you calculated them on other pages, and you can change them here as well.")
 
     # ==================== INPUT PARAMETERS ====================
-    c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'))
-    col1, col2 = st.columns(2)
-    with col1:
-        v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'))
-    with col2:
-        v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6)
-    rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'))
+    with st.expander("Edit FORTRAN Input Parameters"):
+        c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'))
+        col1, col2 = st.columns(2)
+        with col1:
+            v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'))
+        with col2:
+            v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6)
+        rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'))
 
-    st.write("Calculate wing aspect ratio (λ) `lmbda`")
+        st.write("Calculate wing aspect ratio (λ) `lmbda`")
+            
+        col1, col2 = st.columns(2)
+        with col1:
+            b = st.number_input('Wingspan (m) `b`', value=get_variable_value('b'))
+        with col2: 
+            S = st.number_input('Wing Area (m^2) `S`', value=get_variable_value('S'))
+        lmbda = b**2 / S
+        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S}}} = {lmbda:.3f}")
         
-    col1, col2 = st.columns(2)
-    with col1:
-        b = st.number_input('Wingspan (m) `b`', value=get_variable_value('b'))
-    with col2: 
-        S = st.number_input('Wing Area (m^2) `S`', value=get_variable_value('S'))
-    lmbda = b**2 / S
-    st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.2f}}}{{{S}}} = {lmbda:.3f}")
-    
-    st.write("Calculate wing taper ratio `b`")
-    col1, col2 = st.columns(2)
-    with col1:
-        l0 = st.number_input('Tip Chord Length (m) `l0`', value=get_variable_value('l0'))
-    with col2:
-        ls = st.number_input('Root Chord Length (m) `ls`', value=get_variable_value('ls'))
-    n = l0 / ls
-    st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0}}} {{{ls}}} = {n:.3f}")
+        st.write("Calculate wing taper ratio `n`")
+        col1, col2 = st.columns(2)
+        with col1:
+            l0 = st.number_input('Tip Chord Length (m) `l0`', value=get_variable_value('l0'))
+        with col2:
+            ls = st.number_input('Root Chord Length (m) `ls`', value=get_variable_value('ls'))
+        n = l0 / ls
+        st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Calculated wing aspect ratio (λ) `lmbda`")
+        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S}}} = {lmbda:.3f}")
+    with col2:
+        st.write("Calculated wing taper ratio `n`")
+        st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
 
     st.markdown('#### Mission parameters & wing geometry')
     wing_inputs = f"""
@@ -133,7 +142,10 @@ def main():
     | 4 | Lift gradient            | $a_0$                 | {a_0_tip:.3f}    | {a_0_root:.3f}   |
     """
     st.markdown(airfoil_inputs)
-
+    
+    spacer()
+    st.success("🎉 Your values are loaded in FORTRAN input")
+    
     st.markdown("***")
 
     fortran_inputs = f"""C     *************** UNOS ULAZNIH PODATAKA I OPCIJA *******************
@@ -170,12 +182,18 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     # ==================== FORTRAN OUTPUT ====================
 
+    st.markdown("#### FORTRAN Output")
     with open('./modules/fortran/IZLAZ.TXT', 'r') as file:
         output = file.read()
-        st.code(output, language='java')
+        if st.button("Show full FORTRAN Output"):
+            st.code(output, language='java')
         
     table_data, czmax_final = regex_fortran(output)
 
+    # ==================== GRAB VALUES ====================
+    st.markdown("***")
+    st.markdown(f"#### 1️⃣ Max lift coefficient – $C_{{z_{{max}}}}$ `c_z_max`")
+    
     #==================== dataframe ====================#
     st.subheader("Flow separation")
     df = pd.DataFrame(table_data)
@@ -194,6 +212,35 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.markdown("***")
 
     wing_trapezoid_image = st.image('./modules/draw/crop_white.png')
+
+    st.markdown("***")
+    # ==================== 2. alpha_0 ============================================================
+    st.markdown(r"### 2️⃣ Zero-lift angle of attack – $\\alpha_0$ `alpha_0`")
+    
+    st.latex(r"\\alpha_n = \\alpha_{ns} + \\varepsilon \cdot f_a")
+
+    st.markdown(r"""
+    - $$ \\alpha_{ns} $$ is the angle of zero lift of the airfoil in the plane of symmetry, $$ \\alpha_{ns} = -1^\\circ $$
+    - $$ \\varepsilon $$ is the total twist of the wing, $$ \\varepsilon = \\varepsilon_a + \\varepsilon_k = 0.3^\\circ + 0^\\circ - 0.3^\\circ $$
+    - $$ \\varepsilon_a $$ is the aerodynamic twist, $$ \\varepsilon_a = \\alpha_{ns} - \\alpha_{n0} = -1^\\circ - (-1.3^\\circ) \cdot 0.3^\\circ $$
+    - $$ \\varepsilon_k $$ is the constructive twist, $$ \\varepsilon_k = 0^\\circ $$ (as there is no constructive twist)
+
+    This is followed by an explanation that at the location where $$ cZ_{max} - cb = 1.148 $$, flow separation occurs, and that value becomes $$ ca $$.
+    """)
+
+    
+    st.markdown("***")
+    # ==================== 3. a_0 ============================================================
+    
+    st.markdown("#### 3️⃣ Lift Gradient – $a$ `a`")
+    st.latex(r"a = \frac{a_0 \cdot \lambda}{2 + \sqrt{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{\tan^2(\phi)}{\beta^2}\right)}} = \frac{0.110 \cdot 3.888}{2 + \sqrt{4 + (3.888)^2 \cdot (0.71)^2 \cdot \left(1 + \frac{\tan^2(27^\circ)}{(0.71)^2}\right)}} = 0.07197 \approx 0.072")
+    
+    st.markdown("***")
+    # ==================== 4. alpha_krst ============================================================
+    st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
+
+
+
 
 
     # Update variables at the end of the session

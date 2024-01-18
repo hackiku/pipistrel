@@ -86,7 +86,7 @@ def main():
     with col2:
         unit_system = st.radio("", ('SI Units', 'Aviation Units'))
 
-    # specs table
+    # specs tablez
     all_specs_df = create_specs_table(aircraft_specs)
     preset = st.selectbox("Select Preset", ["Airfoil", "All"], index=0)
     filtered_df = filter_data_for_preset(all_specs_df, preset)
@@ -128,7 +128,12 @@ def main():
         st.latex(f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
     
     st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
+
     
+    st.markdown('***')
+    st.write("`TODO svodjenje na jedno-trapezno`")
+    st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
+
 #==================== MASS ====================#
 
     st.subheader('2.2. Average mass')
