@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 from modules.draw.draw import draw_measurements_on_image, parse_svg_for_lines
 
 
+
 def draw_trapezoid(image_path, lines, conversion_factor):
     with Image.open(image_path) as img:
         draw = ImageDraw.Draw(img)
@@ -58,9 +59,10 @@ def main():
     # l1 = Variable("Root Chord Length", trapezoid.l_1_px * conversion_factor, "l_{1}", "m")
     # b = Variable("Wingspan", half_wingspan_meters*2, "b", "m")  # Use a Variable instance for the wingspan
     
-    st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")
-    st.latex(f"S = S_{{20}} \\cdot 2 = {trapezoid_area*2:.3f} \\, \\text{{m}}^2")
+    # st.latex(f"S_{{20}} = \\frac{{{l0.latex} + {l1.latex}}}{2} \\cdot \\frac{{{b.latex}}}{2} = \\frac{{{l0.value:.3f} + {l1.value:.3f}}}{2} \\cdot \\frac{{{b.value:.3f}}}{2} = {trapezoid_area:.3f} \\, \\text{{m}}^2")
+    # st.latex(f"S = S_{{20}} \\cdot 2 = {trapezoid_area*2:.3f} \\, \\text{{m}}^2")
 
     calculate_trapezoid_area()
+    
 if __name__ == "__main__":
     main()

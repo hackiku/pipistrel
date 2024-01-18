@@ -58,7 +58,7 @@ lines, conversion_factor = parse_svg_for_lines(svg_lines)
 
 draw_measurements_on_image(base_image, lines, conversion_factor)
 
-
+"""
 def draw_trapezoid(image_path, lines, conversion_factor):
     with Image.open(image_path) as img:
         draw = ImageDraw.Draw(img)
@@ -78,3 +78,4 @@ def draw_trapezoid(image_path, lines, conversion_factor):
         img = img.crop((0, height - 1500, width, height))
 
         return img
+"""
