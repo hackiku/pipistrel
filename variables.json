@@ -65,7 +65,7 @@
     "S_wet_kr": {
         "name": "Wetted Area of the Wing",
         "default": 30.877,
-        "value": 30.877,
+        "value": 30.87744,
         "latex": "S_{wet_{KR}}",
         "unit": "m^2"
     },
@@ -86,14 +86,14 @@
     "nT": {
         "name": "Taper Ratio",
         "default": 0.999,
-        "value": 0.999,
+        "value": 1.7083862770012705,
         "latex": "n_{T}",
         "unit": ""
     },
     "l_sat_kr": {
         "name": "Mean Aerodynamic Chord of the Exposed Wing Area",
         "default": 2.179,
-        "value": 2.179,
+        "value": 3.724461885874564,
         "latex": "l_{sat_{KR}",
         "unit": "m"
     },

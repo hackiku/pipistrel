@@ -22,6 +22,35 @@ c_z_max_tip = tip_airfoil_data[4]
 alpha_0_tip = tip_airfoil_data[2]
 a_0_tip = tip_airfoil_data[3]
 
+def regex_extract_values(output):
+    # Dictionary to hold the extracted values
+    extracted_values = {}
+
+    # Regular expressions for each line
+    patterns = {
+        'Cz': r"KOEFICIJENT UZGONA KRILA\s+Cz\s*=\s*([\d.]+)",
+        'Cxi': r"KOEF\. INDUKOVANOG OTPORA KRILA\s+Cxi\s*=\s*([\d.]+)",
+        'delta': r"Popravni faktor indukovanog otpora\s+delta\s*=\s*([\d.]+)",
+        'a': r"GRADIJENT UZGONA KRILA\s+a\s*=\s*([\d.]+) \[1/o\]",
+        'AlfaA': r"aerodinamicki napadni ugao krila\s+AlfaA\s*=\s*([\d.\-]+) \[o\]",
+        'AlfaAs': r"aerodinamicki nap\. ugao u korenu\s+AlfaAs\s*=\s*([\d.\-]+) \[o\]",
+        'Alfa': r"GEOMETRIJSKI NAPADNI UGAO KRILA\s+Alfa\s*=\s*([\d.\-]+) \[o\]",
+        'AlfaN': r"UGAO NULTOG UZGONA KRILA\s+AlfaN\s*=\s*([\d.\-]+) \[o\]",
+    }
+
+    # Loop over the patterns and apply each regex
+    for key, pattern in patterns.items():
+        match = re.search(pattern, output)
+        if match:
+            # Convert to float if possible, otherwise keep as string
+            try:
+                extracted_values[key] = float(match.group(1))
+            except ValueError:
+                extracted_values[key] = match.group(1)
+
+    return extracted_values
+
+
 
 def regex_fortran(output):
     table_data = []
@@ -189,6 +218,9 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
             st.code(output, language='java')
         
     table_data, czmax_final = regex_fortran(output)
+
+    extracted_values = regex_extract_values(output)
+    st.write(extracted_values)
 
     # ==================== GRAB VALUES ====================
     st.markdown("***")
