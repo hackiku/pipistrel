@@ -5,6 +5,8 @@ from svgpathtools import svg2paths
 # Path to the base image and SVG file
 base_image = "./modules/draw/drawing.png"
 svg_lines = "./modules/draw/lines.svg"
+font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
+
 
 # measurement lines parsing
 def parse_svg_for_lines(svg_file):
@@ -39,10 +41,10 @@ def parse_svg_for_lines(svg_file):
     return lines, conversion_factor
 
 # measurement lines drawing
-def draw_measurements_on_image(image_path, lines, conversion_factor):
-    with Image.open(image_path) as img:
+def draw_measurements_on_image(lines, conversion_factor):
+    with Image.open(base_image) as img:
         draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype('./assets/Roboto_Mono/static/RobotoMono-Regular.ttf', size=22)
+        font = ImageFont.truetype(font_path, size=22)
 
         for line in lines:
             start, end = line['start'], line['end']
@@ -58,7 +60,7 @@ def draw_measurements_on_image(image_path, lines, conversion_factor):
 
 lines, conversion_factor = parse_svg_for_lines(svg_lines)
 
-draw_measurements_on_image(base_image, lines, conversion_factor)
+draw_measurements_on_image(lines, conversion_factor)
 
 #========================= shapes =========================
 def extract_lines_from_svg(svg_file_path):
@@ -73,14 +75,12 @@ def extract_lines_from_svg(svg_file_path):
 
     return lines
 
-def draw_lines_and_display_lengths(image_path, svg_file_path, font_path):
-    # Calculate the conversion factor from the SVG paths
-    # _, conversion_factor = parse_svg_for_lines(svg_file_path)
+def draw_lines_and_display_lengths(svg_file_path):
 
     # Extract lines from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
 
-    img = Image.open(image_path)
+    img = Image.open(base_image)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font_path, size=22)
     lengths = []  # List to store lengths of all lines
@@ -96,7 +96,7 @@ def draw_lines_and_display_lengths(image_path, svg_file_path, font_path):
         # Calculate the length of the line in meters
         length_pixels = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
         length_meters = length_pixels * conversion_factor
-        lengths.append(length_meters)  # Append length to the list
+        lengths.append(length_meters) # Append length to the list
 
         # Find the midpoint for the text label using the SVG coordinates
         midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
