@@ -4,8 +4,6 @@ import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
-# In your Streamlit page
-
 def invert_color(image):
     img = Image.open(image)
     inverted_img = ImageOps.invert(img) 
@@ -21,16 +19,18 @@ def draw_wing_area(svg_file_path):
     cropped_img = crop_image(img, 1500, invert=invert_color)
     st.image(cropped_img, caption='Cropped Image')
 
-    # Use Streamlit widgets to modify shape properties
-    with st.expander("Shape Properties"):
-        for i, shape in enumerate(shapes):
-            st.subheader(f"Shape {i+1}")
-            st.write(f"Initial Area: {shape.area:.2f} square meters")
 
-            for j, line in enumerate(shape.lines):
-                start, end, length, color = line
-                new_length = st.slider(f"Shape {i+1} Line {j+1} Length", min_value=0.0, max_value=2*length, value=length, key=f"shape_{i}_line_{j}")
-                shape.lines[j] = (start, end, new_length, color)
+    # Use Streamlit widgets to modify shape properties
+    with st.expander("Edit shape lengths (sliders)"):
+        for i, shape in enumerate(shapes):
+            st.subheader(f"Shape {i+1} {shape.area:.2f} m²")
+
+            # Creating a markdown table for line lengths
+            st.markdown("| Line | Length (m) |")
+            st.markdown("| ---- | ----------- |")
+            for j, line_dict in enumerate(shape.lines):
+                length = line_dict['length_meters']
+                st.markdown(f"| Line {j+1} | {length:.2f} |") 
 
             # Recompute area if lines are adjusted
             shape.area = calculate_area(shape.lines)
@@ -39,4 +39,4 @@ def draw_wing_area(svg_file_path):
     return shapes
 
 if __name__ == "__main__":
-    shapes = draw_wing_area()
+    shapes = draw_wing_area()  # Replace with actual SVG file path

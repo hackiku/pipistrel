@@ -9,9 +9,9 @@ font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
 
 class Shape:
     def __init__(self, lines):
-        self.lines = lines
-        self.color = lines[0][3]  # Assuming all lines have the same color
-        self.area = 0 
+        self.lines = lines  # Directly assign the list of dictionaries to self.lines
+        self.color = lines[0]['color']  # Access color using dictionary key
+        self.area = 0  # Initialize area, to be calculated later
 
 
 # measurement lines parsing
@@ -86,15 +86,17 @@ def extract_lines_from_svg(svg_file_path):
     return lines_with_color
 
 def calculate_area(lines):
-    # Assuming the shape is a trapezoid
-    a, b = lines[0][2], lines[2][2]  # lengths of parallel sides
-    h = max(lines[1][2], lines[3][2])  # height (longer of the other two sides)
+    # Extracting lengths from the dictionaries
+    a = lines[0]['length_meters']  # Length of the first line
+    b = lines[2]['length_meters']  # Length of the third line
+    # For height, use the lengths of the second or fourth line
+    h = max(lines[1]['length_meters'], lines[3]['length_meters'])
     return 0.5 * (a + b) * h
 
 def calculate_shape_center(lines):
-    # Simple way: average the x and y coordinates of all line endpoints
-    x_coords = [line[0][0] for line in lines] + [line[1][0] for line in lines]
-    y_coords = [line[0][1] for line in lines] + [line[1][1] for line in lines]
+    # Calculate the average of the x and y coordinates of all line endpoints
+    x_coords = [line['start'][0] for line in lines] + [line['end'][0] for line in lines]
+    y_coords = [line['start'][1] for line in lines] + [line['end'][1] for line in lines]
     center_x = sum(x_coords) / len(x_coords)
     center_y = sum(y_coords) / len(y_coords)
     return (center_x, center_y)
@@ -109,7 +111,6 @@ def draw_shapes_with_lengths(svg_file_path):
     font = ImageFont.truetype(font_path, size=22)
     font_area = ImageFont.truetype(font_path, size=32)
 
-    lengths = []
     shapes = []  # List to store shape data
     temp_shape = []  # Temporary list to store lines of a shape
 
@@ -122,29 +123,37 @@ def draw_shapes_with_lengths(svg_file_path):
         draw.line([start_pixels, end_pixels], fill=color, width=3)
 
         # Calculate the length of the line in meters
-        length_pixels = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
+        length_pixels = ((end[0] - start[0])**2 + (end[1] - start[1])**2)**0.5
         length_meters = length_pixels * conversion_factor
-        lengths.append(length_meters)
+
+        # Add line as a dictionary to temp_shape
+        temp_shape.append({
+            'start': start,
+            'end': end,
+            'length_meters': length_meters,
+            'color': color
+        })
 
         # Find the midpoint for the text label using the SVG coordinates
         midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
         draw.text(midpoint, f"{length_meters:.2f}m", fill='blue', font=font)
 
-        # Add line to temp_shape
-        temp_shape.append((start, end, length_meters, color))
-
+        # If temp_shape has 4 lines, calculate area and create a Shape
         if len(temp_shape) == 4:
             area = calculate_area(temp_shape)
-            shape_center = calculate_shape_center(temp_shape)  # Implement this function
-            draw.text(shape_center, f"{area:.2f} m²", fill='red', font=font_area)
+            shape_center = calculate_shape_center(temp_shape)
+            
+            offset_x, offset_y = -50, 30
+            text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
+            
+            draw.text(text_position, f"{area:.2f} m²", fill=color, font=font_area)
+            
             shape = Shape(temp_shape)
             shape.area = area
             shapes.append(shape)
             temp_shape = []
 
-
     return img, shapes, lines
-
 
 ### TODO redrawing shapes blah
 def redraw_shapes(img, shapes):
