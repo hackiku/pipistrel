@@ -19,15 +19,13 @@ airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
 ])
 
-root_airfoil_data = airfoil_df[airfoil_df['Name'] == 'NACA 65-209']
-tip_airfoil_data = airfoil_df[airfoil_df['Name'] == 'NACA 65-206']
+# airfoil_name_root = "NACA 64-209"
+# airfoil_name_tip = "NACA 65-206"
 
-st.write(root_airfoil_data)
-st.write(tip_airfoil_data)
+# select airfoil
+airfoil_name_root = "NACA 65_1-212"
+airfoil_name_tip = "NACA 64-209"
 
-# actual data
-airfoil_name_root = "NACA 64-209"
-airfoil_name_tip = "NACA 65-206"
 
 root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
 tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
@@ -334,37 +332,38 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     The formulas are as follows:
     """)
 
+
     # alpha krm
-    alpha_kr0 = 14.0 # airfoil table
-    alpha_krs = 13.5
-    y_b = 0.634
+    alpha_kr_tip = tip_airfoil_row['alpha_kr']
+    alpha_kr_root = root_airfoil_row['alpha_kr']
+    y_b_2 = 0.556 # TODO extract
     
-    alpha_krm = alpha_krs*(1 - (1 - alpha_krs/alpha_kr0)*y_b)
-    
+    alpha_krm = alpha_kr_root*(1 - (1 - alpha_kr_root/alpha_kr_tip)*y_b_2)
+        
     # Alpha nm calculation
-    alpha_ns = -1.3  # Angle of zero lift at root
-    alpha_n0 = -1.5  # Angle of zero lift at tip
-    y_over_b = 0.634  # y/b value
-    alpha_nm = -1.427  # The calculated value for alpha_nm, replace with the actual computed value if needed
+
+    alpha_n_root = root_airfoil_row['alpha_n']
+    alpha_n_tip = tip_airfoil_row['alpha_n']
+    alpha_nm = alpha_n_root*(1 - (1 - alpha_n_tip/alpha_n_root)*y_b_2) 
 
     # Alpha im calculation
     cz_max = 0.922  # Maximum lift coefficient
-    lambda_wing = 3.358  # Wing aspect ratio
-    alpha_im = 5.008  # The calculated value for alpha_im, replace with the actual computed value if needed
+    lmbda = 3.358  # Wing aspect ratio
+    alpha_im = cz_max / (3.14159 * lmbda) * 57.3 # Induced angle of attack
 
     # Epsilon m calculation
     epsilon_k = -5  # Geometric washout angle
-    epsilon_m = -3.17  # The calculated value for epsilon_m, replace with the actual computed value if needed
+    epsilon_m = -3.17  # The calculated value for epsilon_m
 
     # Alpha kr calculation
-    alpha_kr = 22.122  # The calculated value for alpha_kr, replace with the actual computed value if needed
+    alpha_kr = 22.122  # The calculated value for alpha_kr
     
     # Insert the calculated values into the LaTeX string
-    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_krs} \\left( 1 - \\left(1 - \\frac{{{alpha_kr0}}}{{{alpha_krs}}}\\right)\\frac{{{y_b}}}{{2}}\\right) = {alpha_krm}°")
-    st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {-1.3} \\left( 1 - \\left(1 - \\frac{{{-1.5}}}{{{-1.3}}}\\right){y_over_b}\\right) = {alpha_nm}°")
-    st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lambda_wing}}} \\cdot 57.3 = {alpha_im}°")
-    st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_over_b} = {epsilon_m}°")
-    st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_ns}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
+    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b_2}}}{{2}}\\right) = {alpha_krm:.4f}°")
+    st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_n_root:.4f} \\left( 1 - \\left(1 - \\frac{{{alpha_n_tip}}}{{{alpha_n_root}}}\\right){y_b_2}\\right) = {alpha_nm}°")
+    st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lmbda}}} \\cdot 57.3 = {alpha_im:.4f}°")
+    st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_b_2} = {epsilon_m}°")
+    st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_n_root}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
 
 
 
