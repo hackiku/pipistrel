@@ -62,36 +62,40 @@ lines, conversion_factor = parse_svg_for_lines(svg_lines)
 
 draw_measurements_on_image(lines, conversion_factor)
 
+#==========================================================
 #========================= shapes =========================
+#==========================================================
+
 def extract_lines_from_svg(svg_file_path):
     paths, attributes = svg2paths(svg_file_path)
-    lines = []
+    lines_with_color = []
 
-    for path in paths:
+    for path, attr in zip(paths, attributes):
         for line in path:
             start = (line.start.real, line.start.imag)
             end = (line.end.real, line.end.imag)
-            lines.append((start, end))
+            color = attr.get('stroke', '#FF0000')  # Default to black if no stroke color
+            lines_with_color.append((start, end, color))
 
-    return lines
+    return lines_with_color
 
-def draw_lines_and_display_lengths(svg_file_path):
+def draw_shapes_with_lengths(svg_file_path):
 
-    # Extract lines from SVG paths
+    # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
 
     img = Image.open(base_image)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font_path, size=22)
-    lengths = []  # List to store lengths of all lines
+    lengths = []
 
     for line in lines:
-        start, end = line
+        start, end, color = line
         start_pixels = (start[0], start[1])
         end_pixels = (end[0], end[1])
 
         # Draw the line on the image
-        draw.line([start_pixels, end_pixels], fill='red', width=3)
+        draw.line([start_pixels, end_pixels], fill=color, width=3)
 
         # Calculate the length of the line in meters
         length_pixels = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
@@ -105,12 +109,9 @@ def draw_lines_and_display_lengths(svg_file_path):
         # Display the length of the line on the image using the SVG's coordinate system
         draw.text(midpoint, length_text, fill='blue', font=font)
 
-    return img, lengths
+    return img, lengths, lines # maybe we can return lines so we can reuse them as st.inputs?
 
-# if __name__ == "__main__":
-#     base_image = "./modules/draw/drawing.png"
-#     svg_lines = "./modules/draw/lines.svg"
-#     _, conversion_factor = parse_svg_for_lines(svg_lines)
-#     lines = extract_lines_from_svg(svg_lines)
-#     img = draw_lines_and_display_lengths(base_image, lines, conversion_factor, './assets/Roboto_Mono/static/RobotoMono-Regular.ttf')
-#     st.image(img)  # Or save the image if you prefer
+def crop_image(img, crop_height):
+    width, height = img.size
+    cropped_img = img.crop((0, height - crop_height, width, height))
+    return cropped_img

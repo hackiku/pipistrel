@@ -1,22 +1,29 @@
-# Example usage in a Streamlit page
+# In your Streamlit page
+
 import streamlit as st
-from modules.draw.draw import draw_lines_and_display_lengths
+from modules.draw.draw import draw_shapes_with_lengths, crop_image
 
-def show_wing_page():
-    # base_image_path = "./modules/draw/drawing.png"
-    svg_file_path = './modules/draw/s20.svg'
-    # font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
-    
-    # Draw lines and get their lengths
-    img, line_lengths = draw_lines_and_display_lengths(svg_file_path)
+def redraw_with_adjusted_lengths(original_lines, adjusted_lengths, svg_file_path):
+    # Redrawing logic here
+    # This function needs to be defined and may involve complex geometry
+    pass
 
-    # Display the image with lines and lengths
-    st.image(img, caption='Wing with lines and measurements')
+def interactive_drawing_page(svg_file_path):
+    img, lengths, lines = draw_shapes_with_lengths(svg_file_path)
 
-    # Display line lengths
-    for length in line_lengths:
-        st.write(f"Line length: {length:.2f}m")
+    # Creating sliders for each line
+    adjusted_lengths = []
+    for i, (length, line) in enumerate(zip(lengths, lines)):
+        adjusted_length = st.slider(f"Line {i+1} Length", 0.0, 2.0 * length, length)
+        adjusted_lengths.append(adjusted_length)
+
+    # Redrawing the image if lengths are adjusted
+    if st.button("Redraw with Adjusted Lengths"):
+        img = redraw_with_adjusted_lengths(lines, adjusted_lengths, svg_file_path)
+        st.image(img)
+
+    # Cropping the image
+    st.image(crop_image(img, 1500))
 
 if __name__ == "__main__":
-    show_wing_page()
-
+    interactive_drawing_page('./modules/draw/s20.svg')
