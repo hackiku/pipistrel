@@ -10,9 +10,7 @@ import matplotlib.image as mpimg
 import os
 import re
 
-# TODO hardcoded airfoil array
-# root_airfoil_data = ["NACA 65_2-415", 9.0, -2.8, 0.113, 1.62, "D", 16.5, 0.30, 11.5, 0.0040, -0.062, 0.266, -0.062]
-# tip_airfoil_data = ["NACA 63_4-412", 9.0, -3.0, 0.100, 1.78, "D", 15.0, 0.32, 9.6, 0.0045, -0.075, 0.270, -0.073]
+# ./modules/draw/wing_cutout.png
 
 airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
@@ -263,14 +261,36 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
 
     
-    #==================== dataframe ====================#
+    #==================== PLOT ====================#
+    
     st.subheader("Flow separation")
     df = pd.DataFrame(table_data)
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
-    st.dataframe(df, width=1100, use_container_width=False)
+    # df['Highlight'] = np.where(df['Czmax ap.'] == czmax_final, 'Yes', 'No')
 
-    # st.write(table_data)
-    
+    st.dataframe(df, width=1100, use_container_width=False)
+    st.dataframe(df.style.apply(lambda x: ['background: yellow' if x.Highlight == 'Yes' else '' for _ in x], axis=1))
+
+    st.subheader("Cz distribution along wing span")
+    fig, ax = plt.subplots()
+
+    ax.plot(df['y/(b/2)'], df['Czmax ap.'], label='Czmax ap.', marker='o', linestyle='-')
+    ax.scatter(df[df['Highlight'] == 'Yes']['y/(b/2)'], df[df['Highlight'] == 'Yes']['Czmax ap.'], color='red', s=120, label='Flow Separation Point')
+
+    # Annotate the flow separation point
+    for _, row in df[df['Highlight'] == 'Yes'].iterrows():
+        ax.annotate(f"({row['y/(b/2)']:.3f}, {row['Czmax ap.']:0.3f})", (row['y/(b/2)'], row['Czmax ap.']), textcoords="offset points", xytext=(10,-10), ha='center')
+
+    # Set labels and title
+    ax.set_xlabel('y/(b/2)')
+    ax.set_ylabel('Cz')
+    ax.set_title('Cz distribution along wing span')
+    ax.legend()
+    ax.grid(True)
+
+    # Show the plot
+    st.pyplot(fig)
+
     # y_b2 = Variable("y/(b/2)", df['y/(b/2)'].tolist(), "y_b2", r"y/(b/2)", "")
     # c_z_max = Variable("Max Lift Coefficient", df['Czmax ap.'].tolist(), "c_z_max", r"C_{z_{max}}", "")
     # c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
@@ -279,8 +299,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     spacer()       
     st.markdown("***")
-
-    wing_trapezoid_image = st.image('./modules/draw/crop_white.png')
 
     st.markdown("***")
     # ==================== 2. alpha_0 ============================================================
