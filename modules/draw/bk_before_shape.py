@@ -9,9 +9,9 @@ font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
 
 class Shape:
     def __init__(self, lines):
-        self.lines = lines
-        self.color = lines[0][3]  # Assuming all lines have the same color
-        self.area = 0 
+        self.lines = lines  # Lines making up the shape
+        self.color = lines[0][3]  # Assuming all lines in shape have the same color
+        self.area = self.calculate_area()
 
 
 # measurement lines parsing
@@ -85,21 +85,13 @@ def extract_lines_from_svg(svg_file_path):
 
     return lines_with_color
 
-def calculate_area(lines):
-    # Assuming the shape is a trapezoid
-    a, b = lines[0][2], lines[2][2]  # lengths of parallel sides
-    h = max(lines[1][2], lines[3][2])  # height (longer of the other two sides)
+def calculate_area(self):
+    # Calculate area assuming the shape is a trapezoid
+    a, b = self.lines[0][2], self.lines[2][2]  # lengths of parallel sides
+    h = max(self.lines[1][2], self.lines[3][2])  # height (longer of the other two sides)
     return 0.5 * (a + b) * h
 
-def calculate_shape_center(lines):
-    # Simple way: average the x and y coordinates of all line endpoints
-    x_coords = [line[0][0] for line in lines] + [line[1][0] for line in lines]
-    y_coords = [line[0][1] for line in lines] + [line[1][1] for line in lines]
-    center_x = sum(x_coords) / len(x_coords)
-    center_y = sum(y_coords) / len(y_coords)
-    return (center_x, center_y)
-
-# ========================= draw shapes  =========================
+# draw shapes
 def draw_shapes_with_lengths(svg_file_path):
     # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
@@ -107,8 +99,6 @@ def draw_shapes_with_lengths(svg_file_path):
     img = Image.open(base_image)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font_path, size=22)
-    font_area = ImageFont.truetype(font_path, size=32)
-
     lengths = []
     shapes = []  # List to store shape data
     temp_shape = []  # Temporary list to store lines of a shape
@@ -133,15 +123,11 @@ def draw_shapes_with_lengths(svg_file_path):
         # Add line to temp_shape
         temp_shape.append((start, end, length_meters, color))
 
+        # If temp_shape has 4 lines, add it to shapes and reset temp_shape
         if len(temp_shape) == 4:
-            area = calculate_area(temp_shape)
-            shape_center = calculate_shape_center(temp_shape)  # Implement this function
-            draw.text(shape_center, f"{area:.2f} m²", fill='red', font=font_area)
             shape = Shape(temp_shape)
-            shape.area = area
             shapes.append(shape)
             temp_shape = []
-
 
     return img, shapes, lines
 

@@ -6,10 +6,11 @@ import inspect
 from data import aircraft_specs, create_specs_table 
 from utils import spacer
 from modules.isa_lite import get_ISA_conditions
-from modules.draw.draw import draw_measurements_on_image, parse_svg_for_lines, draw_trapezoid
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
+from modules.draw.wing_area.s20 import draw_wing_area
 
-# use data points in calculations
+
+# aircraft specs from POH
 def get_specific_data(df, category):
     category_data = df[df['Specification'] == f"**{category}**"]
     if not category_data.empty:
@@ -80,13 +81,17 @@ def main():
     st.title("Wing area")
     spacer('2em')
     
-    # 2.1. wing area
-    st.subheader('2.1. Wing area calculator')
+    shapes = draw_wing_area('./modules/draw/wing_area/s20.svg')
 
-    S = st.number_input("Wing Area (m^2)", value=get_variable_value('S'), step=0.1, format="%.2f")
-    st.markdown('***')
+    l0 = 0.72
+    ls = 1.04
+    b = 2* 5.00
+    S = 10.00
+    st.latex(f"S_{{20}} = \\frac{{{l0} + {ls}}}{2} \\cdot \\frac{{{b}}}{2} = \\frac{{{l0:.3f} + {ls:.3f}}}{2} \\cdot \\frac{{{b:.3f}}}{2} = {S:.3f} \\, \\text{{m}}^2")
+    st.latex(f"S = S_{{20}} \\cdot 2 = {S*2:.3f} \\, \\text{{m}}^2")
 
-        
+    st.code(shapes)
+    
 #==================== MASS ====================#
 
     st.subheader('2.2. Average mass')
@@ -105,7 +110,7 @@ def main():
 
     # Calculate average mass
     m_sr = (max_take_off_weight + design_empty_weight) / 2
-    update_variables(page_values, locals())
+    
     st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
 
     st.markdown('***')
