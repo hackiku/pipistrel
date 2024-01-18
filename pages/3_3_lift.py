@@ -113,7 +113,7 @@ def regex_fortran(output):
     return table_data, czmax_final_value
 
 
-def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column):
+def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column):
     # Load the wing image
     img = mpimg.imread(wing_image_path)
     
@@ -128,7 +128,8 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column):
 
     # Overlay the aerodynamic curves
     ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
-    
+    ax.plot(df[y_b2_column], df[czlok_column], label='Czlok', marker='x', linestyle='--')
+
     # Highlight the flow separation point
     separation_point = df[df[czmax_ap_column] == czmax_final]
     ax.scatter(separation_point[y_b2_column], separation_point[czmax_ap_column], color='red', s=100, label='Flow Separation Point')
@@ -141,7 +142,7 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column):
     # Add grid, legend, and show the plot
     ax.legend()
     ax.grid(True)
-    st.pyplot()
+    st.pyplot(fig)
 
 # ======================================================================#
 # ================================ MAIN ================================#
@@ -309,15 +310,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     wing_image_path = './modules/draw/wing_cutout.png'  # Adjust path as necessary
     y_b2_column = 'y/(b/2)'
     czmax_ap_column = 'Czmax ap.'
-    draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column)
+    czlok_column = 'Czlok'
+    czmax_cb_ca_column = 'Czmax-Cb/Ca'
 
-
-    # st.image(wing_image_path)
-    # y_b2 = Variable("y/(b/2)", df['y/(b/2)'].tolist(), "y_b2", r"y/(b/2)", "")
-    # c_z_max = Variable("Max Lift Coefficient", df['Czmax ap.'].tolist(), "c_z_max", r"C_{z_{max}}", "")
-    # c_z_max_cb_ca = Variable("Max Lift Coefficient - Cb/Ca", df['Czmax-Cb/Ca'].tolist(), "c_z_max_cb_ca", r"C_{z_{max}} - C_{b}/C_{a}")
-    # c_z_lok = Variable("Max Lift Coefficient", df["Czlok"].tolist(), "c_z_lok", r"C_{z_{max}}", "")
-    # p_max = Variable("Max pressure", df["Pmax [N/m]"].tolist(), "p_max", r"C_{z_{max}}", "N/m")
+    st.write(czmax_cb_ca_column)
+    # Assuming df is your DataFrame with the necessary data
+    draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column)
     
     spacer()       
     st.markdown("***")

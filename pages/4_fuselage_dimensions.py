@@ -4,6 +4,39 @@ from variables_manager import initialize_session_state, get_variable_value, get_
 from utils import spacer, emoji_header  # Assuming these are utility functions you've defined
 
 
+
+# ./modules/draw/s20.py
+
+import streamlit as st
+from PIL import Image, ImageOps
+from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
+
+def invert_color(image):
+    
+    img = Image.open(image)
+
+    inverted_img = ImageOps.invert(img) 
+    return inverted_img
+
+def draw_wing_area(svg_file_path):
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
+
+    # Radio button to choose color inversion
+    invert_color = st.radio("Color", ["Black", "White"], index=0) == "Black"
+
+    # Display cropped (and possibly inverted) image
+    cropped_img = crop_image(img, 1500, invert=invert_color)
+    st.image(cropped_img, caption='Wing areas')
+
+
+    # recalculatre area with st.sliders
+    # with st.expander("Edit shape lengths (sliders)"):
+        # shape.area = calculate_area(shape.lines)
+        # st.code(f"Updated Area: {shape.area:.2f} square meters")
+
+    return shapes
+
+
 def main():
     page_values = [
         'S', 'S_20', 'S_21', 'S_wet_kr', 'lT', 'l0', 'nT', 
@@ -26,109 +59,6 @@ def main():
 
     st.header("4.1. Characteristic dimensions ")
 
-    # ==================== wing ==================== #
-    st.subheader("Wing")
-    
-    spacer()
-    
-    st.text('– aerodynamic reference area')
-    
-    S_20 = get_variable_value('S_20')    
-    S = 2 * S_20
-    display_variable('S_20')
-    st.latex(r"S = 2 \cdot S_{20} = 2 \cdot 10.301 = 20.602 \, m^2")
-    
-    st.text('– exposed area')
-    S_21 = get_variable_value('S_21')
-    S_exp_kr = 2 * S_21
-    st.latex(rf"S_{{21}} = {S_21} \, m^2")
-    st.latex(rf"S_{{expKR}} = 2 \cdot S_{{21}} = 2 \cdot {S_21} = {S_exp_kr} \, m^2")
-    
-    st.text('– wetted area')
-    S_wet_kr = S_exp_kr * 2 * 1.02
-    st.latex(rf"S_{{wetKR}} = S_{{expKR}} \cdot 2 \cdot 1.02 = {S_exp_kr} \cdot 2 \cdot 1.02 = {S_wet_kr:.3f} \, m^2")
-
-    update_variables(page_values, locals())
-    log_changed_variables()
-
-    
-    spacer()
-
-    # dimensions =========
-    
-    st.text('– taper ratio')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        l0 = st.number_input("Trapezoid chord length", value=get_variable_value('l0'), key='l0')
-        st.latex(rf"l_0 = {l0:.3f} \, m")
-    with col2:
-        lT = st.number_input("Tip chord length", value=get_variable_value('lT'), key='lT')
-        st.latex(rf"l_T = {lT:.3f} \, m")
-    nT = lT / l0
-    st.latex(rf"n_T = \frac{{l_1}}{{l_0}} = \frac{{{lT:.3f}}}{{{l0:.3f}}} = {nT:.3f}")
-
-    # Mean aerodynamic chord (l_sat_kr)
-    st.text('– mean aerodynamic chord')
-    l_sat_kr = (2/3) * lT * ((1 + nT + nT**2) / (1 + nT))
-    st.latex(rf"l_{{satKR}} = \frac{{2}}{{3}} \cdot l_0 \cdot \frac{{1 + n_T + n_T^2}}{{1 + n_T}}")
-    st.latex(rf"l_{{satKR}} = \frac{{2}}{{3}} \cdot {l0:.3f} \cdot \frac{{1 + {nT:.3f} + {nT:.3f}^2}}{{1 + {nT:.3f}}} = {l_sat_kr:.3f} \, m")
-
-    # Reynolds number (Re)
-    st.text('– Reynolds number')
-    v_krst = 224.28  # Cruising speed in m/s (assuming constant or obtained elsewhere)
-    nu = 2.21e-5     # Kinematic viscosity in m^2/s (assuming constant or obtained elsewhere)
-    Re = v_krst * l_sat_kr / nu
-    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{satKR}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {l_sat_kr:.3f}}}{{{nu:.2e}}} \approx {Re:.2e}")
-
-    update_variables(page_values, locals())
-    log_changed_variables()
-    
-    nu = 2.21e-5     # Kinematic viscosity in m^2/s
-    
-    # graph
-    st.markdown("""<div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
-    spacer()
-
-    # ==================== cx wing ==================== #
-
-    
-    st.write("Iz gore priloženog dijagrama očitava se koeficijent otpora trenja Cf")
-    c_fkr = 0.0026 # TODO add to json
-    st.latex(rf"C_{{fKR}} = {c_fkr:.4f}")
-    
-    st.markdown("***")
-
-    l0 = 1.574  # Root chord length in meters
-    dl0 = 0.09  # Relative thickness at the root
-    lT = 2.689  # Tip chord length in meters
-    dlT = 0.12  # Relative thickness at the tip
-
-    dl_effekKR = (l0 * dl0 + lT * dlT) / (l0 + lT)
-    
-    # Display the text and the equation
-    st.write("Efektivna relativna debljina se dobija osrednjavanjem relativnih debljina u korenu i na kraju krila jer su različite:")
-    st.latex(rf"(d/l)_{{effekKR}} = \frac{{l_0 \cdot (d/l)_0 + l_T \cdot (d/l)_T}}{{l_0 + l_T}} = \frac{{{l0:.3f} \cdot {dl0} + {lT:.3f} \cdot {dlT}}}{{{l0:.3f} + {lT:.3f}}} = {dl_effekKR:.3f}")
-    
-    spacer()
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("Faktor otpora oblika krila K očitava se sa dijagrama na sledećoj strani, a koji pokazuje zavisnost relativne debljine i ugla strele od faktora otpora oblika.")
-        dl = 0.109
-        phi = 10
-        st.latex(rf"(d/l)_{{effekKR}} = {dl:.3f}")
-        st.latex(rf"\phi = {phi:.3f}")
-        s = 20.602  # Reference area in square meters
-        K_kr = st.number_input("Shape drag factor of the wing", value=get_variable_value('K_kr'), key='K_kr')
-        c_x_min_krilo = (K_kr * c_fkr * S_wet_kr) / s
-        st.write("Koeficijent minimalnog otpora krila")
-        st.latex(rf"C_{{X min krilo}} = \frac{{K_{{KR}} \cdot C_{{fKR}} \cdot S_{{WET_{{KR}}}}}}{{S}} = \frac{{{K_kr:.2f} \cdot {c_fkr:.4f} \cdot {S_wet_kr:.3f}}}{{{s:.3f}}} = {c_x_min_krilo:.6f}")
-
-    with col2:
-        st.image('./assets/tmp_assets/koef_min_otpora.png', )
-
-    st.markdown("***")
-    
     #======================================================#
     #==================== (2) fuselage ====================#
     #======================================================#

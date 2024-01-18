@@ -2,7 +2,7 @@
     "S": {
         "name": "Wing Area",
         "default": 9.99,
-        "value": 9.99,
+        "value": 20.602,
         "latex": "S",
         "unit": "m^2"
     },
@@ -100,7 +100,7 @@
     "Re": {
         "name": "Reynolds Number",
         "default": 22110000,
-        "value": 22110000,
+        "value": 37797389.6725768,
         "latex": "Re",
         "unit": ""
     },
@@ -142,7 +142,7 @@
     "v_krst": {
         "name": "Cruising Speed",
         "default": 50.0,
-        "value": 50.0,
+        "value": 224.28,
         "latex": "v_{krst}",
         "unit": "m/s"
     },
@@ -205,7 +205,7 @@
     "n": {
         "name": "Wing Taper Ratio",
         "default": 0.52,
-        "value": 1.0,
+        "value": 0.52,
         "latex": "n",
         "unit": ""
     },

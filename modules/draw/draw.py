@@ -178,6 +178,6 @@ def crop_image(img, crop_height, invert=False):
     cropped_img = img.crop((0, height - crop_height, width, height))
 
     if invert:
-        cropped_img = ImageOps.invert(cropped_img.convert('RGB'))  # Convert to RGB if necessary
+        cropped_img = ImageOps.invert(cropped_img.convert('RGB'))
 
     return cropped_img
