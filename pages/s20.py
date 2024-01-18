@@ -3,6 +3,7 @@
 import streamlit as st
 from modules.draw.draw import draw_shapes_with_lengths, crop_image
 
+
 def redraw_with_adjusted_lengths(original_lines, adjusted_lengths, svg_file_path):
     # Redrawing logic here
     # This function needs to be defined and may involve complex geometry
@@ -24,6 +25,7 @@ def interactive_drawing_page(svg_file_path):
 
     # Cropping the image
     st.image(crop_image(img, 1500))
+    st.code(lines)
 
 if __name__ == "__main__":
     interactive_drawing_page('./modules/draw/s20.svg')

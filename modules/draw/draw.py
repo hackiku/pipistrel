@@ -1,5 +1,5 @@
 # ./modules/draw/draw.py
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from svgpathtools import svg2paths
 
 # Path to the base image and SVG file
@@ -80,7 +80,6 @@ def extract_lines_from_svg(svg_file_path):
     return lines_with_color
 
 def draw_shapes_with_lengths(svg_file_path):
-
     # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
 
@@ -88,6 +87,8 @@ def draw_shapes_with_lengths(svg_file_path):
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(font_path, size=22)
     lengths = []
+    shapes = []  # List to store shape data
+    temp_shape = []  # Temporary list to store lines of a shape
 
     for line in lines:
         start, end, color = line
@@ -100,18 +101,57 @@ def draw_shapes_with_lengths(svg_file_path):
         # Calculate the length of the line in meters
         length_pixels = ((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2) ** 0.5
         length_meters = length_pixels * conversion_factor
-        lengths.append(length_meters) # Append length to the list
+        lengths.append(length_meters)
 
         # Find the midpoint for the text label using the SVG coordinates
         midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
-        length_text = f"{length_meters:.2f}m"
+        draw.text(midpoint, f"{length_meters:.2f}m", fill='blue', font=font)
 
-        # Display the length of the line on the image using the SVG's coordinate system
-        draw.text(midpoint, length_text, fill='blue', font=font)
+        # Add line to temp_shape
+        temp_shape.append((start, end, length_meters, color))
 
-    return img, lengths, lines # maybe we can return lines so we can reuse them as st.inputs?
+        # If temp_shape has 4 lines, add it to shapes and reset temp_shape
+        if len(temp_shape) == 4:
+            shapes.append(temp_shape)
+            temp_shape = []
 
-def crop_image(img, crop_height):
+    return img, shapes, lines
+
+
+### TODO redrawing shapes blah
+def redraw_shapes(img, shapes):
+    
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
+
+    draw = ImageDraw.Draw(original_image)
+    font = ImageFont.truetype(font_path, size=22)
+
+    for shape in shapes:
+        for line in shape:
+            start, end, length, color = line
+            # Logic to adjust the end point based on the new length
+            # and redraw the line
+            # ...
+
+    return original_image
+
+
+from PIL import Image, ImageOps
+
+def crop_image(img, crop_height, invert=False):
+
     width, height = img.size
     cropped_img = img.crop((0, height - crop_height, width, height))
+
+    if invert:
+        cropped_img = ImageOps.invert(cropped_img.convert('RGB'))  # Convert to RGB if necessary
+
+    return cropped_img
+
+def crop_image_old(img, crop_height, invert=True):
+    img = Image.open(image)
+
+    width, height = img.size
+    cropped_img = img.crop((0, height - crop_height, width, height))
+    inverted_img = ImageOps.invert(cropped_img)
     return cropped_img
