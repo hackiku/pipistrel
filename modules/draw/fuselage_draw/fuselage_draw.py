@@ -18,7 +18,7 @@ def draw_fuselage(svg_file_path):
     invert_color = st.radio("Color", ["Black", "White"], index=0) == "Black"
 
     # Display cropped (and possibly inverted) image
-    cropped_img = crop_image(img, 1500, invert=invert_color)
+    cropped_img = crop_image(img, 3000, invert=invert_color)
     st.image(cropped_img, caption='Wing areas')
 
 
@@ -30,4 +30,4 @@ def draw_fuselage(svg_file_path):
     return shapes
 
 if __name__ == "__main__":
-    shapes = draw_wing_area()  # Replace with actual SVG file path
+    shapes = draw_fuselage() 

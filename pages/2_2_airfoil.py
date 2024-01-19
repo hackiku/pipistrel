@@ -54,7 +54,7 @@ def main():
     st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
     c_z_krst = st.number_input("Lift coefficient at cruise", value=get_variable_value('c_z_krst'), key='c_z_krst')
 
-    st.latex(r"C_{Z_{opt}} \approx C_{Z_{krst}}")
+    st.latex(f"C_{{Z_{{opt}}}} \\approx C_{{Z_{{krst}}}} \\approx {c_z_krst:.3f}")
     airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst)
     
     spacer()

@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 from svgpathtools import svg2paths
 
 # Path to the base image and SVG file
-base_image = "./modules/draw/drawing.png"
+base_image = "./modules/draw/base_image.png"
 svg_lines = "./modules/draw/lines.svg"
 
 def parse_svg_for_lines(svg_file):
