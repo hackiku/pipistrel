@@ -223,10 +223,4 @@
         "latex": "\\alpha_n",
         "unit": "degrees"
     }
-} Attack",
-        "default": -1.3,
-        "value": -1.3,
-        "latex": "\\alpha_n",
-        "unit": "degrees"
-    }
 }
