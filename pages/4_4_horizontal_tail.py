@@ -1,4 +1,4 @@
-# ./pages/4_4_vertical_tail.py
+# ./pages/4_4_horizontal_tail.py
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
@@ -8,7 +8,7 @@ def invert_image_color(img, invert=False):
         return ImageOps.invert(img.convert('RGB'))
     return img
 
-def draw_vertical_tail_area(svg_file_path):
+def draw_horizontal_tail_area(svg_file_path):
     img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
 
     invert_choice = st.radio("Color", ["Black", "White"], index=0)
@@ -30,13 +30,14 @@ def main():
     st.title("Vertical tail area drawing")
     
     # Replace the following with actual drawing code for the vertical tail
-    shapes = draw_vertical_tail_area('./modules/draw/vertical_draw/vertical_tail.svg')
+    shapes = draw_horizontal_tail_area('./modules/draw/vertical_draw/vertical_tail.svg')
 
+    # ===================== drawing =====================
+    S_exp = shapes[0].area
     
     # ===================== areas =====================
     st.markdown("##### Vertical Tail Area from Drawing")
 
-    S_exp = shapes[0].area
     st.latex(f"S_{{exp}} = {S_exp:.3f}  \\, \\text{{m}}^2")
 
     # Wetted area
@@ -44,8 +45,8 @@ def main():
     st.latex(f"S_{{WET}} = 2 \\cdot S_{{exp}} \\cdot 1.02 = 2 \\cdot {S_exp:.3f} \\cdot 1.02 = {Swet:.3f}  \\, \\text{{m}}^2")
 
     # Taper ratio
-    l0 = shapes[0].lines[1]['length_meters']  # tip chord
-    lt = shapes[0].lines[3]['length_meters']  # root chord
+    lt = shapes[0].lines[1]['length_meters']  # root chord
+    l0 = shapes[0].lines[0]['length_meters']  # tip chord
     col1, col2 = st.columns(2)
     with col1:
         st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")

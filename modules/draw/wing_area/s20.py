@@ -18,7 +18,7 @@ def draw_wing_area(svg_file_path):
     invert_color = st.radio("Color", ["Black", "White"], index=0) == "Black"
 
     # Display cropped (and possibly inverted) image
-    cropped_img = crop_image(img, 1500, invert=invert_color)
+    cropped_img = crop_image(img, 1600, 3000, invert=invert_color)
     st.image(cropped_img, caption='Wing areas')
 
 
