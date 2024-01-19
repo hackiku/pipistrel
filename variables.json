@@ -23,7 +23,7 @@
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
         "default": 0.398,
-        "value": 0.398,
+        "value": 0.37749070316754685,
         "latex": "C_{z_{krst}}",
         "unit": ""
     },
@@ -142,7 +142,7 @@
     "v_krst": {
         "name": "Cruising Speed",
         "default": 50.0,
-        "value": 58.70277777777777,
+        "value": 49.37777777777777,
         "latex": "v_{krst}",
         "unit": "m/s"
     },

@@ -134,6 +134,43 @@ def main():
     st.write("`TODO svodjenje na jedno-trapezno`")
     st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
 
+
+    # Display the text
+    st.text("""
+    (d) Centropplansko krilo:
+    Kod ovog krila definiše se relativni razmah centropplanskog dela krila bm/b (slika 5 - unutrašnji pravougaonik), površina koju zahvata 
+    centroplan Sc i površina koju zahvataju trapezni segmenti St, gde je:
+    """)
+
+    # Display the formula for S
+    st.latex(r'''
+    S = S_t + S_c
+    ''')
+
+    # Continue with the text
+    st.text("""
+    Vrednosti lSAT i ya određuju se po pravilu određivanja težišta višesegmentnih površina. Pri tome se lSATc i yac centropplanskog
+    dela određuju kao da nema trapeznog, a lSATt i yat trapeznog dela 
+    kao da nema centropplanskog. Zatim se koriste izrazi:
+    """)
+
+    # Display the formula for lSAT
+    st.latex(r'''
+    l_{SAT} = \frac{l_{SATc}S_c + l_{SATt}S_t}{S_c + S_t}
+    ''')
+
+    # Display the formula for ya
+    st.latex(r'''
+    y_a = \frac{y_{ac}S_c + y_{at}S_t}{S_c + S_t}
+    ''')
+
+    # Continue with the text
+    st.text("gde je yac = bm/4 i y'at = bm/2 + yat .")
+
+    # Display the image caption
+    st.text("Slika 5. Geometrija centropplanskog krila")
+
+
 #==================== MASS ====================#
 
     st.subheader('2.2. Average mass')
@@ -205,22 +242,22 @@ def main():
     st.write(r"Recommended: 70-80% of Vne for piston engines.")
 
     # Retrieve the Never Exceed Speed from aircraft_specs
-    v_ne_poh = aircraft_specs["Performance"]["Never Exceed Speed"]["value"]
+    v_max_poh = aircraft_specs["Performance"]["Max Structural Cruising Speed"]["value"]
 
     col1, col2, col3 = st.columns([4, 1, 2])
     with col1:
-        percentage_of_vne = st.slider("Percentage of Vne (%)", min_value=0, max_value=100, value=70, step=1)
+        percentage_of_vne = st.slider("Percentage of Vne (%)", min_value=0, max_value=100, value=80, step=1)
     with col2:
         unit = st.radio("", ['Km/h', 'm/s'])
     with col3:
         if unit == 'Km/h':
-            v_ne = st.number_input("Never Exceed Speed (Km/h)", value=v_ne_poh, min_value=0.00, step=10.00)
-            v_krst = percentage_of_vne / 100.0 * (v_ne / 3.6)  # Convert to m/s
+            v_max = st.number_input("Max structural cruise speed (Km/h)", value=v_max_poh, min_value=0.00, step=10.00)
+            v_krst = percentage_of_vne / 100.0 * (v_max / 3.6)  # Convert to m/s
         else:
-            v_ne = st.number_input("Never Exceed Speed (m/s)", value=v_ne_poh / 3.6, min_value=0.00, step=1.00)
-            v_krst = percentage_of_vne / 100.0 * v_ne  # Already in m/s
+            v_max = st.number_input("Max structural cruise speed", value=v_max_poh / 3.6, min_value=0.00, step=1.00)
+            v_krst = percentage_of_vne / 100.0 * v_max  # Already in m/s
 
-    st.latex(f"v_{{\\text{{krst}}}} = \\frac{{\\text{{Vne}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_ne:.3f} \\times {percentage_of_vne}}}{{100}}")
+    st.latex(f"v_{{\\text{{krst}}}} = \\frac{{v_{{max}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_max:.3f} \\times {percentage_of_vne}}}{{100}}")
     st.latex(f"v_{{\\text{{krst}}}} = {v_krst*3.6:.2f} \\, \\text{{Km/h}} = {v_krst:.2f} \\, \\text{{m/s}}")
 
     st.markdown('***')

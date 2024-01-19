@@ -2,6 +2,30 @@
 import streamlit as st
 from modules.draw.wing_area.s20 import draw_wing_area
 
+st.code("""from PIL import Image, ImageDraw, ImageFont, ImageOps
+from svgpathtools import svg2paths
+
+def extract_lines_from_svg(svg_file_path):
+    paths, attributes = svg2paths(svg_file_path)
+    lines_with_color = []
+
+    for path, attr in zip(paths, attributes):
+        for line in path:
+            start = (line.start.real, line.start.imag)
+            end = (line.end.real, line.end.imag)
+            color = attr.get('stroke', '#FF0000')
+            lines_with_color.append((start, end, color))
+
+    return lines_with_color
+
+    def calculate_area(lines):
+    # Extracting lengths from line dictionaries
+    a = lines[0]['length_meters']  # 1st line
+    b = lines[2]['length_meters']  # 3rd line
+    # height: 2nd and 4th line
+    h = max(lines[1]['length_meters'], lines[3]['length_meters'])
+    return 0.5 * (a + b) * h
+""")
 
 def calculate_wingspan(shapes):
 
@@ -24,7 +48,7 @@ def calculate_wingspan(shapes):
 def main():
     st.title("Wing Area Test Page")
     
-    shapes = draw_wing_area('./modules/draw/wing_area/s20.svg')
+    shapes = draw_wing_area('./modules/draw/wing_area/wings_both.svg')
 
     # Display table of lines and lengths for each shape
 
