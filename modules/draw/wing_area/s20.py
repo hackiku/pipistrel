@@ -11,23 +11,20 @@ def invert_color(image):
     inverted_img = ImageOps.invert(img) 
     return inverted_img
 
+
 def draw_wing_area(svg_file_path):
     img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
 
-    # Radio button to choose color inversion
-    invert_color = st.radio("Color", ["Black", "White"], index=0) == "Black"
+    invert_choice = st.radio("Color", ["Black", "White"], index=0)
 
-    # Display cropped (and possibly inverted) image
-    cropped_img = crop_image(img, 1600, 3000, invert=invert_color)
+    if invert_choice == "White":
+        img = invert_image_color(img, invert=True)
+
+    cropped_img = crop_image(img, 1600, 3000, invert=True)
     st.image(cropped_img, caption='Wing areas')
 
+    return shapes
 
-    # recalculatre area with st.sliders
-    # with st.expander("Edit shape lengths (sliders)"):
-        # shape.area = calculate_area(shape.lines)
-        # st.code(f"Updated Area: {shape.area:.2f} square meters")
-
-    return shapes, lines
 
 if __name__ == "__main__":
     shapes = draw_wing_area()  # Replace with actual SVG file path

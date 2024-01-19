@@ -2,6 +2,8 @@
 import streamlit as st
 from modules.draw.wing_area.s20 import draw_wing_area
 
+
+
 def calculate_wingspan(shapes):
 
     conversion_hardcoded = 0.00584518884292006
