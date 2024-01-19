@@ -38,13 +38,18 @@ def main():
         'front': {},
         'planform': {}
     }
-    
-    S_tpl = 0 # total planform area (S_tpl)
-    S_tb = 0 # total side projection area (S_tb)
-    S_max = 0 # maximum cross-sectional area (S_max)
 
-    # Initialize LaTeX string for sum
-    latex_sum_str = ""
+    # Initialize variables for total areas
+    S_tpl = 0  # total planform area (S_tpl)
+    S_tb = 0   # total side projection area (S_tb)
+    S_max = 0  # maximum cross-sectional area (S_max)
+
+    # Initialize dictionary for LaTeX strings for sums
+    latex_sum_strs = {
+        'side': "",
+        'front': "",
+        'planform': ""
+    }
 
     # side projection
     fuselage_areas = {}
@@ -52,25 +57,38 @@ def main():
         shapes, lines = draw_fuselage_area(details, key)
         fuselage_areas[key] = {'shapes': shapes, 'lines': lines}
 
-        # Now we calculate and display each area for the projection
+        # Calculate and display each area for the projection
         st.markdown(f"#### {details['name']}")
         for i, shape in enumerate(shapes):
-            # Assuming shape.area is a numerical value for the area of the shape
             area = shape.area
-            individual_areas[key][f'S{i+1}'] = area  # Storing area with key 'S1', 'S2', etc.
+            individual_areas[key][f'S{i+1}'] = area
             st.markdown(f"**S{i+1} area:** {area:.3f} m²")
-            latex_sum_str += f"S_{{{i+1}}} + "
+            latex_sum_strs[key] += f"S_{{{i+1}}} + "
 
-    # Remove the last ' + ' from the string
-    latex_sum_str = latex_sum_str.rstrip(' + ')
+        # Remove the last ' + ' from the string
+        latex_sum_strs[key] = latex_sum_strs[key].rstrip(' + ')
 
-    # Calculate total areas for each projection
-    for projection, areas in individual_areas.items():
-        total_area = sum(areas.values())
-        st.markdown(f"**Total {projection.capitalize()} Projection Area:** {total_area:.3f} m²")
-        st.latex(f"S_{{tpl}} = {latex_sum_str} = {total_area:.3f}  \\, \\text{{m}}^2")
+        # Calculate total area for the current projection
+        total_area = sum(individual_areas[key].values())
+        
+        # Assign the total area to the corresponding variable
+        if key == 'planform':
+            S_tpl = total_area
+        elif key == 'side':
+            S_tb = total_area
+        elif key == 'front':
+            S_max = total_area  # Assuming 'front' projection corresponds to the maximum cross-sectional area
 
-    # Here you can add the rest of your calculations and markdowns as needed
+        # Display the total area with the correct variable in LaTeX
+        if key == 'planform':
+            st.markdown(f"**Total Planform Area (S_tpl):** {S_tpl:.3f} m²")
+            st.latex(f"S_{{tpl}} = {latex_sum_strs[key]} = {S_tpl:.3f}  \\, \\text{{m}}^2")
+        elif key == 'side':
+            st.markdown(f"**Total Side Projection Area (S_tb):** {S_tb:.3f} m²")
+            st.latex(f"S_{{tb}} = {latex_sum_strs[key]} = {S_tb:.3f}  \\, \\text{{m}}^2")
+        elif key == 'front':
+            st.markdown(f"**Maximum Cross-Sectional Area (S_max):** {S_max:.3f} m²")
+            st.latex(f"S_{{max}} = {latex_sum_strs[key]} = {S_max:.3f}  \\, \\text{{m}}^2")
 
 
     st.markdown("##### Fuselage Area from Drawing")

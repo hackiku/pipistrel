@@ -2,7 +2,7 @@
     "S": {
         "name": "Wing Area",
         "default": 9.99,
-        "value": 9.99,
+        "value": 20.602,
         "latex": "S",
         "unit": "m^2"
     },
@@ -65,7 +65,7 @@
     "S_wet_kr": {
         "name": "Wetted Area of the Wing",
         "default": 30.877,
-        "value": 30.877,
+        "value": 30.87744,
         "latex": "S_{wet_{KR}}",
         "unit": "m^2"
     },
@@ -86,21 +86,21 @@
     "nT": {
         "name": "Taper Ratio",
         "default": 0.999,
-        "value": 0.999,
+        "value": 1.7083862770012705,
         "latex": "n_{T}",
         "unit": ""
     },
     "l_sat_kr": {
         "name": "Mean Aerodynamic Chord of the Exposed Wing Area",
         "default": 2.179,
-        "value": 2.179,
+        "value": 3.724461885874564,
         "latex": "l_{sat_{KR}",
         "unit": "m"
     },
     "Re": {
         "name": "Reynolds Number",
         "default": 22110000,
-        "value": 22110000,
+        "value": 37797389.6725768,
         "latex": "Re",
         "unit": ""
     },
@@ -142,7 +142,7 @@
     "v_krst": {
         "name": "Cruising Speed",
         "default": 50.0,
-        "value": 50.0,
+        "value": 224.28,
         "latex": "v_{krst}",
         "unit": "m/s"
     },
