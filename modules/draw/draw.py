@@ -86,10 +86,10 @@ def extract_lines_from_svg(svg_file_path):
     return lines_with_color
 
 def calculate_area(lines):
-    # Extracting lengths from the dictionaries
-    a = lines[0]['length_meters']  # Length of the first line
-    b = lines[2]['length_meters']  # Length of the third line
-    # For height, use the lengths of the second or fourth line
+    # Extracting lengths from line dictionaries
+    a = lines[0]['length_meters']  # 1st line
+    b = lines[2]['length_meters']  # 3rd line
+    # height: 2nd and 4th lines
     h = max(lines[1]['length_meters'], lines[3]['length_meters'])
     return 0.5 * (a + b) * h
 
@@ -143,7 +143,7 @@ def draw_shapes_with_lengths(svg_file_path):
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
             
-            offset_x, offset_y = -50, 30
+            offset_x, offset_y = -60, 30
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
             
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)

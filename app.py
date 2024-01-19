@@ -99,7 +99,7 @@ def main():
     st.title("Wing area")
     spacer('2em')
     
-    shapes = draw_wing_area('./modules/draw/wing_area/s20.svg')
+    shapes = draw_wing_area('./modules/draw/wing_area/wing_single.svg')
 
     S0 = shapes[0].area
     S1 = shapes[1].area

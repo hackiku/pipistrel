@@ -52,16 +52,52 @@ def main():
 
     # Display table of lines and lengths for each shape
 
-    # Example calculations with placeholders for l0, ls, and b
-    S0 = shapes[0].area
-    S1 = shapes[1].area
-    Spr = S0 + S1
-    S = Spr * 2
-    l0 = shapes[0].lines[1]['length_meters']
-    ls = shapes[0].lines[3]['length_meters']
-    wing_length = calculate_wingspan(shapes)
-    b = wing_length * 2
+    # ===================== drawing =====================
+    Sc = shapes[0].area # rectangle
+    St = shapes[1].area # trapezoid
+    Sc_exp = shapes[2].area
+    St_exp = St
+    l0 = shapes[0].lines[0]['length_meters']
+    ls = shapes[0].lines[2]['length_meters']
+    b = 10.159
+    # wing_length = calculate_wingspan(shapes)
 
+    st.markdown("##### Trapezoids:")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.text("wingspan")
+        st.latex(f"b = {b:.3f}  \\, \\text{{m}}")
+    with col2:
+        st.text("Rectangle to symmetry")
+        st.latex(f"S_c = {Sc:.3f}  \\, \\text{{m}}^2")
+    with col3:
+        st.text("Trapezoids")
+        st.latex(f"S_t = S_{{t_{{exp}}}} = {St:.3f}  \\, \\text{{m}}^2")
+
+    # ===================== calculated =====================
+    st.markdown("##### Calculated:")
+    S1 = Sc + St
+    S = S1 * 2
+    col1, col2 = st.columns(2)
+    with col1:
+        st.latex(f"S_{{1}} = S_{{C}} + S_{{T}} = {Sc:.3f} + {St:.3f} = {S1:.3f}  \\, \\text{{m}}^2")
+    with col2:
+        st.code("single wing area to symmetry")
+    
+    st.latex(f"S_{{C_{{exp}}}} = {Sc_exp:.3f}  \\, \\text{{m}}^2")
+    
+    
+    st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
+
+    lmbda = b**2 / S
+    st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b:.3f}^2}}{{{S:.3f}}} = {lmbda:.3f}")
+    
+    # st.latex(f"\\lambda = \\frac{{l_0 + l_s}}{{2b}} = \\frac{{{l0:.3f} + {ls:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
+    st.latex(f" = {b:.3f}  \\, \\text{{m}}")
+
+
+    st.markdown("***")
+    
     col1, col2, col3 = st.columns(3)
     with col1:
         st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
@@ -77,7 +113,7 @@ def main():
     with col2:
         st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
     with col3:
-        st.latex(f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
+        st.latex( f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
     
     st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
 
