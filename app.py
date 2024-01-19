@@ -130,45 +130,7 @@ def main():
     st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
 
     
-    st.markdown('***')
-    st.write("`TODO svodjenje na jedno-trapezno`")
     st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
-
-
-    # Display the text
-    st.text("""
-    (d) Centropplansko krilo:
-    Kod ovog krila definiše se relativni razmah centropplanskog dela krila bm/b (slika 5 - unutrašnji pravougaonik), površina koju zahvata 
-    centroplan Sc i površina koju zahvataju trapezni segmenti St, gde je:
-    """)
-
-    # Display the formula for S
-    st.latex(r'''
-    S = S_t + S_c
-    ''')
-
-    # Continue with the text
-    st.text("""
-    Vrednosti lSAT i ya određuju se po pravilu određivanja težišta višesegmentnih površina. Pri tome se lSATc i yac centropplanskog
-    dela određuju kao da nema trapeznog, a lSATt i yat trapeznog dela 
-    kao da nema centropplanskog. Zatim se koriste izrazi:
-    """)
-
-    # Display the formula for lSAT
-    st.latex(r'''
-    l_{SAT} = \frac{l_{SATc}S_c + l_{SATt}S_t}{S_c + S_t}
-    ''')
-
-    # Display the formula for ya
-    st.latex(r'''
-    y_a = \frac{y_{ac}S_c + y_{at}S_t}{S_c + S_t}
-    ''')
-
-    # Continue with the text
-    st.text("gde je yac = bm/4 i y'at = bm/2 + yat .")
-
-    # Display the image caption
-    st.text("Slika 5. Geometrija centropplanskog krila")
 
 
 #==================== MASS ====================#

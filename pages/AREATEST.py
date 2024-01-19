@@ -53,69 +53,78 @@ def main():
     # Display table of lines and lengths for each shape
 
     # ===================== drawing =====================
-    Sc = shapes[0].area # rectangle
-    St = shapes[1].area # trapezoid
+    Sc = shapes[1].area # rectangle
+    St = shapes[0].area # trapezoid
     Sc_exp = shapes[2].area
     St_exp = St
     l0 = shapes[0].lines[0]['length_meters']
     ls = shapes[0].lines[2]['length_meters']
     b = 10.159
-    # wing_length = calculate_wingspan(shapes)
-
-    st.markdown("##### Trapezoids:")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.text("wingspan")
-        st.latex(f"b = {b:.3f}  \\, \\text{{m}}")
-    with col2:
-        st.text("Rectangle to symmetry")
-        st.latex(f"S_c = {Sc:.3f}  \\, \\text{{m}}^2")
-    with col3:
-        st.text("Trapezoids")
-        st.latex(f"S_t = S_{{t_{{exp}}}} = {St:.3f}  \\, \\text{{m}}^2")
-
-    # ===================== calculated =====================
-    st.markdown("##### Calculated:")
     S1 = Sc + St
     S = S1 * 2
-    col1, col2 = st.columns(2)
+    S_exp = Sc_exp + St_exp * 1.02 # TODO check in slides
+    Swet = S_exp * 2
+
+
+    # ===================== areas =====================
+    st.markdown("##### Wing areas from drawing")
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.latex(f"S_{{1}} = S_{{C}} + S_{{T}} = {Sc:.3f} + {St:.3f} = {S1:.3f}  \\, \\text{{m}}^2")
+        st.latex(f"S_T = {St:.3f}  \\, \\text{{m}}^2")
     with col2:
-        st.code("single wing area to symmetry")
+        st.latex(f"S_C = {Sc:.3f}  \\, \\text{{m}}^2")
+    with col3:
+        st.latex(f"S_{{T_{{exp}}}} = S_T = {St:.3f}  \\, \\text{{m}}^2")
     
     st.latex(f"S_{{C_{{exp}}}} = {Sc_exp:.3f}  \\, \\text{{m}}^2")
+        
+    st.markdown("##### Calc wing areas")
+
+    st.latex(f"S_{{1}} = S_{{C}} + S_{{T}} = {Sc:.3f} + {St:.3f} = {S1:.3f}  \\, \\text{{m}}^2")
+    st.latex(f"S_{{exp}} = S_{{C_{{exp}}}} + S_{{T_{{exp}}}} = {Sc_exp:.3f} + {St_exp:.3f} = {S_exp:.3f}  \\, \\text{{m}}^2")
+    st.latex(f"S = 2 \\cdot S_1 = 2 \\cdot {S1:.3f} = {S:.3f}  \\, \\text{{m}}^2")
+    st.latex(f"S_{{WET}} = S_{{exp}} \\cdot 2 \\cdot 1.2 = {S_exp:.3f} \\cdot 2 \\cdot 1.2 = {Swet:.3f}  \\, \\text{{m}}^2")
     
+    # ===================== calc Lsat =====================
+
+    st.markdown("##### Calc mean aerodynamic chord (L_sat)")
     
-    st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.latex(f"l_s = {ls:.3f}  \\, \\text{{m}}")
+    with col2:
+        st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
+    with col3:
+        st.latex(f"b = {b:.3f}  \\, \\text{{m}}")
 
     lmbda = b**2 / S
     st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b:.3f}^2}}{{{S:.3f}}} = {lmbda:.3f}")
-    
-    # st.latex(f"\\lambda = \\frac{{l_0 + l_s}}{{2b}} = \\frac{{{l0:.3f} + {ls:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
-    st.latex(f" = {b:.3f}  \\, \\text{{m}}")
 
-
-    st.markdown("***")
+    st.text("Trapezoidal section")
+    nt = l0 / ls
+    st.latex(f"n_T = \\frac{{l_0}}{{l_s}} = \\frac{{{l0:.3f}}}{{{ls:.3f}}} = {nt:.3f}")    
+    Lsat_t = (2/3) * ls * (1 + nt + nt**2) / (1 + nt)
     
-    col1, col2, col3 = st.columns(3)
+    st.text("Rectangular section")
+
+    Lsat_c = S / b
+
+    st.latex(f"L_{{SAT_{{T}}}} = \\frac{{2}}{{3}} \\cdot l_s \\cdot \\frac{{1 + n_T + n_T^2}}{{1 + n_T}} = \\frac{{2}}{{3}} \\cdot {ls:.3f} \\cdot \\frac{{1 + {nt:.3f} + {nt:.3f}^2}}{{1 + {nt:.3f}}} = {Lsat_t:.3f}  \\, \\text{{m}}")
+    st.latex(f"L_{{SAT_{{C}}}} = \\frac{{S}}{{b}} = \\frac{{{S:.3f}}}{{{b:.3f}}} = {Lsat_c:.3f}  \\, \\text{{m}}")
+    st.latex(f"l_{{SAT}} = \\frac{{2}}{{3}} \\cdot l_s \\cdot \\frac{{1 + n_T + n_T^2}}{{1 + n_T}} = \\frac{{2}}{{3}} \\cdot {ls:.3f} \\cdot \\frac{{1 + {nt:.3f} + {nt:.3f}^2}}{{1 + {nt:.3f}}} = {Lsat_t:.3f}  \\, \\text{{m}}")
+
+    # TODO interpolate NACA thickness
+    col1, col2= st.columns(2)
     with col1:
-        st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
+        st.latex(r"\left(\frac{d}{l}\right)_s = 0.15")
     with col2:
-        st.latex(f"l_s = {ls:.3f}  \\, \\text{{m}}")
-    with col3:
-        st.latex(f"b = {wing_length:.3f} \\cdot 2 = {b:.3f}  \\, \\text{{m}}")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.latex(f"S_0 = {S0:.3f}  \\, \\text{{m}}^2")
-    with col2:
-        st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
-    with col3:
-        st.latex( f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
+        st.latex(r"\left(\frac{d}{l}\right)_0 = 0.12")
     
-    st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
+    # Display the formula for ya
+    st.latex(r'''
+    y_a = \frac{y_{ac}S_c + y_{at}S_t}{S_c + S_t}
+    ''')
+
 
     with st.expander("Line Lengths"):
         markdown_content = ""
