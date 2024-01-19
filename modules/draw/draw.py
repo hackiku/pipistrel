@@ -172,10 +172,18 @@ def redraw_shapes(img, shapes):
 
     return original_image
 
-def crop_image(img, crop_height, invert=False):
+from PIL import Image, ImageOps
 
+def crop_image(img, y_top, y_bottom, invert=False):
     width, height = img.size
-    cropped_img = img.crop((0, height - crop_height, width, height))
+    # Ensure the y-coordinates are within the image bounds
+    y_top = max(0, min(y_top, height))
+    y_bottom = max(0, min(y_bottom, height))
+    
+    # Create the crop coordinates (left, upper, right, lower)
+    crop_coordinates = (0, y_top, width, y_bottom)
+
+    cropped_img = img.crop(crop_coordinates)
 
     if invert:
         cropped_img = ImageOps.invert(cropped_img.convert('RGB'))
