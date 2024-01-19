@@ -32,27 +32,46 @@ def draw_fuselage_area(projection_details, key):
 def main():
     st.title("Fuselage Area Calculation")
     
+    # Initialize dictionaries to store individual areas
+    individual_areas = {
+        'side': {},
+        'front': {},
+        'planform': {}
+    }
+    
+    S_tpl = 0 # total planform area (S_tpl)
+    S_tb = 0 # total side projection area (S_tb)
+    S_max = 0 # maximum cross-sectional area (S_max)
+
+    # Initialize LaTeX string for sum
+    latex_sum_str = ""
+
     # side projection
     fuselage_areas = {}
     for key, details in projections_details.items():
         shapes, lines = draw_fuselage_area(details, key)
         fuselage_areas[key] = {'shapes': shapes, 'lines': lines}
-    
-    
-    # ===================== areas =====================
 
-    sections_planform = {'S3': 0.924, 'S4': 1.940, 'S5': 2.998, 'S6': 7.898, 'S7': 3.572, 'S8': 0.135}
-    sections_side_proj = {'S9': 1.129, 'S10': 1.450, 'S11': 2.001, 'S12': 5.030, 'S13': 5.863, 'S14': 0.146}
-    sections_max_cross = {'S15': 0.143, 'S16': 0.208, 'S17': 1.090, 'S18': 0.934}
+        # Now we calculate and display each area for the projection
+        st.markdown(f"#### {details['name']}")
+        for i, shape in enumerate(shapes):
+            # Assuming shape.area is a numerical value for the area of the shape
+            area = shape.area
+            individual_areas[key][f'S{i+1}'] = area  # Storing area with key 'S1', 'S2', etc.
+            st.markdown(f"**S{i+1} area:** {area:.3f} m²")
+            latex_sum_str += f"S_{{{i+1}}} + "
 
-    # Calculate total planform area (S_tpl)
-    S_tpl = sum(sections_planform.values())
-    
-    # Calculate total side projection area (S_tb)
-    S_tb = sum(sections_side_proj.values())
-    
-    # Calculate maximum cross-sectional area (S_max)
-    S_max = sum(sections_max_cross.values())
+    # Remove the last ' + ' from the string
+    latex_sum_str = latex_sum_str.rstrip(' + ')
+
+    # Calculate total areas for each projection
+    for projection, areas in individual_areas.items():
+        total_area = sum(areas.values())
+        st.markdown(f"**Total {projection.capitalize()} Projection Area:** {total_area:.3f} m²")
+        st.latex(f"S_{{tpl}} = {latex_sum_str} = {total_area:.3f}  \\, \\text{{m}}^2")
+
+    # Here you can add the rest of your calculations and markdowns as needed
+
 
     st.markdown("##### Fuselage Area from Drawing")
     st.markdown("#### Area Calculations")
