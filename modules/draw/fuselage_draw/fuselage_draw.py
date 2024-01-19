@@ -27,6 +27,7 @@ def draw_fuselage(svg_file_path):
         # shape.area = calculate_area(shape.lines)
         # st.code(f"Updated Area: {shape.area:.2f} square meters")
 
+
     return shapes
 
 if __name__ == "__main__":

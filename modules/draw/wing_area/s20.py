@@ -27,7 +27,7 @@ def draw_wing_area(svg_file_path):
         # shape.area = calculate_area(shape.lines)
         # st.code(f"Updated Area: {shape.area:.2f} square meters")
 
-    return shapes
+    return shapes, lines
 
 if __name__ == "__main__":
     shapes = draw_wing_area()  # Replace with actual SVG file path
