@@ -3,33 +3,33 @@ import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
-def invert_image_color(img, invert=False):
-    if invert:
-        return ImageOps.invert(img.convert('RGB'))
-    return img
+def draw_horizontal_tail(svg_file_path, show_labels=True):
 
-def draw_horizontal_tail_area(svg_file_path):
-    img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
+        show_labels = labels_choice != "Area only"
 
-    invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
+    
+    # invert image colors (defailt to )
+    if invert_choice == "Black":
+        img = ImageOps.invert(img.convert('RGB'))
 
-    if invert_choice == "White":
-        img = invert_image_color(img, invert=True)
-
-    cropped_img = crop_image(img, 1600, 3000, invert=True)
-    st.image(cropped_img, caption='Horizontal tail areas')
+    cropped_img = crop_image(img, 1600, 3000)
+    st.image(cropped_img, caption='Wing areas')
 
     return shapes
-
-def invert_color(image):
-    img = Image.open(image)
-    inverted_img = ImageOps.invert(img) 
-    return inverted_img
 
 def main():
     st.title("Horizontal Tail Area Calculation")
     
-    shapes = draw_horizontal_tail_area('./modules/draw/horizontal_draw/horizontal_tail.svg')
+    svg_file_path = './modules/draw/horizontal_draw/horizontal_tail.svg'
+    shapes = draw_horizontal_tail(svg_file_path)
 
     # ===================== drawing =====================
     S_exp = shapes[0].area  # Exposed area of the horizontal tail

@@ -124,7 +124,19 @@ def main():
     L = 12.942  # This value appears to be given in the document
     st.markdown(f"**Fuselage Length (L):** {L:.3f} m")
     
-    st.write(lines)
+    with st.expander("Fuselage Area Calculations"):
+        markdown_content = ""
+        markdown_content += "| Area | Value (m²) |\n"
+        markdown_content += "| ---- | ----------- |\n"
+        markdown_content += f"| S_tpl | {S_tpl:.3f} |\n"
+        markdown_content += f"| S_tb | {S_tb:.3f} |\n"
+        markdown_content += f"| S_max | {S_max:.3f} |\n"
+        markdown_content += f"| S_exp | {S_exp:.3f} |\n"
+        markdown_content += f"| S_wet | {S_wet:.3f} |\n"
+        markdown_content += f"| D | {D:.3f} |\n"
+        markdown_content += f"| L | {L:.3f} |\n"
+        st.markdown(markdown_content)
+        st.write(lines)
 
     with st.expander("Line Lengths"):
         markdown_content = ""
