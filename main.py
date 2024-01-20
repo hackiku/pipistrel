@@ -7,7 +7,7 @@ from data import aircraft_specs, create_specs_table
 from utils import spacer
 from modules.isa_lite import get_ISA_conditions
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
-from modules.draw.wing_area.s20 import draw_wing_area
+from pages.draw_wing_areas import draw_wing_area
 
 # TODO abstract wingspan
 def calculate_wingspan(shapes):
@@ -98,8 +98,9 @@ def main():
 
     st.title("Wing area")
     spacer('2em')
-    
-    shapes = draw_wing_area('./modules/draw/wing_area/wing_single.svg')
+
+    svg_file_path = './modules/draw/wing_area/wing_single.svg'
+    shapes = draw_wing_area(svg_file_path)
 
     S0 = shapes[0].area
     S1 = shapes[1].area

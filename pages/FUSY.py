@@ -32,78 +32,66 @@ def draw_fuselage_area(projection_details, key, show_labels=True):
 
     return shapes, lines
 
-# ... [existing code above] ...
-
-# ... [existing code above] ...
-
 def main():
     st.title("Fuselage Area Calculation")
     
-    # Initialize dictionaries to store individual areas and LaTeX strings
-    individual_areas = {'side': {}, 'front': {}, 'planform': {}}
-    latex_sum_strs = {'side': "", 'front': "", 'planform': ""}
+    # Initialize dictionaries to store individual areas
+    individual_areas = {
+        'side': {},
+        'front': {},
+        'planform': {}
+    }
 
     # Initialize variables for total areas
-    S_tpl, S_tb, S_max = 0, 0, 0
+    S_tpl = 0  # total planform area (S_tpl)
+    S_tb = 0   # total side projection area (S_tb)
+    S_max = 0  # maximum cross-sectional area (S_max)
 
-    # Process each projection
+    # Initialize dictionary for LaTeX strings for sums
+    latex_sum_strs = {
+        'side': "",
+        'front': "",
+        'planform': ""
+    }
+
+    # side projection
+    fuselage_areas = {}
     for key, details in projections_details.items():
         shapes, lines = draw_fuselage_area(details, key)
+        fuselage_areas[key] = {'shapes': shapes, 'lines': lines}
 
-        # Initialize markdown table rows for names and values
-        markdown_area_names = "| Area "
-        markdown_area_values = "| Value (m²) "
-        latex_areas_sum_names = ""
-        latex_areas_sum_values = ""
-
-        # Display the title for each projection
-        st.markdown(f"### {details['name']}")
-
+        # Calculate and display each area for the projection
+        st.markdown(f"#### {details['name']}")
         for i, shape in enumerate(shapes):
             area = shape.area
             individual_areas[key][f'S{i+1}'] = area
+            st.markdown(f"**S{i+1} area:** {area:.3f} m²")
+            latex_sum_strs[key] += f"S_{{{i+1}}} + "
 
-            # Append to markdown rows using dollar signs for LaTeX in markdown
-            markdown_area_names += f"| $S_{{{i+1}}}$ "
-            markdown_area_values += f"| {area:.3f} "
-
-            # Append to LaTeX sum strings
-            latex_areas_sum_names += f"S_{{{i+1}}} + "
-            latex_areas_sum_values += f"{area:.3f} + "
-
-        markdown_area_names += "|"
-        markdown_area_values += "|"
-
-        # Remove the last ' + ' from the LaTeX sum strings
-        latex_areas_sum_names = latex_areas_sum_names.rstrip(' + ')
-        latex_areas_sum_values = latex_areas_sum_values.rstrip(' + ')
+        # Remove the last ' + ' from the string
+        latex_sum_strs[key] = latex_sum_strs[key].rstrip(' + ')
 
         # Calculate total area for the current projection
         total_area = sum(individual_areas[key].values())
-
-        # Display the markdown table with two rows
-        markdown_table_divider = "| --- " * (len(shapes) + 1) + "|"
-        # markdown_table_divider = "|" + " --- |" * 2
-        markdown_table = markdown_area_names + "\n" + markdown_table_divider + "\n" + markdown_area_values
-        st.markdown(markdown_table)
-
-        # Display the LaTeX sums
-        st.latex(f"S_{{total}} = {latex_areas_sum_names} = {total_area:.3f} \\, \\text{{m}}^2")
-        st.latex(f"S_{{total}} = {latex_areas_sum_values} = {total_area:.3f} \\, \\text{{m}}^2")
-
-        # Store the LaTeX string for sums
-        latex_sum_strs[key] = latex_areas_sum_names
-
-        # Assign the total area to the corresponding variable and display
+        
+        # Assign the total area to the corresponding variable
         if key == 'planform':
             S_tpl = total_area
-            st.markdown(f"**Total Planform Area (S_tpl):** {S_tpl:.3f} m²")
         elif key == 'side':
             S_tb = total_area
-            st.markdown(f"**Total Side Projection Area (S_tb):** {S_tb:.3f} m²")
         elif key == 'front':
-            S_max = total_area
+            S_max = total_area  # Assuming 'front' projection corresponds to the maximum cross-sectional area
+
+        # Display the total area with the correct variable in LaTeX
+        if key == 'planform':
+            st.markdown(f"**Total Planform Area (S_tpl):** {S_tpl:.3f} m²")
+            st.latex(f"S_{{tpl}} = {latex_sum_strs[key]} = {S_tpl:.3f}  \\, \\text{{m}}^2")
+        elif key == 'side':
+            st.markdown(f"**Total Side Projection Area (S_tb):** {S_tb:.3f} m²")
+            st.latex(f"S_{{tb}} = {latex_sum_strs[key]} = {S_tb:.3f}  \\, \\text{{m}}^2")
+        elif key == 'front':
             st.markdown(f"**Maximum Cross-Sectional Area (S_max):** {S_max:.3f} m²")
+            st.latex(f"S_{{max}} = {latex_sum_strs[key]} = {S_max:.3f}  \\, \\text{{m}}^2")
 
 
     st.markdown("##### Fuselage Area from Drawing")

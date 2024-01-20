@@ -1,4 +1,4 @@
-# ./pages/4_4_vertical_tail.py
+# ./pages/draw_vertical_tail_areas.py
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
@@ -14,7 +14,6 @@ def draw_vertical_tail(svg_file_path, show_labels=True):
         labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
         show_labels = labels_choice != "Area only"
 
-    
     # draw the shapes    
     img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
     
