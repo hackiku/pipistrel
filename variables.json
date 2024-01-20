@@ -2,28 +2,28 @@
     "S": {
         "name": "Wing Area",
         "default": 9.99,
-        "value": 10.08705916127932,
+        "value": 9.99,
         "latex": "S",
         "unit": "m^2"
     },
     "ls": {
         "name": "Root Chord Length at Symmetry Plane",
         "default": 1.574,
-        "value": 1.982209478928028,
+        "value": 1.574,
         "latex": "l_{1}",
         "unit": "m"
     },
     "b": {
         "name": "Wingspan",
         "default": 9.262,
-        "value": 10.158938208995066,
+        "value": 9.262,
         "latex": "b",
         "unit": "m"
     },
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
         "default": 0.398,
-        "value": 0.4046336954044174,
+        "value": 0.398,
         "latex": "C_{z_{krst}}",
         "unit": ""
     },
@@ -79,7 +79,7 @@
     "l0": {
         "name": "Tip Chord Length",
         "default": 1.574,
-        "value": 1.9952652931075523,
+        "value": 1.574,
         "latex": "l_{0}",
         "unit": "m"
     },
@@ -135,14 +135,14 @@
     "m_sr": {
         "name": "Average Mass",
         "default": 100.0,
-        "value": 485.5,
+        "value": 100.0,
         "latex": "m_{sr}",
         "unit": "kg"
     },
     "v_krst": {
         "name": "Cruising Speed",
         "default": 50.0,
-        "value": 49.37777777777777,
+        "value": 50.0,
         "latex": "v_{krst}",
         "unit": "m/s"
     },
@@ -156,28 +156,28 @@
     "T": {
         "name": "Temperature",
         "default": 0.0,
-        "value": 271.9,
+        "value": 0.0,
         "latex": "T",
         "unit": "K"
     },
     "P": {
         "name": "Pressure",
         "default": 0.0,
-        "value": 74682.92480906344,
+        "value": 0.0,
         "latex": "P",
         "unit": "Pa"
     },
     "rho": {
         "name": "Air Density at Altitude",
         "default": 0.05,
-        "value": 0.9568639890727465,
+        "value": 0.05,
         "latex": "\\rho",
         "unit": "kg/m^3"
     },
     "c": {
         "name": "Speed of Sound",
         "default": 0.0,
-        "value": 330.5623969540395,
+        "value": 0.0,
         "latex": "c",
         "unit": "m/s"
     },
@@ -205,7 +205,7 @@
     "n": {
         "name": "Wing Taper Ratio",
         "default": 0.52,
-        "value": 0.52,
+        "value": 1.0,
         "latex": "n",
         "unit": ""
     },

@@ -32,10 +32,6 @@ def draw_fuselage_area(projection_details, key, show_labels=True):
 
     return shapes, lines
 
-# ... [existing code above] ...
-
-# ... [existing code above] ...
-
 def main():
     st.title("Fuselage Area Calculation")
     
@@ -48,7 +44,10 @@ def main():
 
     # Process each projection
     for key, details in projections_details.items():
+        
+        st.markdown(f"### {details['name']}")
         shapes, lines = draw_fuselage_area(details, key)
+        latex_sum_with_indices = " + ".join([f"S_{{{i+1}}}" for i in range(len(shapes))])
 
         # Initialize markdown table rows for names and values
         markdown_area_names = "| Area "
@@ -57,7 +56,6 @@ def main():
         latex_areas_sum_values = ""
 
         # Display the title for each projection
-        st.markdown(f"### {details['name']}")
 
         for i, shape in enumerate(shapes):
             area = shape.area
@@ -97,13 +95,19 @@ def main():
         # Assign the total area to the corresponding variable and display
         if key == 'planform':
             S_tpl = total_area
-            st.markdown(f"**Total Planform Area (S_tpl):** {S_tpl:.3f} m²")
+            st.markdown(f"**Total Planform Area `S_tpl`:** {S_tpl:.3f} m²")
+            st.latex(f"S_{{tpl}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_tpl:.3f} \\, \\text{{m}}^2")
+            st.markdown("***")
         elif key == 'side':
             S_tb = total_area
-            st.markdown(f"**Total Side Projection Area (S_tb):** {S_tb:.3f} m²")
+            st.markdown(f"**Total Side Projection Area `S_tb`:**")
+            st.latex(f"S_{{tb}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_tb:.3f} \\, \\text{{m}}^2")
+            st.markdown("***")
         elif key == 'front':
             S_max = total_area
-            st.markdown(f"**Maximum Cross-Sectional Area (S_max):** {S_max:.3f} m²")
+            st.markdown(f"**Maximum Cross-Sectional Area `S_max`:**")
+            st.latex(f"S_{{max}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_max:.3f} \\, \\text{{m}}^2")
+            st.markdown("***")
 
 
     st.markdown("##### Fuselage Area from Drawing")
