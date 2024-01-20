@@ -168,7 +168,4 @@ def crop_image(img, y_top, y_bottom):
 
     cropped_img = img.crop(crop_coordinates)
 
-    # if invert:
-    #     cropped_img = ImageOps.invert(cropped_img.convert('RGB'))
-
     return cropped_img
