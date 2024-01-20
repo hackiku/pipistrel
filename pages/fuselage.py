@@ -10,19 +10,22 @@ projections_details = {
     'planform': {'name': 'Planform Projection', 'svg_path': './modules/draw/fuselage_draw/fuselage_planform.svg', 'crop_y': (1500, 3000)},
 }
 
-def invert_image_color(img, invert=False):
-    if invert:
-        return ImageOps.invert(img.convert('RGB'))
-    return img
+def draw_fuselage_area(projection_details, key, show_labels=True):
 
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0, key=f"invert_choice_{key}")
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0, key=f"labels_choice_{key}")
+        show_labels = labels_choice != "Area only"
 
-def draw_fuselage_area(projection_details, key):
-    img, shapes, lines = draw_shapes_with_lengths(projection_details['svg_path'])
-
-    invert_choice = st.radio("Color", ["Black", "White"], index=0, key=f"{key}_color")
-
-    if invert_choice == "White":
-        img = invert_image_color(img, invert=True)
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(projection_details['svg_path'], show_labels)
+    
+    # invert image colors (defailt to )
+    if invert_choice == "Black":
+        img = ImageOps.invert(img.convert('RGB'))
 
     cropped_img = crop_image(img, *projection_details['crop_y'])
     st.image(cropped_img, caption=projection_details['name'])

@@ -1,7 +1,32 @@
 # ./pages/AREATEST.py
 import streamlit as st
-from modules.draw.wing_area.s20 import draw_wing_area
+from PIL import Image, ImageOps
+from modules.draw.draw import draw_shapes_with_lengths, crop_image
 
+
+def draw_wing_area(svg_file_path, show_labels=True):
+
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
+
+    if labels_choice == "Area only":
+        show_labels = False
+    
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
+    
+    # invert image colors (defailt to )
+    if invert_choice == "Black":
+        img = ImageOps.invert(img.convert('RGB'))
+
+    cropped_img = crop_image(img, 1600, 3000)
+    st.image(cropped_img, caption='Wing areas')
+
+    return shapes
 
 
 def calculate_wingspan(shapes):
@@ -25,7 +50,8 @@ def calculate_wingspan(shapes):
 def main():
     st.title("Wing Area Test Page")
     
-    shapes = draw_wing_area('./modules/draw/wing_area/wings_both.svg')
+    svg_file_path = './modules/draw/wing_area/wings_both.svg'
+    shapes = draw_wing_area(svg_file_path)
 
     # Display table of lines and lengths for each shape
 

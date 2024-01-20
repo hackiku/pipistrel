@@ -4,7 +4,7 @@ from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
 
-def draw_airplane(svg_file_path, show_labels=True):
+def draw_vertical_tail(svg_file_path, show_labels=True):
 
     # choose color inversion and measurements
     col1, col2 = st.columns(2)
@@ -12,18 +12,17 @@ def draw_airplane(svg_file_path, show_labels=True):
         invert_choice = st.radio("Color", ["Black", "White"], index=0)
     with col2:
         labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
+        show_labels = labels_choice != "Area only"
 
-    if labels_choice == "Area only":
-        show_labels = False
     
     # draw the shapes    
     img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
     
     # invert image colors (defailt to )
-    if invert_choice == "White":
+    if invert_choice == "Black":
         img = ImageOps.invert(img.convert('RGB'))
 
-    cropped_img = crop_image(img, 0, 650, invert=True)
+    cropped_img = crop_image(img, 0, 650)
     st.image(cropped_img, caption='Wing areas')
 
     return shapes
@@ -32,7 +31,7 @@ def main():
     st.title("Vertical tail area drawing")
     
     svg_file_path = './modules/draw/vertical_draw/vertical_tail.svg'
-    shapes = draw_airplane(svg_file_path)
+    shapes = draw_vertical_tail(svg_file_path)
     
     # ===================== areas =====================
     st.markdown("##### Vertical Tail Area from Drawing")

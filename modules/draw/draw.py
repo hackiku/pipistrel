@@ -157,7 +157,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     return img, shapes, lines
 
 
-def crop_image(img, y_top, y_bottom, invert=False):
+def crop_image(img, y_top, y_bottom):
     width, height = img.size
     # Ensure the y-coordinates are within the image bounds
     y_top = max(0, min(y_top, height))
@@ -168,7 +168,7 @@ def crop_image(img, y_top, y_bottom, invert=False):
 
     cropped_img = img.crop(crop_coordinates)
 
-    if invert:
-        cropped_img = ImageOps.invert(cropped_img.convert('RGB'))
+    # if invert:
+    #     cropped_img = ImageOps.invert(cropped_img.convert('RGB'))
 
     return cropped_img
