@@ -102,7 +102,7 @@ def calculate_shape_center(lines):
     return (center_x, center_y)
 
 # ========================= draw shapes  =========================
-def draw_shapes_with_lengths(svg_file_path):
+def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
 
@@ -135,8 +135,9 @@ def draw_shapes_with_lengths(svg_file_path):
         })
 
         # Find the midpoint for the text label using the SVG coordinates
-        midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
-        draw.text(midpoint, f"{length_meters:.2f}m", fill='blue', font=font)
+        if show_labels:
+            midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
+            draw.text(midpoint, f"{length_meters:.3f}m", fill='blue', font=font)
 
         # If temp_shape has 4 lines, calculate area and create a Shape
         if len(temp_shape) == 4:
@@ -155,24 +156,6 @@ def draw_shapes_with_lengths(svg_file_path):
 
     return img, shapes, lines
 
-### TODO redrawing shapes blah
-def redraw_shapes(img, shapes):
-    
-    img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
-
-    draw = ImageDraw.Draw(original_image)
-    font = ImageFont.truetype(font_path, size=22)
-
-    for shape in shapes:
-        for line in shape:
-            start, end, length, color = line
-            # Logic to adjust the end point based on the new length
-            # and redraw the line
-            # ...
-
-    return original_image
-
-from PIL import Image, ImageOps
 
 def crop_image(img, y_top, y_bottom, invert=False):
     width, height = img.size

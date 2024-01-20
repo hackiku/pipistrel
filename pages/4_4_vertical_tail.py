@@ -3,35 +3,36 @@ import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
-def invert_image_color(img, invert=False):
-    if invert:
-        return ImageOps.invert(img.convert('RGB'))
-    return img
 
-def draw_vertical_tail_area(svg_file_path):
-    img, shapes, lines = draw_shapes_with_lengths(svg_file_path)
+def draw_airplane(svg_file_path, show_labels=True):
 
-    invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
 
+    if labels_choice == "Area only":
+        show_labels = False
+    
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
+    
+    # invert image colors (defailt to )
     if invert_choice == "White":
-        img = invert_image_color(img, invert=True)
+        img = ImageOps.invert(img.convert('RGB'))
 
     cropped_img = crop_image(img, 0, 650, invert=True)
     st.image(cropped_img, caption='Wing areas')
 
     return shapes
 
-def invert_color(image):
-    img = Image.open(image)
-    inverted_img = ImageOps.invert(img) 
-    return inverted_img
-
 def main():
     st.title("Vertical tail area drawing")
     
-    # Replace the following with actual drawing code for the vertical tail
-    shapes = draw_vertical_tail_area('./modules/draw/vertical_draw/vertical_tail.svg')
-
+    svg_file_path = './modules/draw/vertical_draw/vertical_tail.svg'
+    shapes = draw_airplane(svg_file_path)
     
     # ===================== areas =====================
     st.markdown("##### Vertical Tail Area from Drawing")

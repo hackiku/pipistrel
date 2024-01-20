@@ -1,1 +1,1 @@
-watchmedo auto-restart --patterns="*.py" --recursive -- streamlit run app.py --server.headless=true --browser.serverAddress="127.0.0.1"
+watchmedo auto-restart --patterns="*.py" --recursive -- streamlit run main.py --server.headless=true --browser.serverAddress="127.0.0.1"
