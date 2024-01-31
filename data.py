@@ -27,6 +27,11 @@ def create_specs_table(aircraft_specs):
     df = pd.DataFrame(specs_data)
     return df
 
+#airfoil_variables = [
+    ["Name", "Reynolds Number", "Camber Position", "Thickness", "Max Camber", "Max Thickness", "Max Thickness Position", "Max Camber Position", "Max Camber Location", "Max Thickness Location", "Max Camber/Thickness", "Max Camber/Thickness Position", "Max Camber/Thickness Location"]
+    ["", "Re", "x/c", "t/c", "m/c", "t/c", "x/c", "x/c", "x/c", "x/c", "m/c", "x/c", "x/c"]
+#]
+
 airfoil_data = [
     # first pass not fully checked
     ["NACA 63-006", 9.0, 0.0, 0.110, 0.87, "D", 10.0, 0.00, 7.7, 0.0042, 0.000, 0.258, -0.033],

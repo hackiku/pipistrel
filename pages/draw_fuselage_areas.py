@@ -6,8 +6,8 @@ from modules.draw.draw import draw_shapes_with_lengths, crop_image
 # Define a dictionary for each projection with its details
 projections_details = {
     'side': {'name': 'Side Projection', 'svg_path': './modules/draw/fuselage_draw/fuselage_side.svg', 'crop_y': (0, 650)},
-    'front': {'name': 'Front Projection', 'svg_path': './modules/draw/fuselage_draw/fuselage_front.svg', 'crop_y': (650, 1500)},
     'planform': {'name': 'Planform Projection', 'svg_path': './modules/draw/fuselage_draw/fuselage_planform.svg', 'crop_y': (1500, 3000)},
+    'front': {'name': 'Front Projection', 'svg_path': './modules/draw/fuselage_draw/fuselage_front.svg', 'crop_y': (650, 1500)},
 }
 
 def draw_fuselage_area(projection_details, key, show_labels=True):
@@ -96,50 +96,69 @@ def main():
         if key == 'planform':
             S_tpl = total_area
             st.markdown(f"**Total Planform Area `S_tpl`:** {S_tpl:.3f} m²")
-            st.latex(f"S_{{tpl}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_tpl:.3f} \\, \\text{{m}}^2")
+            st.latex(f"S_{{tpl}} = \\sum_{{i=1}}^{len(shapes)} S_i = {S_tpl:.3f} \\, \\text{{m}}^2")
             st.markdown("***")
         elif key == 'side':
             S_tb = total_area
             st.markdown(f"**Total Side Projection Area `S_tb`:**")
-            st.latex(f"S_{{tb}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_tb:.3f} \\, \\text{{m}}^2")
+            st.latex(f"S_{{tb}} = \\sum_{{i=1}}^{len(shapes)} S_i = {S_tb:.3f} \\, \\text{{m}}^2")
             st.markdown("***")
         elif key == 'front':
             S_max = total_area
             st.markdown(f"**Maximum Cross-Sectional Area `S_max`:**")
-            st.latex(f"S_{{max}} = \\sum_{{i=1}}^{len(shapes)} S_i = {latex_sum_with_indices} = {S_max:.3f} \\, \\text{{m}}^2")
+            st.latex(f"S_{{max}} = \\sum_{{i=1}}^{len(shapes)} S_i = {S_max:.3f} \\, \\text{{m}}^2")
             st.markdown("***")
 
-
-    st.markdown("##### Fuselage Area from Drawing")
-    st.markdown("#### Area Calculations")
     
-    st.markdown(f"**Total Planform Area (S_tpl):** {S_tpl:.3f} m²")
-    st.latex(f"S_{{tpl}} = {S_tpl:.3f}  \\, \\text{{m}}^2")
+    #========================= Fuselage Dimensions =========================
+    st.markdown("***")
+
+    # Display S_Tb and S_Tpl
+    st.markdown(f"**S_Tb (Total Side Projection Area):** {S_tb:.3f} m²")
+    st.markdown(f"**S_Tpl (Total Planform Projection Area):** {S_tpl:.3f} m²")
+
+    # S_wet
+    S_wet = (S_tpl + S_tb) * (2 - 0.4 * (S_tpl / S_tb))
+    st.latex(f"S_{{wet}} = (S_{{Tpl}} + S_{{Tb}}) \\cdot (2 - 0.4 \\cdot \\frac{{S_{{Tpl}}}}{{S_{{Tb}}}})")
+    st.latex(f"S_{{wet}} = ({S_tpl:.3f} + {S_tb:.3f}) \\cdot (2 - 0.4 \\cdot \\frac {{{S_tpl:.3f}}} {{{S_tb:.3f}}}) = {S_wet:.3f} \, m^2")
+
+    # Calculate S_max based on given individual areas
+    st.markdown(f"**S_max (Maximum Cross-Sectional Area):** {S_max:.3f} m²")
+
+    # Maximum Cross-Sectional Area Calculation
+    S_max = 2.302  # Sum of areas S6 to S10 from your paper
+
+    # Equivalent Diameter Calculation
+    D = (4 * S_max / 3.14159) ** 0.5
+
+    # Fuselage Fineness Ratio Calculation
+    L = 10.37  # Fuselage length given in the paper
+    fineness_ratio = L / D
+
+    # K Factor (Drag Coefficient Factor)
+    K = 1.225  # Value from the paper
+
+    # Displaying the Maximum Cross-Sectional Area
+    st.write("The maximum cross-sectional area of the fuselage, `S_max`, represents the sum of areas in the frontal projection.")
+    st.latex(r"S_{max} = S_6 + S_7 + S_8 + S_9 + S_{10}")
+    st.latex(f"S_{{max}} = 0.251 + 0.213 + 1.104 + 0.367 + 0.367 = {S_max:.3f} \, m^2")
+
+    # Displaying the Equivalent Diameter
+    st.write("The equivalent diameter `D` of the maximum cross-sectional area needs to be transformed into a circle for the purpose of calculating the fuselage's fineness. This diameter can be calculated from the following expression:")
+    st.latex(r"D = \sqrt{\frac{4 \cdot S_{max}}{\pi}}")
+    st.latex(f"D = \\sqrt{{\\frac{{4 \cdot {S_max:.3f}}}{{\pi}}}} = {D:.3f} \, m")
+
+    # Displaying the Fuselage Fineness Ratio
+    st.write("Now, the fineness ratio of the fuselage can be determined:")
+    st.latex(r"\frac{L}{D}")
+    st.latex(f"\\frac{{L}}{{D}} = \\frac{{{L:.2f}}}{{{D:.3f}}} = {fineness_ratio:.2f}")
+
+    # Displaying the K Factor
+    st.write("Based on the calculated fineness ratio of the fuselage, the value of the drag coefficient shape factor `K` can be read from a chart:")
+    st.latex(r"K = 1.225")
     
-    st.markdown(f"**Total Side Projection Area (S_tb):** {S_tb:.3f} m²")
-    st.latex(f"S_{{tb}} = {S_tb:.3f}  \\, \\text{{m}}^2")
     
-    st.markdown(f"**Maximum Cross-Sectional Area (S_max):** {S_max:.3f} m²")
-    st.latex(f"S_{{max}} = {S_max:.3f}  \\, \\text{{m}}^2")
-
-    S_exp = shapes[0].area  # Assuming shapes[0] is the fuselage exposed area
-    st.latex(f"S_{{exp}} = {S_exp:.3f}  \\, \\text{{m}}^2")
-
-    l0 = shapes[0].lines[1]['length_meters']  # Base length of the fuselage
-    lt = shapes[0].lines[3]['length_meters']  # Top length of the fuselage
-
-    # Calculate wetted area (S_wet)
-    S_wet = (S_tpl + S_tb) - (2 - 0.4 * (S_tpl / S_tb)) * (S_tpl / S_tb)
-    st.markdown(f"**Wetted Area (S_wet):** {S_wet:.3f} m²")
-
-    # Calculate equivalent diameter (D)
-    D = ((4 * S_max) / 3.14159)**0.5
-    st.markdown(f"**Equivalent Diameter (D):** {D:.3f} m")
-
-    # Given fuselage length (L)
-    L = 12.942  # This value appears to be given in the document
-    st.markdown(f"**Fuselage Length (L):** {L:.3f} m")
-    
+    # ========================= debug markdown tables =========================
     with st.expander("Fuselage Area Calculations"):
         markdown_content = ""
         markdown_content += "| Area | Value (m²) |\n"
@@ -147,7 +166,7 @@ def main():
         markdown_content += f"| S_tpl | {S_tpl:.3f} |\n"
         markdown_content += f"| S_tb | {S_tb:.3f} |\n"
         markdown_content += f"| S_max | {S_max:.3f} |\n"
-        markdown_content += f"| S_exp | {S_exp:.3f} |\n"
+        # markdown_content += f"| S_exp | {S_exp:.3f} |\n"
         markdown_content += f"| S_wet | {S_wet:.3f} |\n"
         markdown_content += f"| D | {D:.3f} |\n"
         markdown_content += f"| L | {L:.3f} |\n"

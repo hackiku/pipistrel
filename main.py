@@ -2,7 +2,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
-import inspect
 from data import aircraft_specs, create_specs_table 
 from utils import spacer
 from modules.isa_lite import get_ISA_conditions
@@ -96,7 +95,7 @@ def main():
 
 # ==================== IMAGE ====================#
 
-    st.title("Wing area")
+    st.title("Mission planner")
     spacer('2em')
 
     svg_file_path = './modules/draw/wing_area/wing_single.svg'

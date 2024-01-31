@@ -17,11 +17,19 @@ def extract_airfoil_specs(naca_name):
     else:
         return None
 
+
 # show table
 def display_airfoil_table(df):
     st.write(df.to_html(escape=False), unsafe_allow_html=True)
 
-# ======================== main ======================== #
+
+# Example usage:
+# airfoil_df = calculate_aerodynamic_parameters(airfoil_df)
+
+# ====================================================== #
+# ======================== MAIN ======================== #
+# ====================================================== #
+
 def main():
     st.title("Airfoil Selection Tool")
     
@@ -31,15 +39,16 @@ def main():
     
     initialize_session_state(page_values)
 
-    # load and preprocess data
+    # crate dataframe
     airfoil_df = pd.DataFrame(airfoil_data, columns=[
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
         "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
     ])
+    
     airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)
-
+    
     # button to display all airfoils
-    if st.button("Display Airfoil Table"):
+    if st.button("Show All Airfoils"):
         st.markdown("### All Airfoils")
         st.write("All airfoils:", airfoil_df)
 
@@ -81,10 +90,38 @@ def main():
     st.write("Tip airfoils:", tip_airfoils)
 
 
+    # ===================== INDIVIDUAL AIRFOILS OPS ===================== #
+
+    st.subheader("Individual Airfoils")
+    # avoid division by zero
+    airfoil_df['Cx'] = airfoil_df['Cx'].replace(0, 1e-8)
+    
+    cz_cx_max = 0.0 # max finesse
+    
+    
+    root_airfoils['Cz/Cx'] = root_airfoils['Cz'] / root_airfoils['Cx']
+    
+    def calculate_aerodynamic_parameters(df):
+        # Avoid division by zero
+        df['Cx'] = df['Cx'].replace(0, 1e-8)
+        
+        # Calculate the required aerodynamic parameters
+        
+        df['Cz^3/Cx^2'] = (df['Cz'] ** 3) / (df['Cx'] ** 2)
+        df['sqrt(Cz/Cx)'] = (df['Cz'] / df['Cx']) ** 0.5
+        
+        # Format the calculated values as LaTeX f-strings
+        df['Cz/Cx_latex'] = df['Cz/Cx'].apply(lambda x: f"${x:.2f}$")
+        df['Cz^3/Cx^2_latex'] = df['Cz^3/Cx^2'].apply(lambda x: f"${x:.2f}$")
+        df['sqrt(Cz/Cx)_latex'] = df['sqrt(Cz/Cx)'].apply(lambda x: f"${x:.2f}$")
+        
+        return df
+
+
+    # ===================== UPDATE SESSION STATE ===================== #
+    # final command to update and debug session state as json
     update_variables(page_values, locals())
     log_changed_variables()
-
-    
 
 # App Execution
 if __name__ == "__main__":
