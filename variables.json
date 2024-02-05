@@ -4,7 +4,8 @@
         "default": 10.08705916127932,
         "value": 10.08705916127932,
         "latex": "S",
-        "unit": "m^2"
+        "unit": "m^2",
+        "changed": false
     },
     "ls": {
         "name": "Root Chord Length at Symmetry Plane",
@@ -22,10 +23,11 @@
     },
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
-        "default": 0.2461959173105224,
+        "default": 0.3846811207976912,
         "value": 0.3846811207976912,
         "latex": "C_{z_{krst}}",
-        "unit": ""
+        "unit": "",
+        "changed": false
     },
     "S_f": {
         "name": "Flaps Wing Area",
@@ -137,56 +139,88 @@
         "default": 485.5,
         "value": 485.5,
         "latex": "m_{sr}",
-        "unit": "kg"
+        "unit": "kg",
+        "changed": false
+    },
+    "m_empty": {
+        "name": "Design empty weight",
+        "default": 371,
+        "value": 371,
+        "latex": "m_{empty}",
+        "unit": "kg",
+        "changed": false
+    },
+    "m_max": {
+        "name": "Max takeoff weight",
+        "default": 600,
+        "value": 600,
+        "latex": "m_{max}",
+        "unit": "kg",
+        "changed": false
+    },
+    "v_max_percent": {
+        "name": "Percentage of v_max",
+        "default": 80,
+        "value": 80,
+        "latex": "v_{max}_{%}",
+        "unit": "%",
+        "changed": false
     },
     "v_krst": {
         "name": "Cruising Speed",
-        "default": 61.722222222222214,
+        "default": 49.37777777777777,
         "value": 49.37777777777777,
         "latex": "v_{krst}",
-        "unit": "m/s"
+        "unit": "m/s",
+        "changed": false
     },
     "H": {
         "name": "Altitude",
         "default": 2000,
         "value": 2000,
         "latex": "H",
-        "unit": "m"
+        "unit": "m",
+        "changed": false
     },
     "T": {
         "name": "Temperature",
         "default": 275.15,
         "value": 275.15,
         "latex": "T",
-        "unit": "K"
+        "unit": "K",
+        "changed": false
     },
     "P": {
         "name": "Pressure",
         "default": 79495.54663756581,
         "value": 79495.54663756581,
         "latex": "P",
-        "unit": "Pa"
+        "unit": "Pa",
+        "changed": false
     },
     "rho": {
         "name": "Air Density at Altitude",
         "default": 1.0064944468682158,
         "value": 1.0064944468682158,
         "latex": "\\rho",
-        "unit": "kg/m^3"
+        "unit": "kg/m^3",
+        "changed": false
     },
     "c": {
         "name": "Speed of Sound",
         "default": 332.53212202733135,
         "value": 332.53212202733135,
         "latex": "c",
-        "unit": "m/s"
+        "unit": "m/s",
+        "changed": false
     },
     "nu": {
         "name": "Kinematic viscosity",
-        "default": 1.79e-05,
-        "value": 1.79e-05,
+        "default": 1.7148246161606248e-05,
+        "value": 1.7148246161606248e-05,
         "latex": "\\nu",
-        "unit": "m^2/s"
+        "unit": "m^2/s",
+        "changed": false
     },
     "g": {
         "name": "Gravity Acceleration",
@@ -204,10 +238,11 @@
     },
     "n": {
         "name": "Wing Taper Ratio",
-        "default": 0.52,
-        "value": 0.52,
+        "default": 0.7265363128491618,
+        "value": 0.7265363128491618,
         "latex": "n",
-        "unit": ""
+        "unit": "",
+        "changed": false
     },
     "phi": {
         "name": "Sweep Angle",

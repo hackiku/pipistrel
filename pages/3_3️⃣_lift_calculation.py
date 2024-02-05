@@ -77,7 +77,7 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
     # Load the wing image
     img = mpimg.imread(wing_image_path)
     
-    # Determine the highest value of Czmax ap. for flow separation
+    # find highest Czmax ap. for flow separation
     czmax_final = df[czmax_ap_column].max()
 
     # Create a figure with an appropriate size

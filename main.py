@@ -62,8 +62,9 @@ def filter_data_for_preset(data, preset):
 def main():
     
     page_values = [
-        'S', 'l0', 'ls', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
-        'g', 'Re', 'c_z_krst'
+        'S', 'l0', 'ls', 'b', 'm_sr', 'H', 'T', 'P', 'rho', 'c', 
+        'g', 'nu', 'v_max_percent', 'v_krst', 'Re', 'c_z_krst',
+        'm_empty', 'm_max'
     ]
     
     initialize_session_state()
@@ -137,7 +138,7 @@ def main():
     
     st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
 
-    
+    # sweepback angle
     # st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
 
     st.markdown('***')
@@ -145,23 +146,29 @@ def main():
 #==================== MASS ====================#
 
     st.subheader('🧲 Average mass')
+    
+    m_empty_poh = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
+    m_max_poh = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
 
-    max_take_off_weight = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
-    design_empty_weight = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
+    if st.button('⚠️ Reload POH values'):
+        reload_poh = True
+    else:
+        reload_poh = False
+        
+    m_empty_default = m_empty_poh if reload_poh else get_variable_value('m_empty') or m_empty_poh
+    m_max_default = m_max_poh if reload_poh else get_variable_value('m_max') or m_max_poh
 
     # max takeoff weight & design empty weight
     col1, col2 = st.columns(2)
     with col1:
-        max_take_off_weight = st.number_input("Max Take Off Weight (kg)", value=max_take_off_weight, min_value=0,
-        step=20)
+        m_empty = st.number_input("Design Empty Weight (kg) `m_empty`", value=m_empty_default, min_value=1, step=20)
     with col2:
-        design_empty_weight = st.number_input("Design Empty Weight (kg)", value=design_empty_weight, min_value=0, 
-        step=20)
+            m_max = st.number_input("Max Take Off Weight (kg) `m_max`", value=m_max_default, min_value=m_empty, step=20)
 
     # Calculate average mass
-    m_sr = (max_take_off_weight + design_empty_weight) / 2
+    m_sr = (m_max + m_empty) / 2
     
-    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.3f} \\, \\text{{kg}}")
+    st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{m_max:.2f} + {m_empty:.2f}}}{2} = {m_sr:.3f} \\, \\text{{kg}}")
 
     st.markdown('***')
 
@@ -200,7 +207,7 @@ def main():
         
     st.markdown('***')
 
-# ==================== CRUISE SPEED ====================#
+# ==================== SPEED ====================#
     
     col1, col2 = st.columns([3,1])
     with col1:
@@ -215,18 +222,18 @@ def main():
 
     col1, col2, col3 = st.columns([4, 1, 2])
     with col1:
-        percentage_of_vne = st.slider("Percentage of `v_max` (%)", min_value=0, max_value=100, value=80, step=1)
+        v_max_percent = st.slider("Percentage of `v_max` (%)", value=get_variable_value('v_max_percent'), min_value=0, max_value=100, step=1)
     with col2:
         unit = st.radio("", ['Km/h', 'm/s'])
     with col3:
         if unit == 'Km/h':
             v_max = st.number_input("Max structural speed (Km/h)", value=v_max_poh, min_value=0.00, step=10.00)
-            v_krst = percentage_of_vne / 100.0 * (v_max / 3.6)  # Convert to m/s
+            v_krst = v_max_percent / 100.0 * (v_max / 3.6)  # Convert to m/s
         else:
             v_max = st.number_input("Max structural cruise speed", value=v_max_poh / 3.6, min_value=0.00, step=1.00)
-            v_krst = percentage_of_vne / 100.0 * v_max  # Already in m/s
+            v_krst = v_max_percent / 100.0 * v_max  # Already in m/s
 
-    st.latex(f"v_{{\\text{{krst}}}} = \\frac{{v_{{max}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_max:.3f} \\times {percentage_of_vne}}}{{100}}")
+    st.latex(f"v_{{\\text{{krst}}}} = \\frac{{v_{{max}} \\times {v_max_percent}\\%}}{{100}} = \\frac{{{v_max:.3f} \\times {v_max_percent}}}{{100}}")
     st.latex(f"v_{{\\text{{krst}}}} = {v_krst*3.6:.3f} \\, \\text{{Km/h}} = {v_krst:.3f} \\, \\text{{m/s}}")
 
     st.markdown('***')
@@ -236,35 +243,40 @@ def main():
 
     st.subheader("⬆️ Lift coefficient at cruise")
 
-    with st.expander("Manually change all parameters to recalculate Cz_krst"):
-        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=1)
+    # manual changes
+    with st.expander("Manually recalculate `cz_krst`"):
+        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
         col1, col2, col3 = st.columns(3)
         with col1:
-            S_manual = st.number_input(f'Wing area', value=S, step=0.1, format="%.3f")
+            S_manual = st.number_input(f'Wing area (m²) `S`', value=S, step=0.1, format="%.3f")
             S = S_manual
+            st.code(S)
+            
         with col2:
-            m_sr_manual = st.number_input('Average mass (kg)', value=m_sr, step=100.0, format="%.3f")
+            m_sr_manual = st.number_input('Average mass (kg) `m_sr`', value=m_sr, step=100.0, format="%.3f")
             m_sr = m_sr_manual
-            # m_sr = st.number_input(f'{m_sr.name} ({m_sr.unit})', value=m_sr.value, step=100.0, format="%.2f")
+            st.code(m_sr)
         with col3:
-            v_krst_manual = st.number_input('Mass at cruise (kg)', value=v_krst, step=1.0, format="%.3f")
+            v_krst_manual = st.number_input('Cruise speed (m/s) `v_krst`', value=v_krst, step=1.0, format="%.3f")
             v_krst = v_krst_manual
+            st.code(v_krst)
         spacer()
 
+        # planet selector
         col1, col2, col3 = st.columns(3)
         with col1:
             if planet == 'Earth':
                 altitude = st.number_input("Altitude (m)", value=H, min_value=0, step=100)
                 temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-            else:
-                # rho = 0.020
+            elif planet == 'Mars':
                 g = st.number_input('Gravity', value=3.711, step=0.01, format="%.5f")
                 spacer('1em')
                 st.warning(f"🪐 Mars")
         with col2:
             g = st.number_input('Gravity', value=9.80665, step=0.01, format="%.5f")
         with col3:
-            st.write('rho TODO')
+            rho = st.number_input(f'Density $${{kg/m}}^3$$ `rho`', value=density, step=0.001, format="%.5f")
+            st.code(rho)
             # rho = st.number_input(f'Density', value=rho.value, step=0.001, format="%.5f")
 
     c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
@@ -281,6 +293,8 @@ def main():
     if st.button('⚠️ Rewrite default values'):
         rewrite_default_values()
     
+    # st.write(locals())
+
     # log_changed_variables()
     
 if __name__ == "__main__":

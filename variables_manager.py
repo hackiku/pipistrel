@@ -44,15 +44,6 @@ def initialize_session_state_all():
         st.session_state['variables_data'] = load_variables()
 """
 
-def rewrite_default_values():
-    variables_data = st.session_state['variables_data']
-    
-    for var_name, var_details in variables_data.items():
-        var_details['default'] = var_details['value']
-
-    save_variables(variables_data)
-    st.success("Default values have been updated!")
-
 def update_variables(page_values, local_vars):
     variables_data = st.session_state['variables_data']
     for var_name in page_values:
@@ -65,10 +56,23 @@ def update_variables(page_values, local_vars):
         else:
             continue  # Skip if variable is neither in session state nor local_vars
 
-        if var_name in variables_data:
+        if var_name in variables_data and variables_data[var_name]['value'] != new_value:
             variables_data[var_name]['value'] = new_value
+            variables_data[var_name]['changed'] = True  # Mark as changed
 
     save_variables(variables_data)
+
+def rewrite_default_values():
+    variables_data = st.session_state['variables_data']
+    
+    for var_name, var_details in variables_data.items():
+        if 'changed' in var_details and var_details['changed']:
+            var_details['default'] = var_details['value']
+            var_details['changed'] = False
+
+    save_variables(variables_data)
+    st.success("Default values have been updated:")
+    st.code(f'{variables_data}')
 
 #=================== extract variable data ===================
 def get_variable_value(var_name):
