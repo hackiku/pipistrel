@@ -17,6 +17,31 @@ airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
 ])
 
+# select airfoil
+
+airfoil_name_root = st.selectbox('Select Root Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_2-415, a=0.5'))
+airfoil_name_tip = st.selectbox('Select Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_1-412'))
+
+root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
+tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
+
+col1, col2 = st.columns(2)
+with col1:
+    st.text("root_airfoil_row")
+    st.code(root_airfoil_row)
+with col2:
+    st.text("tip airfoil row")
+    st.code(tip_airfoil_row)
+
+# root airfoil data
+c_z_max_root = root_airfoil_row['Cz_max']
+alpha_0_root = root_airfoil_row['alpha_n']
+a_0_root = root_airfoil_row['a0']
+
+# tip airfoil data
+c_z_max_tip = tip_airfoil_row['Cz_max']
+alpha_0_tip = tip_airfoil_row['alpha_n']
+a_0_tip = tip_airfoil_row['a0']
 
 def regex_extract_values(output):
     # Dictionary to hold the extracted values
@@ -131,38 +156,16 @@ def main():
     st.header("💾 Fortran program")
     st.write("The following values are used in the FORTRAN program below. Values are default unless you calculated them on other pages, and you can change them here as well.")
 
-
-    spacer('1em')
-
-    # ---------- mission ----------
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown('#### ✏️ Mission parameter inputs')
-    with col2:
-        with st.expander("Adjust mission parameters"):
-            c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'))
-            col1, col2 = st.columns(2)
-            with col1:
-                v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'))
-            with col2:
-                v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6)
-            rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'))
-
-    
-    mission_params_table = f"""
-    | # | Parameter                           | Symbol                 | Value                       | Unit    |
-    |---|-------------------------------------|------------------------|-----------------------------|---------|
-    | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
-    | 6 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.2f}                | m/s     |
-    | 7 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
-    """
-    st.markdown(mission_params_table)
-    
-    spacer()
-
-    st.markdown('#### 📐   Wing geometry inputs')
+    # ==================== INPUT PARAMETERS ====================
     with st.expander("Manually edit Fortran input parameters"):
-        
+        c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'))
+        col1, col2 = st.columns(2)
+        with col1:
+            v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'))
+        with col2:
+            v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6)
+        rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'))
+
         st.write("Calculate wing aspect ratio (λ) `lmbda`")
             
         col1, col2 = st.columns(2)
@@ -183,6 +186,30 @@ def main():
         st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
 
 
+    spacer('1em')
+    # ---------- mission ----------
+    st.markdown('#### ✏️ Mission parameter inputs')
+    mission_params_table = f"""
+    | # | Parameter                           | Symbol                 | Value                       | Unit    |
+    |---|-------------------------------------|------------------------|-----------------------------|---------|
+    | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
+    | 6 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.2f}                | m/s     |
+    | 7 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
+    """
+    st.markdown(mission_params_table)
+    
+    spacer()
+
+    st.markdown('#### 📐   Wing geometry inputs')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Calculated wing aspect ratio (λ) `lmbda`")
+        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
+    with col2:
+        st.write("Calculated wing taper ratio `n`")
+        st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
+
     wing_geometry_table = f"""
     | # | Parameter                           | Symbol                 | Value                       | Unit    |
     |---|-------------------------------------|------------------------|-----------------------------|---------|
@@ -196,48 +223,18 @@ def main():
     spacer() # ---------- airfoils ----------
     
     st.markdown('#### 🦋 Airfoil data inputs')
-
-    col1, col2 = st.columns(2)
-    with col1:
-        airfoil_name_root = st.selectbox('🌳 Root airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_2-415, a=0.5'))
-        root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
-    with col2:
-        airfoil_name_tip = st.selectbox('🔺 Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_1-412'))
-        tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
-
-    with st.expander("See airfoil raw data"):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.text("root_airfoil_row")
-            st.code(root_airfoil_row)
-        with col2:
-            st.text("tip airfoil row")
-            st.code(tip_airfoil_row)
-
-    # root airfoil data
-    c_z_max_root = root_airfoil_row['Cz_max']
-    alpha_0_root = root_airfoil_row['alpha_n']
-    a_0_root = root_airfoil_row['a0']
-
-    # tip airfoil data
-    c_z_max_tip = tip_airfoil_row['Cz_max']
-    alpha_0_tip = tip_airfoil_row['alpha_n']
-    a_0_tip = tip_airfoil_row['a0']
-
-    
     airfoil_inputs = f"""
-    | # | Parameter                | Symbol                | Root       | Tip                |
-    |---|--------------------------|-----------------------|--------------------|-----------------|
-    | 1 | Airfoil name             |                       | {airfoil_name_root} | {airfoil_name_tip}   |
-    | 2 | Max lift coefficient     | $C_{{z_{{max}}}}$     | {c_z_max_root:.3f}  | {c_z_max_tip:.3f} |
-    | 3 | Angle of zero lift       | $\\alpha_0$           | {alpha_0_root:.2f}° | {alpha_0_tip:.2f}° |
-    | 4 | Lift gradient            | $a_0$                 | {a_0_root:.3f}      | {a_0_tip:.3f}   |
+    | # | Parameter Name           | Symbol                | Tip         | Root       |
+    |---|--------------------------|-----------------------|------------------|-----------------|
+    | 1 | Airfoil name             |                       | {airfoil_name_tip}    | {airfoil_name_root}   |
+    | 2 | Max lift coefficient     | $C_{{z_{{max}}}}$     | {c_z_max_tip:.3f}| {c_z_max_root:.3f} |
+    | 3 | Angle of zero lift       | $\\alpha_0$           | {alpha_0_tip:.2f}° | {alpha_0_root:.2f}° |
+    | 4 | Lift gradient            | $a_0$                 | {a_0_tip:.3f}    | {a_0_root:.3f}   |
     """
     st.markdown(airfoil_inputs)
     
     spacer()
-    
-    st.success("🎉 All values loaded in Fortran code")
+    st.success("🎉 → All values loaded in Fortran code")
     
     # st.markdown("***")
 
