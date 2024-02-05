@@ -93,14 +93,22 @@ def extract_and_save_section(input_file, output_file, start_pattern):
 # -------------------- flow separation graph -------------------------
 
 def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column, czmax_final):
+    
     fig, ax = plt.subplots(figsize=(10, 6)) 
     ax.set_title('Cz distribution along wing span')
     ax.set_xlabel('y/(b/2)')
     ax.set_ylabel('Cz')
     
     img = mpimg.imread(wing_image_path)
-    ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')
+    img_aspect_ratio = img.shape[1] / img.shape[0]  # width / height
+    ax.set_xlim(0, 1)
 
+    y_center = 0.5
+    y_margin = 0.5 / img_aspect_ratio
+    ax.set_ylim(y_center - y_margin, y_center + y_margin)
+    
+    ax.imshow(img, extent=[0, 1, y_center - y_margin, y_center + y_margin], aspect='auto')
+        
     ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
     ax.plot(df[y_b2_column], df[czlok_column], label='Czlok', marker='x', linestyle='--')
     ax.plot(df[y_b2_column], df[czmax_cb_ca_column], label='Czmax-Cb/Ca', marker='.', linestyle='-')
@@ -323,19 +331,11 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     df = pd.DataFrame(table_data)
     
-    # czmax_final = 1.599
-    
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
-    # df['Highlight'] = np.where(df['Czmax ap.'] == czmax_final, 'Yes', 'No')
     
     st.write(df)
 
     wing_image_path = './modules/draw/wing_cutout.png'
-    
-    y_b2_column = 'y/(b/2)'
-    czmax_ap_column = 'Czmax ap.'
-    czlok_column = 'Czlok'
-    czmax_cb_ca_column = 'Czmax-Cb/Ca'
     
     draw_flow_separation(df, wing_image_path, 'y/(b/2)', 'Czmax ap.', 'Czlok', 'Czmax-Cb/Ca', czmax_final)
 
