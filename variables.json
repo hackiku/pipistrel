@@ -240,7 +240,8 @@
         "default": 3.888,
         "value": 3.888,
         "latex": "\\lambda",
-        "unit": ""
+        "unit": "",
+        "changed": true
     },
     "n": {
         "name": "Wing Taper Ratio",

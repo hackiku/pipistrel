@@ -97,28 +97,29 @@ def extract_and_save_section(input_file, output_file, start_pattern):
 
 def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column):
 
-    # load img and cz_max
+
+    # img & cz_max
     img = mpimg.imread(wing_image_path)
     czmax_final = df[czmax_ap_column].max()
 
-    # create plot figure
+    # initialize plot
     fig, ax = plt.subplots(figsize=(10, 6)) 
-
-    # Display the wing image
+    ax.set_title('Cz distribution along wing span')
+    ax.set_xlabel('y/(b/2)')
+    ax.set_ylabel('Cz')
+    
     ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')  # Adjust extent if needed
 
     # Overlay the aerodynamic curves
     ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
     ax.plot(df[y_b2_column], df[czlok_column], label='Czlok', marker='x', linestyle='--')
+    ax.plot(df[y_b2_column], df[czmax_cb_ca_column], label='Czmax Ca/Cb', marker='.', linestyle='-')
 
     # Highlight the flow separation point
     separation_point = df[df[czmax_ap_column] == czmax_final]
     ax.scatter(separation_point[y_b2_column], separation_point[czmax_ap_column], color='red', s=100, label='Flow Separation Point')
 
     # Set labels and title
-    ax.set_xlabel('y/(b/2)')
-    ax.set_ylabel('Cz')
-    ax.set_title('Cz distribution along wing span')
 
     # Add grid, legend, and show the plot
     ax.legend()
@@ -135,10 +136,9 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
 def main():
     
     page_values = [
-        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 
-        'g', 'Re', 'c_z_krst',
-        'lambda_wing', 'n', 'phi', 'alpha_n', 'c_z_max_root', 'alpha_0_root', 
-        'a_0_root', 'c_z_max_tip', 'alpha_0_tip', 'a_0_tip'
+        'S', 'l0', 'l1', 'b', 'm_sr', 'v_krst', 'T', 'P', 'rho', 'c', 'g', 
+        'Re', 'c_z_krst', 'lmbda', 'n', 'phi', 'alpha_n', 'c_z_max_root',
+        'alpha_0_root',  'a_0_root', 'c_z_max_tip', 'alpha_0_tip', 'a_0_tip'
     ]
     initialize_session_state(page_values)
 
@@ -324,6 +324,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         st.code(output, language='brainfuck')
     
     #==================== PLOT ====================#
+    
     st.header("📈 Flow separation")
     spacer()
     
@@ -340,16 +341,17 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     st.write(df)
 
-    wing_image_path = './modules/draw/wing_cutout.png'  # Adjust path as necessary
+    wing_image_path = './modules/draw/wing_cutout.png'
+    
     y_b2_column = 'y/(b/2)'
     czmax_ap_column = 'Czmax ap.'
     czlok_column = 'Czlok'
     czmax_cb_ca_column = 'Czmax-Cb/Ca'
 
-    st.write(czmax_cb_ca_column)
     # Assuming df is your DataFrame with the necessary data
     draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column)
-    
+
+
     spacer()       
 
     st.markdown("***")

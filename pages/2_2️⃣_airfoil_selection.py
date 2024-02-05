@@ -35,7 +35,7 @@ def main():
     st.title("Airfoil Selection Tool")
     
     page_values = [
-        'c_z_krst'
+        'c_z_krst', 
     ]
     
     initialize_session_state(page_values)
@@ -45,6 +45,7 @@ def main():
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
         "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
     ])
+    
     
     airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)
     
@@ -112,37 +113,25 @@ def main():
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
 
+    st.markdown('#### 🦋 Airfoil data inputs')
+
+    col1, col2 = st.columns(2)
+    with col1:
+        airfoil_name_root = st.selectbox('🌳 Root airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65-009'))
+        # root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
+    with col2:
+        airfoil_name_tip = st.selectbox('🔺 Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 64-206'))
+        # tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
+
+    update_variables(page_values, locals())
+    log_changed_variables()
+ 
 
     # ===================== INDIVIDUAL AIRFOILS OPS ===================== #
 
     st.subheader("Individual Airfoils")
-    # avoid division by zero
-    airfoil_df['Cx'] = airfoil_df['Cx'].replace(0, 1e-8)
-    
-    cz = airfoil_df['Cz']
-    cz_cx_max = 0.0 # max finesse
-    
-    root_airfoils['Cz/Cx'] = root_airfoils['Cz'] / root_airfoils['Cx']
-    
-    def calculate_aerodynamic_parameters(df):
-        # Avoid division by zero
-        df['Cx'] = df['Cx'].replace(0, 1e-8)
-        
-        # Calculate the required aerodynamic parameters
-        
-        df['Cz^3/Cx^2'] = (df['Cz'] ** 3) / (df['Cx'] ** 2)
-        df['sqrt(Cz/Cx)'] = (df['Cz'] / df['Cx']) ** 0.5
-        
-        # Format the calculated values as LaTeX f-strings
-        df['Cz/Cx_latex'] = df['Cz/Cx'].apply(lambda x: f"${x:.2f}$")
-        df['Cz^3/Cx^2_latex'] = df['Cz^3/Cx^2'].apply(lambda x: f"${x:.2f}$")
-        df['sqrt(Cz/Cx)_latex'] = df['sqrt(Cz/Cx)'].apply(lambda x: f"${x:.2f}$")
-        
-        return df
-
 
     # ===================== UPDATE SESSION STATE ===================== #
-    # final command to update and debug session state as json
     update_variables(page_values, locals())
     log_changed_variables()
 
