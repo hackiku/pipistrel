@@ -82,14 +82,14 @@ def get_variable_value(var_name):
 
 def get_variable_props(var_key):
     var_data = st.session_state['variables_data'].get(var_key, {})
-    return var_data.get('value'), var_data.get('latex'), var_data.get('unit')
+    return var_data.get('value'), var_data.get('default'), var_data.get('latex'), var_data.get('unit')
 
 def display_variable(var_key, help=None):
-    value, latex, unit = get_variable_props(var_key)
+    value, default, latex, unit = get_variable_props(var_key)
     if latex and unit:
         st.latex(rf"{latex} = {value} \, {unit}")
-    elif latex:
-        st.latex(rf"{latex} = {value}")
+    elif latex and default:
+        st.latex(rf"{latex} = {value}, default: {default}")
     else:
         st.text(f"{var_key}: {value}")
 

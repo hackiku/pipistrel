@@ -163,7 +163,7 @@ def main():
     with col1:
         m_empty = st.number_input("Design Empty Weight (kg) `m_empty`", value=m_empty_default, min_value=1, step=20)
     with col2:
-            m_max = st.number_input("Max Take Off Weight (kg) `m_max`", value=m_max_default, min_value=m_empty, step=20)
+        m_max = st.number_input("Max Take Off Weight (kg) `m_max`", value=m_max_default, min_value=m_empty, step=20)
 
     # Calculate average mass
     m_sr = (m_max + m_empty) / 2
@@ -173,12 +173,14 @@ def main():
     st.markdown('***')
 
 # ==================== ISA ====================#
-
-    # 🌤️ ISA conditions (from isa_lite.py)
+    # ./modules/isa_lite.py
+    
     st.subheader("🌤️ ISA air conditions")
 
     col1, col2 = st.columns(2)
-    with col1:
+    
+    # altitude slider
+    with col1: 
         H = st.slider("Altitude (m)", min_value=0, value=get_variable_value('H'), max_value=30000, step=100)
         T, P, rho, c, zone = get_ISA_conditions(H)
         # rho = density
@@ -191,8 +193,7 @@ def main():
         st.write("You are flying in the:")
         st.info(f"🌍 {zone}")
 
-    with col2:
-        # Displaying the values and zone using LaTeX
+    with col2: # latex values
         st.latex(f"H = {H} \, \ {{m}} \, \ ({H * 3.28084:.0f} \, \ {{ft}})")
         st.latex(f"T = {T:.2f} \, \ {{K}} \, ({T - 273.15:.2f} \ {{°C}})")
         st.latex(f"P = {P:.2f} \, \ {{Pa}}")
@@ -241,42 +242,43 @@ def main():
 
 #==================== LIFT COEFF ====================#
 
-    st.subheader("⬆️ Lift coefficient at cruise")
+    st.subheader("🎈 Lift coefficient at cruise")
+
+    # toggle planet
+    planet = st.radio("Select Planet", ['🌎 Earth', '🟠 Mars'], horizontal= True, index=0)
 
     # manual changes
     with st.expander("Manually recalculate `cz_krst`"):
-        planet = st.radio("Select Planet", ['Earth', 'Mars'], index=0)
+
         col1, col2, col3 = st.columns(3)
         with col1:
-            S_manual = st.number_input(f'Wing area (m²) `S`', value=S, step=0.1, format="%.3f")
+            S_manual = st.number_input(f'Wing area (m²) `S`', value=S, step=0.1, format="%.5f")
             S = S_manual
-            st.code(S)
-            
         with col2:
-            m_sr_manual = st.number_input('Average mass (kg) `m_sr`', value=m_sr, step=100.0, format="%.3f")
+            m_sr_manual = st.number_input('Average mass (kg) `m_sr`', value=m_sr, step=20.0, format="%.3f")
             m_sr = m_sr_manual
-            st.code(m_sr)
         with col3:
-            v_krst_manual = st.number_input('Cruise speed (m/s) `v_krst`', value=v_krst, step=1.0, format="%.3f")
+            v_krst_manual = st.number_input('Cruise speed (m/s) `v_krst`', value=v_krst, step=1.0, format="%.5f")
             v_krst = v_krst_manual
-            st.code(v_krst)
+
         spacer()
 
         # planet selector
         col1, col2, col3 = st.columns(3)
         with col1:
-            if planet == 'Earth':
+            if planet == '🌎 Earth':
                 altitude = st.number_input("Altitude (m)", value=H, min_value=0, step=100)
                 temperature, pressure, density, sound_speed, zone = get_ISA_conditions(altitude)
-            elif planet == 'Mars':
-                g = st.number_input('Gravity', value=3.711, step=0.01, format="%.5f")
+                g_planet = 9.80665
+            elif planet == '🟠 Mars':
+                g_planet = 3.72076
+                density = 0.020
                 spacer('1em')
                 st.warning(f"🪐 Mars")
         with col2:
-            g = st.number_input('Gravity', value=9.80665, step=0.01, format="%.5f")
+            g = st.number_input('Gravity', value=g_planet, step=0.01, format="%.5f")
         with col3:
             rho = st.number_input(f'Density $${{kg/m}}^3$$ `rho`', value=density, step=0.001, format="%.5f")
-            st.code(rho)
             # rho = st.number_input(f'Density', value=rho.value, step=0.001, format="%.5f")
 
     c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
@@ -290,12 +292,10 @@ def main():
     update_variables(page_values, locals())
     log_changed_variables()
     
+    st.write(page_values)
+    
     if st.button('⚠️ Rewrite default values'):
         rewrite_default_values()
-    
-    # st.write(locals())
-
-    # log_changed_variables()
     
 if __name__ == "__main__":
     main()

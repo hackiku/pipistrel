@@ -5,7 +5,7 @@
         "value": 10.08705916127932,
         "latex": "S",
         "unit": "m^2",
-        "changed": false
+        "changed": true
     },
     "ls": {
         "name": "Root Chord Length at Symmetry Plane",
@@ -19,7 +19,8 @@
         "default": 10.158938208995066,
         "value": 10.158938208995066,
         "latex": "b",
-        "unit": "m"
+        "unit": "m",
+        "changed": false
     },
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
@@ -27,7 +28,7 @@
         "value": 0.3846811207976912,
         "latex": "C_{z_{krst}}",
         "unit": "",
-        "changed": false
+        "changed": true
     },
     "S_f": {
         "name": "Flaps Wing Area",
@@ -69,7 +70,8 @@
         "default": 30.877,
         "value": 30.877,
         "latex": "S_{wet_{KR}}",
-        "unit": "m^2"
+        "unit": "m^2",
+        "changed": true
     },
     "lT": {
         "name": "Inner Trapezoid Chord Length",
@@ -90,21 +92,24 @@
         "default": 0.999,
         "value": 0.999,
         "latex": "n_{T}",
-        "unit": ""
+        "unit": "",
+        "changed": true
     },
     "l_sat_kr": {
         "name": "Mean Aerodynamic Chord of the Exposed Wing Area",
         "default": 2.179,
         "value": 2.179,
         "latex": "l_{sat_{KR}",
-        "unit": "m"
+        "unit": "m",
+        "changed": true
     },
     "Re": {
         "name": "Reynolds Number",
         "default": 22110000,
         "value": 22110000,
         "latex": "Re",
-        "unit": ""
+        "unit": "",
+        "changed": true
     },
     "Cf_kr": {
         "name": "Friction Drag Coefficient",
@@ -140,7 +145,7 @@
         "value": 485.5,
         "latex": "m_{sr}",
         "unit": "kg",
-        "changed": false
+        "changed": true
     },
     "m_empty": {
         "name": "Design empty weight",
@@ -148,7 +153,7 @@
         "value": 371,
         "latex": "m_{empty}",
         "unit": "kg",
-        "changed": false
+        "changed": true
     },
     "m_max": {
         "name": "Max takeoff weight",
@@ -156,7 +161,7 @@
         "value": 600,
         "latex": "m_{max}",
         "unit": "kg",
-        "changed": false
+        "changed": true
     },
     "v_max_percent": {
         "name": "Percentage of v_max",
@@ -164,7 +169,7 @@
         "value": 80,
         "latex": "v_{max}_{%}",
         "unit": "%",
-        "changed": false
+        "changed": true
     },
     "v_krst": {
         "name": "Cruising Speed",
@@ -172,7 +177,7 @@
         "value": 49.37777777777777,
         "latex": "v_{krst}",
         "unit": "m/s",
-        "changed": false
+        "changed": true
     },
     "H": {
         "name": "Altitude",
@@ -180,7 +185,7 @@
         "value": 2000,
         "latex": "H",
         "unit": "m",
-        "changed": false
+        "changed": true
     },
     "T": {
         "name": "Temperature",
@@ -188,7 +193,7 @@
         "value": 275.15,
         "latex": "T",
         "unit": "K",
-        "changed": false
+        "changed": true
     },
     "P": {
         "name": "Pressure",
@@ -196,7 +201,7 @@
         "value": 79495.54663756581,
         "latex": "P",
         "unit": "Pa",
-        "changed": false
+        "changed": true
     },
     "rho": {
         "name": "Air Density at Altitude",
@@ -204,7 +209,7 @@
         "value": 1.0064944468682158,
         "latex": "\\rho",
         "unit": "kg/m^3",
-        "changed": false
+        "changed": true
     },
     "c": {
         "name": "Speed of Sound",
@@ -212,7 +217,7 @@
         "value": 332.53212202733135,
         "latex": "c",
         "unit": "m/s",
-        "changed": false
+        "changed": true
     },
     "nu": {
         "name": "Kinematic viscosity",
@@ -220,14 +225,15 @@
         "value": 1.7148246161606248e-05,
         "latex": "\\nu",
         "unit": "m^2/s",
-        "changed": false
+        "changed": true
     },
     "g": {
         "name": "Gravity Acceleration",
         "default": 9.80665,
         "value": 9.80665,
         "latex": "g",
-        "unit": "m/s\u00b2"
+        "unit": "m/s\u00b2",
+        "changed": true
     },
     "lmbda": {
         "name": "Wing Aspect Ratio",

@@ -4,7 +4,8 @@ import streamlit as st
 import pandas as pd
 import re
 from data import airfoil_data
-from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
+from variables_manager import initialize_session_state, get_variable_value,\
+     update_variables, log_changed_variables, get_variable_props, display_variable
 from utils import spacer, emoji_header
 
 # data preparation
@@ -52,20 +53,42 @@ def main():
         st.markdown("### All Airfoils")
         st.write("All airfoils:", airfoil_df)
 
-    # User interactions
+    # ------------------ 1 ------------------ #
     emoji_header("1️⃣", "Thickness Ratio", "")
     thickness_ratio = st.select_slider("Choose Thickness Ratio", options=["15:12", "12:10", "12:09", "09:06"])
     root_thickness, tip_thickness = (float(value) / 100 for value in thickness_ratio.split(':'))
 
+    # ------------------ 2 ------------------ #
+    emoji_header("2️⃣", "Optimal lift coefficient", "")
+    st.write("Optimal lift coefficient closest to the one at cruise.")
     spacer()
+    
+    current_value, default_value, _, _ = get_variable_props('c_z_krst')
+    
+    col1, col2, col3 = st.columns([1,3,3])
+    with col1:
+        spacer('2em')
 
-    emoji_header("2️⃣", "Lift coefficient", r"C_{Z_{opt}} \approx C_{Z_{krst}}")
-    st.write("Selecting the airfoil's optimal lift coefficient by similarity to the one at cruise.")
-    c_z_krst = st.number_input("Lift coefficient at cruise", value=get_variable_value('c_z_krst'), key='c_z_krst')
+        if st.button("⏪ Reset", key="reset_cz_krst"):
+            current_value = default_value
+    with col2:
+        c_z_krst = st.number_input(
+            "Lift coefficient at cruise",
+            value=current_value,
+            key="c_z_krst",
+            format="%.3f"
+        )
+    with col3:
+        spacer('1em')
+        if c_z_krst != default_value:
+            st.warning(f"Value updated from default {default_value:.5f}")
+    
+    st.code(c_z_krst, "Current Value")
+    st.code(default_value, "Default Value")
 
     st.latex(f"C_{{Z_{{opt}}}} \\approx C_{{Z_{{krst}}}} \\approx {c_z_krst:.3f}")
     airfoil_df['Cz_Diff'] = abs(airfoil_df['Cz_op'] - c_z_krst)
-    
+       
     spacer()
    
     emoji_header("3️⃣", "Drag coefficient", r"C_{x_{min}}")

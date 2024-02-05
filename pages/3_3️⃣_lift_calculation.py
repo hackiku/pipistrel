@@ -81,7 +81,7 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
     czmax_final = df[czmax_ap_column].max()
 
     # Create a figure with an appropriate size
-    fig, ax = plt.subplots(figsize=(10, 6))  # Adjust the size as needed
+    fig, ax = plt.subplots(figsize=(10, 6)) 
 
     # Display the wing image
     ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')  # Adjust extent if needed
@@ -131,7 +131,6 @@ def main():
     st.header("💾 Fortran program")
     st.write("The following values are used in the FORTRAN program below. Values are default unless you calculated them on other pages, and you can change them here as well.")
 
-
     spacer('1em')
 
     # ---------- mission ----------
@@ -140,29 +139,29 @@ def main():
         st.markdown('#### ✏️ Mission parameter inputs')
     with col2:
         with st.expander("Adjust mission parameters"):
-            c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'))
+            c_z_krst = st.number_input('Cruise Lift Coefficient `c_z_krst`', value=get_variable_value('c_z_krst'), format="%.3f")
             col1, col2 = st.columns(2)
             with col1:
-                v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'))
+                v_krst = st.number_input('Cruising Speed (m/s) `v_krst`', value=get_variable_value('v_krst'), format="%.3f")
             with col2:
-                v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6)
-            rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'))
+                v_krst_kmh = st.number_input('Cruising Speed (km/h) `v_krst_kmh`', value=get_variable_value('v_krst') * 3.6, format="%.3f")
+            rho = st.number_input('Air Density at Cruise Altitude (kg/m^3) `rho`', value=get_variable_value('rho'), format="%.3f")
 
     
     mission_params_table = f"""
     | # | Parameter                           | Symbol                 | Value                       | Unit    |
     |---|-------------------------------------|------------------------|-----------------------------|---------|
-    | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
-    | 2 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.3f}                | m/s     |
-    | 3 | Cruising speed (km/h)               | $v_{{krst}}$           | {v_krst_kmh:.3f}            | Km/h    |
-    | 4 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
+    | 1 | Lift coefficient at cruise          | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
+    | 2 | Cruising speed                      | $v_{{krst}}$           | {v_krst:.3f}                | m/s     |
+    | 3 | Cruising speed (km/h)               | $v_{{krst_{{km/h}}}}$  | {v_krst_kmh:.3f}            | Km/h    |
+    | 4 | Air density at cruise altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
     """
     st.markdown(mission_params_table)
     
     spacer()
 
     st.markdown('#### 📐   Wing geometry inputs')
-    with st.expander("Manually edit Fortran input parameters"):
+    with st.expander("Edit wing dimensions"):
         
         st.write("Calculate wing aspect ratio (λ) `lmbda`")
             
