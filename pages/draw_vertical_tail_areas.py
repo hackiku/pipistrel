@@ -3,7 +3,6 @@ import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 
-
 def draw_vertical_tail(svg_file_path, show_labels=True):
 
     # choose color inversion and measurements

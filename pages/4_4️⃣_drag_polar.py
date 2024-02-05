@@ -13,7 +13,7 @@ def main():
 
     
     #==================== drag ====================#
-    st.title("4. Drag calculation")
+    st.title("4. Drag polar")
     
     st.write("""Proračun otpora aviona (za nestišljivo strujanje. Za ovaj proračun proračun potrebno je:
 - Definisati sve dimenzije elemenata konstrukcije aviona potrebne za proračun otpora;

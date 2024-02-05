@@ -1,4 +1,4 @@
-# ./pages/4_3_horizontal_tail.py
+# ./pages/draw_horizontal_tail_areas.py
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area

@@ -17,14 +17,10 @@ airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
 ])
 
-# airfoil_name_root = "NACA 64-209"
-# airfoil_name_tip = "NACA 65-206"
-
 # select airfoil
-airfoil_name_root = "NACA 64-209"
-airfoil_name_tip = "NACA 65-206"
 
-
+airfoil_name_root = st.selectbox('Select Root Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_2-415, a=0.5'))
+airfoil_name_tip = st.selectbox('Select Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_1-412'))
 
 root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
 tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
@@ -37,25 +33,15 @@ with col2:
     st.text("tip airfoil row")
     st.code(tip_airfoil_row)
 
-
-# airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)
+# root airfoil data
 c_z_max_root = root_airfoil_row['Cz_max']
 alpha_0_root = root_airfoil_row['alpha_n']
 a_0_root = root_airfoil_row['a0']
 
-# And for the tip airfoil
+# tip airfoil data
 c_z_max_tip = tip_airfoil_row['Cz_max']
 alpha_0_tip = tip_airfoil_row['alpha_n']
 a_0_tip = tip_airfoil_row['a0']
-
-# Display the extracted values
-st.write(f"Root airfoil max lift coefficient (Cz_max): `{c_z_max_root}`")
-st.write(f"Root airfoil zero-lift angle of attack (alpha_0): `{alpha_0_root}`")
-st.write(f"Root airfoil lift curve slope (a_0): `{a_0_root}`")
-
-st.write(f"Tip airfoil max lift coefficient (Cz_max): `{c_z_max_tip}`")
-st.write(f"Tip airfoil zero-lift angle of attack (alpha_0): `{alpha_0_tip}`")
-st.write(f"Tip airfoil lift curve slope (a_0): `{a_0_tip}`")
 
 def regex_extract_values(output):
     # Dictionary to hold the extracted values
@@ -84,7 +70,6 @@ def regex_extract_values(output):
                 extracted_values[key] = match.group(1)
 
     return extracted_values
-
 
 def regex_fortran(output):
     table_data = []
@@ -190,7 +175,7 @@ def main():
         with col2: 
             S = st.number_input('Wing Area (m^2) `S`', value=get_variable_value('S'))
         lmbda = b**2 / S
-        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S}}} = {lmbda:.3f}")
+        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
         
         st.write("Calculate wing taper ratio `n`")
         col1, col2 = st.columns(2)
@@ -204,7 +189,7 @@ def main():
     col1, col2 = st.columns(2)
     with col1:
         st.write("Calculated wing aspect ratio (λ) `lmbda`")
-        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S}}} = {lmbda:.3f}")
+        st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
     with col2:
         st.write("Calculated wing taper ratio `n`")
         st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
@@ -213,11 +198,11 @@ def main():
     wing_inputs = f"""
     | # | Parameter                           | Symbol                 | Value                       | Unit    |
     |---|-------------------------------------|------------------------|-----------------------------|---------|
-    |1️⃣ | **_Mission Parameters_**            |                        |                             |         |
+    |   | _Mission Parameters_            |                        |                             |         |
     | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
     | 6 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.2f}                | m/s     |
     | 7 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
-    |2️⃣ | **_Wing Geometry_**                 |                        |                             | -       |
+    |   | **_Wing Geometry_**                 |                        |                             | -       |
     | 2 | Wing Aspect Ratio (λ)               | $\\lambda$             | {lmbda:.3f}                 | -       |
     | 3 | Tip Chord Length                    | $l_0$                  | {l0:.3f}                    | m       |
     | 4 | Root Chord Length                   | $l_s$                  | {ls:.3f}                    | m       |

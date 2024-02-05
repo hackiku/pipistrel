@@ -152,7 +152,7 @@ def main():
     # Calculate average mass
     m_sr = (max_take_off_weight + design_empty_weight) / 2
     
-    st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.2f} \\, \\text{{kg}}")
+    st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.3f} \\, \\text{{kg}}")
 
     st.markdown('***')
 
@@ -220,7 +220,7 @@ def main():
             v_krst = percentage_of_vne / 100.0 * v_max  # Already in m/s
 
     st.latex(f"v_{{\\text{{krst}}}} = \\frac{{v_{{max}} \\times {percentage_of_vne}\\%}}{{100}} = \\frac{{{v_max:.3f} \\times {percentage_of_vne}}}{{100}}")
-    st.latex(f"v_{{\\text{{krst}}}} = {v_krst*3.6:.2f} \\, \\text{{Km/h}} = {v_krst:.2f} \\, \\text{{m/s}}")
+    st.latex(f"v_{{\\text{{krst}}}} = {v_krst*3.6:.3f} \\, \\text{{Km/h}} = {v_krst:.3f} \\, \\text{{m/s}}")
 
     st.markdown('***')
 
@@ -263,7 +263,7 @@ def main():
     st.code(m_sr)
     c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
     st.latex(r"C_{Z_{krst}} = \frac{G}{q \cdot S} = \frac{m_{sr} \cdot g}{0.5 \cdot \rho \cdot v_{krst}^2 \cdot S}")
-    st.latex(f"C_{{Z_{{krst}}}} = \\frac{{ {m_sr:.2f} \\cdot {g:.2f} }}{{ 0.5 \\cdot {rho:.4f} \\cdot {v_krst:.2f}^2 \\cdot {S:.2f} }}")
+    st.latex(f"C_{{Z_{{krst}}}} = \\frac{{ {m_sr:.3f} \\cdot {g:.3f} }}{{ 0.5 \\cdot {rho:.4f} \\cdot {v_krst:.3f}^2 \\cdot {S:.3f} }}")
     st.latex(f"C_{{Z_{{krst}}}} = {c_z_krst:.3f}")
     
     st.markdown('***')

@@ -11,7 +11,7 @@ def main():
     ]
     initialize_session_state()
 
-    
+
     #==================== drag ====================#
     st.title("4. Drag calculation")
     
@@ -144,8 +144,8 @@ def main():
     st.latex(r"Re = \frac{v_{krst} \cdot L_T}{\nu} = \frac{" + str(v_krst) + r" \cdot " + str(L_T) + r"}{" + str(nu) + r"} = " + str(round(Re_T, 2)))
 
     # Drag coefficient from diagram
-    st.write("Iz prethodno datih dijagrama koeficijent otpora trenja trupa " + r"C_{fT} = " + str(CfKR.value))
-    st.latex(rf"C_{{fT}} = {CfKR}")
+    # st.write("Iz prethodno datih dijagrama koeficijent otpora trenja trupa " + r"C_{fT} = " + str(CfKR.value))
+    # st.latex(rf"C_{{fT}} = {CfKR}")
 
     # Minimum drag coefficient of the fuselage
     st.write("Koeficijent minimalnog otpora trupa")

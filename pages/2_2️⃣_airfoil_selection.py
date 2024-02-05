@@ -77,8 +77,8 @@ def main():
     airfoil_df['Combined_Score'] = airfoil_df['Cz_Diff'] * (1 - drag_importance) + airfoil_df['Cd_min'] * drag_importance
 
     # Sort the airfoils by the combined score
-    root_airfoils = airfoil_df[airfoil_df['Thickness'] == root_thickness].nsmallest(5, 'Combined_Score')
-    tip_airfoils = airfoil_df[airfoil_df['Thickness'] == tip_thickness].nsmallest(5, 'Combined_Score')
+    root_airfoils = airfoil_df[airfoil_df['Thickness'] == root_thickness].nsmallest(7, 'Combined_Score')
+    tip_airfoils = airfoil_df[airfoil_df['Thickness'] == tip_thickness].nsmallest(7, 'Combined_Score')
 
     # Display tables
     st.markdown("***")
@@ -96,8 +96,8 @@ def main():
     # avoid division by zero
     airfoil_df['Cx'] = airfoil_df['Cx'].replace(0, 1e-8)
     
+    cz = airfoil_df['Cz']
     cz_cx_max = 0.0 # max finesse
-    
     
     root_airfoils['Cz/Cx'] = root_airfoils['Cz'] / root_airfoils['Cx']
     
