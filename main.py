@@ -78,10 +78,14 @@ def main():
     st.markdown('***')
 
     # 1. specs
-    
+    st.title("① Mission planner")
+    st.write("This tool will help you plan your aircraft's mission by calculating the lift coefficient at cruise conditions.")
+
+    spacer()
+
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.title("1. Aircraft Specs")
+        st.header("🛩️ Aircraft specs")
     with col2:
         unit_system = st.radio("", ('SI Units', 'Aviation Units'))
 
@@ -95,7 +99,7 @@ def main():
 
 # ==================== IMAGE ====================#
 
-    st.title("Mission planner")
+    st.header("📐 Wing geometry")
     spacer('2em')
 
     svg_file_path = './modules/draw/wing_area/wing_single.svg'
@@ -105,17 +109,20 @@ def main():
     S1 = shapes[1].area
     Spr = S0 + S1
     S = Spr * 2
-    l0 = shapes[0].lines[1]['length_meters']
-    ls = shapes[0].lines[3]['length_meters']
+    l0 = shapes[0].lines[0]['length_meters']
+    ls = shapes[0].lines[2]['length_meters']
     wing_length = calculate_wingspan(shapes)
     b = wing_length * 2
 
     col1, col2, col3 = st.columns(3)
     with col1:
+        st.text("Tip length")
         st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
     with col2:
+        st.text("Root length")
         st.latex(f"l_s = {ls:.3f}  \\, \\text{{m}}")
     with col3:
+        st.text("Wingspan")
         st.latex(f"b = {wing_length:.3f} \\cdot 2 = {b:.3f}  \\, \\text{{m}}")
 
     col1, col2, col3 = st.columns(3)
@@ -132,10 +139,11 @@ def main():
     
     # st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
 
+    st.markdown('***')
 
 #==================== MASS ====================#
 
-    st.subheader('2.2. Average mass')
+    st.subheader('🧲 Average mass')
 
     max_take_off_weight = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
     design_empty_weight = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
@@ -152,14 +160,14 @@ def main():
     # Calculate average mass
     m_sr = (max_take_off_weight + design_empty_weight) / 2
     
-    st.latex(f"m_{{\\text{{sr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.3f} \\, \\text{{kg}}")
+    st.latex(f"m_{{\\text{{pr}}}} = \\frac{{m_{{\\text{{max}}}} + m_{{\\text{{min}}}}}}{2} = \\frac{{{max_take_off_weight:.2f} + {design_empty_weight:.2f}}}{2} = {m_sr:.3f} \\, \\text{{kg}}")
 
     st.markdown('***')
 
 # ==================== ISA ====================#
 
-    # 2.3 ISA conditions (from isa_lite.py)
-    st.subheader("2.3. ISA air conditions")
+    # 🌤️ ISA conditions (from isa_lite.py)
+    st.subheader("🌤️ ISA air conditions")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -184,36 +192,34 @@ def main():
         st.latex(f"c = {c:.2f} \, \ {{m/s}}")
 
     spacer()
-    st.write('Kinematic viscosity calculated with the Sutherland formula')
+    st.text('Kinematic viscosity calculated with the Sutherland formula: ')
     nu = (1.458e-6 * T**1.5) / (T + 110.4) / rho
     st.latex(r'\nu = \frac{\mu}{\rho} = \frac{1.458 \times 10^{-6} \cdot T^{1.5}}{T + 110.4} \cdot \frac{1}{\rho}')
     st.latex(f'\\nu = {nu:.2e} \\, \\text{{m}}^2/\\text{{s}}')
-    
-    
+        
     st.markdown('***')
 
 # ==================== CRUISE SPEED ====================#
     
     col1, col2 = st.columns([3,1])
     with col1:
-        st.subheader("2.3. Define cruise speed")
+        st.subheader("⚡️ Cruise speed")
     with col2:
         st.write()
         # unit = st.radio("", ['Km/h', 'm/s'])
     
-    st.write(r"Recommended: 70-80% of Vne for piston engines.")
-
-    # Retrieve the Never Exceed Speed from aircraft_specs
     v_max_poh = aircraft_specs["Performance"]["Max Structural Cruising Speed"]["value"]
+    
+    st.write(f"Pick the cruise speed as % of max structural cruising speed ({v_max_poh} Km/h), usually 70-80%")
 
     col1, col2, col3 = st.columns([4, 1, 2])
     with col1:
-        percentage_of_vne = st.slider("Percentage of Vne (%)", min_value=0, max_value=100, value=80, step=1)
+        percentage_of_vne = st.slider("Percentage of `v_max` (%)", min_value=0, max_value=100, value=80, step=1)
     with col2:
         unit = st.radio("", ['Km/h', 'm/s'])
     with col3:
         if unit == 'Km/h':
-            v_max = st.number_input("Max structural cruise speed (Km/h)", value=v_max_poh, min_value=0.00, step=10.00)
+            v_max = st.number_input("Max structural speed (Km/h)", value=v_max_poh, min_value=0.00, step=10.00)
             v_krst = percentage_of_vne / 100.0 * (v_max / 3.6)  # Convert to m/s
         else:
             v_max = st.number_input("Max structural cruise speed", value=v_max_poh / 3.6, min_value=0.00, step=1.00)
@@ -227,7 +233,7 @@ def main():
 
 #==================== LIFT COEFF ====================#
 
-    st.subheader("Lift coefficient at cruise conditions")
+    st.subheader("⬆️ Lift coefficient at cruise")
 
     with st.expander("Manually change all parameters to recalculate Cz_krst"):
         planet = st.radio("Select Planet", ['Earth', 'Mars'], index=1)
@@ -260,7 +266,6 @@ def main():
             st.write('rho TODO')
             # rho = st.number_input(f'Density', value=rho.value, step=0.001, format="%.5f")
 
-    st.code(m_sr)
     c_z_krst = (m_sr * g) / (0.5 * rho * v_krst**2 * S)
     st.latex(r"C_{Z_{krst}} = \frac{G}{q \cdot S} = \frac{m_{sr} \cdot g}{0.5 \cdot \rho \cdot v_{krst}^2 \cdot S}")
     st.latex(f"C_{{Z_{{krst}}}} = \\frac{{ {m_sr:.3f} \\cdot {g:.3f} }}{{ 0.5 \\cdot {rho:.4f} \\cdot {v_krst:.3f}^2 \\cdot {S:.3f} }}")

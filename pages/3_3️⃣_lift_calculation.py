@@ -153,8 +153,9 @@ def main():
     | # | Parameter                           | Symbol                 | Value                       | Unit    |
     |---|-------------------------------------|------------------------|-----------------------------|---------|
     | 1 | Cruise Lift Coefficient             | $C_{{z_{{krst}}}}$     | {c_z_krst:.3f}              | -       |
-    | 6 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.2f}                | m/s     |
-    | 7 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
+    | 2 | Cruising Speed                      | $v_{{krst}}$           | {v_krst:.3f}                | m/s     |
+    | 3 | Cruising speed (km/h)               | $v_{{krst}}$           | {v_krst_kmh:.3f}            | Km/h    |
+    | 4 | Air Density at Cruise Altitude      | $\\rho$                | {rho:.5f}                   | kg/m³   |
     """
     st.markdown(mission_params_table)
     
@@ -167,18 +168,18 @@ def main():
             
         col1, col2 = st.columns(2)
         with col1:
-            b = st.number_input('Wingspan (m) `b`', value=get_variable_value('b'))
+            b = st.number_input('Wingspan `b` (m)', value=get_variable_value('b'), format='%.3f')
         with col2: 
-            S = st.number_input('Wing Area (m^2) `S`', value=get_variable_value('S'))
+            S = st.number_input('Wing Area (m^2) `S`', value=get_variable_value('S'), format='%.3f')
         lmbda = b**2 / S
         st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b**2:.3f}}}{{{S:.3f}}} = {lmbda:.3f}")
         
         st.write("Calculate wing taper ratio `n`")
         col1, col2 = st.columns(2)
         with col1:
-            l0 = st.number_input('Tip Chord Length (m) `l0`', value=get_variable_value('l0'))
+            l0 = st.number_input('Tip Chord Length (m) `l0`', value=get_variable_value('l0'), format='%.3f')
         with col2:
-            ls = st.number_input('Root Chord Length (m) `ls`', value=get_variable_value('ls'))
+            ls = st.number_input('Root Chord Length (m) `ls`', value=get_variable_value('ls'), format='%.3f')
         n = l0 / ls
         st.latex(f"n = \\frac{{l_0}} {{l_s}} = \\frac{{{l0:.3f}}} {{{ls:.3f}}} = {n:.3f}")
 
@@ -205,7 +206,7 @@ def main():
         airfoil_name_tip = st.selectbox('🔺 Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65_1-412'))
         tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
 
-    with st.expander("See airfoil raw data"):
+    with st.expander("Show raw airfoil data"):
         col1, col2 = st.columns(2)
         with col1:
             st.text("root_airfoil_row")
@@ -237,7 +238,7 @@ def main():
     
     spacer()
     
-    st.success("🎉 All values loaded in Fortran code")
+    st.success("🎉 All values loaded in Fortran code below")
     
     # st.markdown("***")
 
@@ -275,36 +276,37 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     # ==================== FORTRAN OUTPUT ====================
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### 🧲 Fortran output")
-    with col2:
-        st.write('json')
-
     
     with open('./modules/fortran/IZLAZ.TXT', 'r') as file:
         output = file.read()
-        if st.button("Show full Fortran text file"):
-            st.code(output, language='java')
         
     table_data, czmax_final = regex_fortran(output)
 
     extracted_values = regex_extract_values(output)
-    st.write(extracted_values)
-    st.table(extracted_values)
 
-    st.markdown(f"##### 1️⃣ Max lift coefficient `c_z_max`")
-    
-    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("#### 🧲 Fortran output")
+    with col2:
+        st.write(extracted_values)
+
+
+    if st.button("Show full Fortran text file"):
+        st.code(output, language='java')
 
     st.markdown("***")
     
     #==================== PLOT ====================#
     st.header("📈 Flow separation")
+    spacer()
     
+    st.markdown(f"##### Max lift coefficient `c_z_max`")
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
+    spacer('1em')
+
     df = pd.DataFrame(table_data)
     
-    czmax_final = 1.599
+    # czmax_final = 1.599
     
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
     # df['Highlight'] = np.where(df['Czmax ap.'] == czmax_final, 'Yes', 'No')
@@ -322,9 +324,9 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column)
     
     spacer()       
-    st.markdown("***")
 
     st.markdown("***")
+    
     # ==================== 2. alpha_0 ============================================================
     st.markdown(r"#### 2️⃣ Zero-lift angle of attack – $\\alpha_0$ `alpha_0`")
     
