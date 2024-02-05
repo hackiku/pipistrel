@@ -90,43 +90,32 @@ def extract_and_save_section(input_file, output_file, start_pattern):
     else:
         print("Start pattern not found in the file.")
 
-
-
-
 # -------------------- flow separation graph -------------------------
 
-def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column):
-
-
-    # img & cz_max
-    img = mpimg.imread(wing_image_path)
-    czmax_final = df[czmax_ap_column].max()
-
-    # initialize plot
+def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column, czmax_final):
     fig, ax = plt.subplots(figsize=(10, 6)) 
     ax.set_title('Cz distribution along wing span')
     ax.set_xlabel('y/(b/2)')
     ax.set_ylabel('Cz')
     
-    ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')  # Adjust extent if needed
+    img = mpimg.imread(wing_image_path)
+    ax.imshow(img, extent=[0, 1, 0, 1], aspect='auto')
 
-    # Overlay the aerodynamic curves
     ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
     ax.plot(df[y_b2_column], df[czlok_column], label='Czlok', marker='x', linestyle='--')
-    ax.plot(df[y_b2_column], df[czmax_cb_ca_column], label='Czmax Ca/Cb', marker='.', linestyle='-')
+    ax.plot(df[y_b2_column], df[czmax_cb_ca_column], label='Czmax-Cb/Ca', marker='.', linestyle='-')
 
-    # Highlight the flow separation point
-    separation_point = df[df[czmax_ap_column] == czmax_final]
-    ax.scatter(separation_point[y_b2_column], separation_point[czmax_ap_column], color='red', s=100, label='Flow Separation Point')
-
-    # Set labels and title
-
-    # Add grid, legend, and show the plot
+    separation_point = df[df[czmax_cb_ca_column] == czmax_final]
+    if not separation_point.empty:
+        sep_point_row = separation_point.iloc[0]
+        ax.scatter(sep_point_row[y_b2_column], sep_point_row[czmax_cb_ca_column], color='red', s=100, label='Flow Separation Point')
+    else:
+        st.error("Flow separation point not found in the data.")
+    
     ax.legend()
     ax.grid(True)
+
     st.pyplot(fig)
-
-
 
 
 # ======================================================================#
@@ -347,12 +336,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     czmax_ap_column = 'Czmax ap.'
     czlok_column = 'Czlok'
     czmax_cb_ca_column = 'Czmax-Cb/Ca'
-
-    # Assuming df is your DataFrame with the necessary data
-    draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column)
-
-
-    spacer()       
+    
+    draw_flow_separation(df, wing_image_path, 'y/(b/2)', 'Czmax ap.', 'Czlok', 'Czmax-Cb/Ca', czmax_final)
 
     st.markdown("***")
     
@@ -404,7 +389,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     The formulas are as follows:
     """)
-
 
     # alpha krm
     alpha_kr_tip = tip_airfoil_row['alpha_kr']
