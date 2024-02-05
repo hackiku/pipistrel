@@ -17,7 +17,6 @@ airfoil_df = pd.DataFrame(airfoil_data, columns=[
     "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
 ])
 
-
 def regex_extract_values(output):
     # Dictionary to hold the extracted values
     extracted_values = {}
@@ -119,7 +118,7 @@ def main():
     initialize_session_state(page_values)
 
     # Display title and headers
-    st.title("③ Lift calculations ⬆️")
+    st.title("③ Lift performance ⬆️")
     st.write('The goal of this section is to construct the lift curve, and for that we need to calculate the following parameters:')
     st.markdown(r"""- $C_{z_{max}}$ - Max lift coefficient
 - $\alpha_0$ - Zero-lift angle of attack
@@ -160,7 +159,7 @@ def main():
     
     spacer()
 
-    st.markdown('#### 📐   Wing geometry inputs')
+    st.markdown('#### 📐 Wing geometry inputs')
     with st.expander("Edit wing dimensions"):
         
         st.write("Calculate wing aspect ratio (λ) `lmbda`")
