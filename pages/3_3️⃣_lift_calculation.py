@@ -409,8 +409,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_b_2} = {epsilon_m}°")
     st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_n_root}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
 
-
-
     st.markdown("***")
     # Update variables at the end of the session
     update_variables(page_values, locals())

@@ -44,6 +44,15 @@ def initialize_session_state_all():
         st.session_state['variables_data'] = load_variables()
 """
 
+def rewrite_default_values():
+    variables_data = st.session_state['variables_data']
+    
+    for var_name, var_details in variables_data.items():
+        var_details['default'] = var_details['value']
+
+    save_variables(variables_data)
+    st.success("Default values have been updated!")
+
 def update_variables(page_values, local_vars):
     variables_data = st.session_state['variables_data']
     for var_name in page_values:

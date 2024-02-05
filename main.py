@@ -5,7 +5,8 @@ import pandas as pd
 from data import aircraft_specs, create_specs_table 
 from utils import spacer
 from modules.isa_lite import get_ISA_conditions
-from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
+from variables_manager import initialize_session_state, get_variable_value, \
+    update_variables, log_changed_variables, rewrite_default_values
 from pages.draw_wing_areas import draw_wing_area
 
 # TODO abstract wingspan
@@ -276,10 +277,11 @@ def main():
 
     update_variables(page_values, locals())
     log_changed_variables()
-
     
-    if st.button("render latex and save pics"):
-        st.write("WIP")
-
+    if st.button('⚠️ Rewrite default values'):
+        rewrite_default_values()
+    
+    # log_changed_variables()
+    
 if __name__ == "__main__":
     main()
