@@ -71,15 +71,37 @@ def regex_fortran(output):
 
     return table_data, czmax_final_value
 
+def extract_and_save_section(input_file, output_file, start_pattern):
+    # Read the input file
+    with open(input_file, 'r') as file:
+        content = file.read()
+    
+    # Find the start of the desired section
+    start_index = content.find(start_pattern)
+    
+    if start_index != -1:
+        # Extract from the start pattern to the end
+        extracted_content = content[start_index:]
+        
+        # Save the extracted content to the output file
+        with open(output_file, 'w') as output_file:
+            output_file.write(extracted_content)
+        print(f"Content successfully saved to {output_file.name}")
+    else:
+        print("Start pattern not found in the file.")
+
+
+
+
+# -------------------- flow separation graph -------------------------
 
 def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlok_column, czmax_cb_ca_column):
-    # Load the wing image
+
+    # load img and cz_max
     img = mpimg.imread(wing_image_path)
-    
-    # find highest Czmax ap. for flow separation
     czmax_final = df[czmax_ap_column].max()
 
-    # Create a figure with an appropriate size
+    # create plot figure
     fig, ax = plt.subplots(figsize=(10, 6)) 
 
     # Display the wing image
@@ -102,6 +124,9 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
     ax.legend()
     ax.grid(True)
     st.pyplot(fig)
+
+
+
 
 # ======================================================================#
 # ================================ MAIN ================================#
@@ -273,8 +298,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.markdown("***")
     
     # ==================== FORTRAN OUTPUT ====================
+    extract_and_save_section('./modules/fortran/IZLAZ.TXT', './modules/fortran/short_output.java', 'KARAKTERISTIKE KRILA PRI ZADATOM KOEFICIJENTU UZGONA ILI REZIMU KRSTARENJA')
 
-    
     with open('./modules/fortran/IZLAZ.TXT', 'r') as file:
         output = file.read()
         
@@ -290,9 +315,13 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
 
     if st.button("Show full Fortran text file"):
-        st.code(output, language='java')
+        st.code(output, language='fortran')
 
     st.markdown("***")
+    
+    with open('./modules/fortran/short_output.java', 'r') as file:
+        output = file.read()
+        st.code(output, language='brainfuck')
     
     #==================== PLOT ====================#
     st.header("📈 Flow separation")
