@@ -101,7 +101,22 @@ def calculate_shape_center(lines):
     center_y = sum(y_coords) / len(y_coords)
     return (center_x, center_y)
 
-# ========================= draw shapes  =========================
+def draw_centered_measurement_lines(draw, shape_center, font, conversion_factor):
+    # Define lengths for measurement lines (arbitrary lengths or based on shape size)
+    line_length = 100  # Adjust based on your preference or dynamic calculations
+    # Draw horizontal measurement line centered on centroid
+    draw.line([(shape_center[0] - line_length / 2, shape_center[1]), (shape_center[0] + line_length / 2, shape_center[1])], fill='blue', width=2)
+    # Draw vertical measurement line centered on centroid
+    draw.line([(shape_center[0], shape_center[1] - line_length / 2), (shape_center[0], shape_center[1] + line_length / 2)], fill='blue', width=2)
+    # Compute lengths in meters using the conversion factor
+    measurement_length_m = line_length * conversion_factor
+    # Annotate horizontal line
+    draw.text((shape_center[0] + line_length / 2 + 10, shape_center[1]), f"{measurement_length_m:.2f}m", fill='red', font=font)
+    # Annotate vertical line
+    draw.text((shape_center[0], shape_center[1] - line_length / 2 - 30), f"{measurement_length_m:.2f}m", fill='red', font=font)
+
+
+# ========================= 🔥 draw shapes 🔥 =========================
 def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
@@ -144,10 +159,13 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
             
-            offset_x, offset_y = 60, -160
+            # Draw the area annotation
+            # offset_x, offset_y = 60, -160
+            offset_x, offset_y = 0, -42
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
-            
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)
+            
+            draw_centered_measurement_lines(draw, shape_center, font, conversion_factor)
             
             shape = Shape(temp_shape)
             shape.area = area

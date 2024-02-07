@@ -11,21 +11,20 @@ from pages.draw_wing_areas import draw_wing_area
 
 # TODO abstract wingspan
 def calculate_wingspan(shapes):
-
     conversion_hardcoded = 0.00584518884292006
     
-    min_y = float('inf')
-    max_y = float('-inf')
+    min_x = float('inf')  # Initialize with infinity
+    max_x = float('-inf') # Initialize with negative infinity
 
-    # Iterate through each shape and update min and max y-coordinates
+    # Iterate through each shape and update min and max x-coordinates
     for shape in shapes:
         for line in shape.lines:
-            start_y, end_y = line['start'][1], line['end'][1]
-            min_y = min(min_y, start_y, end_y)
-            max_y = max(max_y, start_y, end_y)
-        # st.code(f"min_y: {min_y}, max_y: {max_y}")
-    # Calculate wingspan as the difference between max and min y-coordinates
-    wingspan = (max_y - min_y) * conversion_hardcoded
+            start_x, end_x = line['start'][0], line['end'][0]
+            min_x = min(min_x, start_x, end_x)
+            max_x = max(max_x, start_x, end_x)
+
+    # Calculate wingspan as the difference between max and min x-coordinates
+    wingspan = (max_x - min_x) * conversion_hardcoded
     return wingspan
 
 

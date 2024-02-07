@@ -17,7 +17,7 @@
     "b": {
         "name": "Wingspan",
         "default": 10.158938208995066,
-        "value": 2.0925776057653818,
+        "value": 10.158938208995066,
         "latex": "b",
         "unit": "m",
         "changed": true
