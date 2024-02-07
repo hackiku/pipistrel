@@ -104,6 +104,7 @@ def main():
     st.header("📐 Wing geometry")
     spacer('2em')
 
+    # svg_file_path = './modules/draw/wing_area/wing_single.svg'
     svg_file_path = './modules/draw/wing_area/wing_single.svg'
     shapes = draw_wing_area(svg_file_path)
 

@@ -144,7 +144,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
             
-            offset_x, offset_y = 110, -100
+            offset_x, offset_y = 60, -160
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
             
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)

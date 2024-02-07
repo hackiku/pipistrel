@@ -2,7 +2,7 @@
     "S": {
         "name": "Wing Area",
         "default": 10.08705916127932,
-        "value": 10.08705916127932,
+        "value": 10.087059161279324,
         "latex": "S",
         "unit": "m^2",
         "changed": true
@@ -17,15 +17,15 @@
     "b": {
         "name": "Wingspan",
         "default": 10.158938208995066,
-        "value": 10.158938208995066,
+        "value": 2.0925776057653818,
         "latex": "b",
         "unit": "m",
-        "changed": false
+        "changed": true
     },
     "c_z_krst": {
         "name": "Cruise Lift Coefficient",
         "default": 0.3846811207976912,
-        "value": 0.3846811207976912,
+        "value": 0.384681120797691,
         "latex": "C_{z_{krst}}",
         "unit": "",
         "changed": true
@@ -84,9 +84,10 @@
     "l0": {
         "name": "Tip Chord Length",
         "default": 0.7601668090217536,
-        "value": 0.7601668090217536,
+        "value": 0.7601668090217549,
         "latex": "l_{0}",
-        "unit": "m"
+        "unit": "m",
+        "changed": true
     },
     "nT": {
         "name": "Taper Ratio",
