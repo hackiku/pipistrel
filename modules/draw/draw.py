@@ -103,12 +103,11 @@ def calculate_shape_center(lines):
     return (center_x, center_y)
 
 
-
 def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
     fill = 'black'  # Main text color
     shadow_color = 'white'  # Shadow color for text
 
-    font = ImageFont.truetype(font_path, size=22)
+    font = ImageFont.truetype(font_path, size=26)
     shadow_font = ImageFont.truetype(font_bold, size=24)
 
     if not shapes:
@@ -126,11 +125,11 @@ def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
             max_y = max(max_y, start[1], end[1])
 
     # Draw the extreme measurement lines
-    horizontal_line_y = max_y + 100  # Additional offset for clarity
-    vertical_line_x = max_x + 80     # Additional offset for clarity
+    horizontal_line_y = max_y + 50
+    vertical_line_x = max_x + 80
 
-    draw.line([(min_x, horizontal_line_y), (max_x, horizontal_line_y)], fill=fill, width=2)
-    draw.line([(vertical_line_x, min_y), (vertical_line_x, max_y)], fill=fill, width=2)
+    draw.line([(min_x, horizontal_line_y), (max_x, horizontal_line_y)], fill=fill, width=3)
+    draw.line([(vertical_line_x, min_y), (vertical_line_x, max_y)], fill=fill, width=3)
 
     # Calculate midpoints for text annotations
     horizontal_text_x = min_x + (max_x - min_x) / 2
@@ -144,13 +143,12 @@ def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
     def draw_text_with_shadow(position, text, font, fill, shadow_color):
         shadow_offset = (0, 0)  # Shadow offset; adjust as needed
         # Draw shadow
-        draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), "•••••••", font=shadow_font, fill=shadow_color, anchor="mm")
+        draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), text, font=shadow_font, fill=shadow_color, anchor="mm")
         # Draw main text
         draw.text(position, text, font=font, fill=fill, anchor="mm")
 
-    # Annotate with shadows
-    draw_text_with_shadow((horizontal_text_x, horizontal_line_y + 0), f"{total_width_m:.3f}m", font, fill, shadow_color)
-    draw_text_with_shadow((vertical_line_x + 0, vertical_text_y), f"{total_length_m:.3f}m", font, fill, shadow_color)
+    draw_text_with_shadow((horizontal_text_x, horizontal_line_y + 20), f"{total_width_m:.3f}m", font, fill, shadow_color)
+    draw_text_with_shadow((vertical_line_x + 20, vertical_text_y), f"{total_length_m:.3f}m", font, fill, shadow_color)
 
 
 # 🔥 ========================= 🔥 draw shapes 🔥 =========================
@@ -199,7 +197,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             shape_center = calculate_shape_center(temp_shape)
             
             # Draw the area annotation
-            offset_x, offset_y = 60, -160
+            offset_x, offset_y = -50, -180
             # offset_x, offset_y = 0, -42
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)

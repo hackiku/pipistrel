@@ -102,9 +102,20 @@ def main():
 
     st.header("📐 Wing geometry")
     spacer('2em')
-
-    # svg_file_path = './modules/draw/wing_area/wing_single.svg'
+    
     svg_file_path = './modules/draw/wing_area/wing_single.svg'
+    
+    option = st.selectbox(
+    'Select wing area configuration',
+    ('Single, no winglets (recommended)', 'Single, winglets included', 'Geometric + exposed wing area (⚠️ WIP)'), index=0)
+    
+    if option == 'Single, no winglets (recommended)':
+        svg_file_path = './modules/draw/wing_area/wing_single.svg'
+    elif option == 'Single, winglets included':
+        svg_file_path = './modules/draw/wing_area/wing_single_winglets_on.svg'
+    else:
+        svg_file_path = './modules/draw/wing_area/wings_both.svg'
+
     shapes = draw_wing_area(svg_file_path)
 
     S0 = shapes[0].area

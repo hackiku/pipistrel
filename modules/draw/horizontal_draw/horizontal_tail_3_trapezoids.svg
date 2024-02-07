@@ -1,4 +1,5 @@
 <svg width="2000" height="3000" viewBox="0 0 2000 3000" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1171 2864L1171 2794L988 2760L988 2877L1171 2864Z" stroke="#FF0000"/>
-<path d="M805 2864L805 2794L982.5 2761.5L982.5 2877L805 2864Z" stroke="#DB00FF"/>
+<path d="M805 2864L805 2794L959 2766L959 2875.5L805 2864Z" stroke="#DB00FF"/>
+<path d="M982 2761.5L982 2842.5L959 2875L959 2766L982 2761.5Z" stroke="#DB00FF"/>
 </svg>
