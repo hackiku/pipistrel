@@ -32,7 +32,6 @@ def display_airfoil_table(df):
 # ====================================================== #
 
 def main():
-    st.title("Airfoil Selection Tool")
     
     page_values = [
         'c_z_krst', 
@@ -45,24 +44,29 @@ def main():
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
         "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
     ])
-    
-    
+        
     airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)
     
+    st.title("② Pick an airfoil")
+    st.write("This tool helps you to select the most suitable airfoil for your wing design. Data is limited to NACA series 6 laminar airfoils.")
+    
+    airfoilNumber = airfoil_df.__len__()
     # button to display all airfoils
-    if st.button("Show All Airfoils"):
-        st.markdown("### All Airfoils")
-        st.write("All airfoils:", airfoil_df)
+    if st.button(f"See all NACA 6-series airfoils ({airfoilNumber})"):
+        st.write("NACA 6-Series airfoils:", airfoil_df)
+
+    st.markdown("***")
 
     # ------------------ 1 ------------------ #
     emoji_header("1️⃣", "Thickness Ratio", "")
     thickness_ratio = st.select_slider("Choose Thickness Ratio", options=["15:12", "12:10", "12:09", "09:06"])
     root_thickness, tip_thickness = (float(value) / 100 for value in thickness_ratio.split(':'))
 
+    spacer()
+
     # ------------------ 2 ------------------ #
     emoji_header("2️⃣", "Optimal lift coefficient", "")
     st.write("Optimal lift coefficient closest to the one at cruise.")
-    spacer()
     
     current_value, default_value, _, _ = get_variable_props('c_z_krst')
     
@@ -113,19 +117,22 @@ def main():
     st.markdown("### Top 5 Tip Airfoils")
     st.write("Tip airfoils:", tip_airfoils)
 
-    st.markdown('#### 🦋 Airfoil data inputs')
+    st.markdown('#### 🛸 Airfoil data inputs')
 
     col1, col2 = st.columns(2)
     with col1:
-        airfoil_name_root = st.selectbox('🌳 Root airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65-009'))
+        airfoil_name_root = st.selectbox('🕹️ Root airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 65-009'))
         # root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
     with col2:
         airfoil_name_tip = st.selectbox('🔺 Tip Airfoil', airfoil_df['Name'].unique(), index=airfoil_df['Name'].tolist().index('NACA 64-206'))
         # tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
 
+    st.markdown("***")
+
+    # ===================== UPDATE SESSION STATE ===================== #
+    st.text('debug:')
     update_variables(page_values, locals())
     log_changed_variables()
- 
 
     # ===================== INDIVIDUAL AIRFOILS OPS ===================== #
 

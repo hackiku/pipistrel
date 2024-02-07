@@ -1,4 +1,4 @@
-### app.py ###
+### main.py ###
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -79,7 +79,7 @@ def main():
     st.markdown('***')
 
     # 1. specs
-    st.title("① Mission planner")
+    st.title("① Plan your mission")
     st.write("This tool will help you plan your aircraft's mission by calculating the lift coefficient at cruise conditions.")
 
     spacer()
@@ -302,6 +302,15 @@ def main():
     st.latex(f"C_{{Z_{{krst}}}} = {c_z_krst:.3f}")
     
     st.markdown('***')
+    
+    url = "https://www.example.com"
+
+    st.markdown(f'''<a href="{url}"><button style="color: white; background-color: #F34A4B; border: none;
+        padding: 6px 20px; text-align: center; text-decoration: none;
+        display: inline-block; font-size: 16px; margin: 0em 0em 0em 45%;
+        cursor: pointer; border-radius: 12px;">Next page</button></a>''', unsafe_allow_html=True)
+
+    
     #==================== SESSION STATE ====================#
 
     update_variables(page_values, locals())

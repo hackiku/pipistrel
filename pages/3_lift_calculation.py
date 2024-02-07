@@ -156,8 +156,8 @@ def main():
 """)
     
     st.markdown("***")    
-    st.header("💾 Fortran program")
-    st.write("The following values are used in the FORTRAN program below. Values are default unless you calculated them on other pages, and you can change them here as well.")
+    st.header("💾 Fun with Fortran")
+    st.write("Review and edit values to be loaded in the Fortran script down here. Values are default unless you calculated them on other pages, and any changes you make here remain until you refresh the page.")
 
     spacer('1em')
 
