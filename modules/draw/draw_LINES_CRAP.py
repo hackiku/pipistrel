@@ -6,7 +6,6 @@ from svgpathtools import svg2paths
 base_image = "./modules/draw/base_image_vertical.png"
 svg_lines = "./modules/draw/lines.svg"
 font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
-font_bold = './assets/Roboto_Mono/static/RobotoMono-Bold.ttf'
 
 class Shape:
     def __init__(self, lines):
@@ -102,55 +101,46 @@ def calculate_shape_center(lines):
     center_y = sum(y_coords) / len(y_coords)
     return (center_x, center_y)
 
+def draw_extreme_measurement_lines(draw, lines, font, conversion_factor, offset=200):
+    # Find the extreme points by creating lists of all x and y coordinates
+    x_coords = [line['start'][0] for line in lines] + [line['end'][0] for line in lines]
+    y_coords = [line['start'][1] for line in lines] + [line['end'][1] for line in lines]
+
+    min_x = min(x_coords)
+    max_x = max(x_coords)
+    min_y = min(y_coords)
+    max_y = max(y_coords)
+
+    # Horizontal lines at min_y and max_y
+    draw.line([(min_x - offset, min_y), (max_x + offset, min_y)], fill='yellow', width=2)
+    draw.line([(min_x - offset, max_y), (max_x + offset, max_y)], fill='yellow', width=2)
+    
+    # Vertical lines at min_x and max_x
+    draw.line([(min_x, min_y - offset), (min_x, max_y + offset)], fill='yellow', width=2)
+    draw.line([(max_x, min_y - offset), (max_x, max_y + offset)], fill='yellow', width=2)
+    
+    # Annotate lines with lengths
+    horizontal_length_m = (max_x - min_x) * conversion_factor
+    vertical_length_m = (max_y - min_y) * conversion_factor
+    
+    # Text positioning adjusted to not overlap with lines
+    draw.text((max_x + offset*3, (min_y + max_y) / 2), f"{vertical_length_m:.5f}m", fill='red', font=font)
+    draw.text(((min_x + max_x) / 2, max_y + offset*3), f"{horizontal_length_m:.5f}m", fill='red', font=font)
 
 
-def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
-    fill = 'black'  # Main text color
-    shadow_color = 'white'  # Shadow color for text
-
-    font = ImageFont.truetype(font_path, size=22)
-    shadow_font = ImageFont.truetype(font_bold, size=24)
-
-    if not shapes:
-        return  # Exit if shapes list is empty
-
-    min_x, min_y = float('inf'), float('inf')
-    max_x, max_y = float('-inf'), float('-inf')
-
-    for shape in shapes:
-        for line in shape.lines:
-            start, end = line['start'], line['end']
-            min_x = min(min_x, start[0], end[0])
-            max_x = max(max_x, start[0], end[0])
-            min_y = min(min_y, start[1], end[1])
-            max_y = max(max_y, start[1], end[1])
-
-    # Draw the extreme measurement lines
-    horizontal_line_y = max_y + 100  # Additional offset for clarity
-    vertical_line_x = max_x + 80     # Additional offset for clarity
-
-    draw.line([(min_x, horizontal_line_y), (max_x, horizontal_line_y)], fill=fill, width=2)
-    draw.line([(vertical_line_x, min_y), (vertical_line_x, max_y)], fill=fill, width=2)
-
-    # Calculate midpoints for text annotations
-    horizontal_text_x = min_x + (max_x - min_x) / 2
-    vertical_text_y = min_y + (max_y - min_y) / 2
-
-    # Total length and width calculated for annotation
-    total_width_m = (max_x - min_x) * conversion_factor
-    total_length_m = (max_y - min_y) * conversion_factor
-
-    # Function to draw text with shadow
-    def draw_text_with_shadow(position, text, font, fill, shadow_color):
-        shadow_offset = (0, 0)  # Shadow offset; adjust as needed
-        # Draw shadow
-        draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), "•••••••", font=shadow_font, fill=shadow_color, anchor="mm")
-        # Draw main text
-        draw.text(position, text, font=font, fill=fill, anchor="mm")
-
-    # Annotate with shadows
-    draw_text_with_shadow((horizontal_text_x, horizontal_line_y + 0), f"{total_width_m:.3f}m", font, fill, shadow_color)
-    draw_text_with_shadow((vertical_line_x + 0, vertical_text_y), f"{total_length_m:.3f}m", font, fill, shadow_color)
+def draw_centered_measurement_lines(draw, shape_center, font, conversion_factor):
+    # Define lengths for measurement lines (arbitrary lengths or based on shape size)
+    line_length = 100  # Adjust based on your preference or dynamic calculations
+    # Draw horizontal measurement line centered on centroid
+    draw.line([(shape_center[0] - line_length / 2, shape_center[1]), (shape_center[0] + line_length / 2, shape_center[1])], fill='blue', width=2)
+    # Draw vertical measurement line centered on centroid
+    draw.line([(shape_center[0], shape_center[1] - line_length / 2), (shape_center[0], shape_center[1] + line_length / 2)], fill='blue', width=2)
+    # Compute lengths in meters using the conversion factor
+    measurement_length_m = line_length * conversion_factor
+    # Annotate horizontal line
+    draw.text((shape_center[0] + line_length / 2 + 10, shape_center[1]), f"{measurement_length_m:.2f}m", fill='red', font=font)
+    # Annotate vertical line
+    draw.text((shape_center[0], shape_center[1] - line_length / 2 - 30), f"{measurement_length_m:.2f}m", fill='red', font=font)
 
 
 # 🔥 ========================= 🔥 draw shapes 🔥 =========================
@@ -159,6 +149,11 @@ def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
 def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     # Extract lines with color from SVG paths
     lines = extract_lines_from_svg(svg_file_path)
+
+    overall_min_x = float('inf')
+    overall_max_x = float('-inf')
+    overall_min_y = float('inf')
+    overall_max_y = float('-inf')
 
     img = Image.open(base_image)
     draw = ImageDraw.Draw(img)
@@ -172,6 +167,12 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
         start, end, color = line
         start_pixels = (start[0], start[1])
         end_pixels = (end[0], end[1])
+
+        # Update the overall extremes
+        overall_min_x = min(overall_min_x, start_pixels[0], end_pixels[0])
+        overall_max_x = max(overall_max_x, start_pixels[0], end_pixels[0])
+        overall_min_y = min(overall_min_y, start_pixels[1], end_pixels[1])
+        overall_max_y = max(overall_max_y, start_pixels[1], end_pixels[1])
 
         # Draw the line on the image
         draw.line([start_pixels, end_pixels], fill=color, width=4)
@@ -212,8 +213,13 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             shape.area = area
             shapes.append(shape)
             temp_shape = []
-    
-    draw_min_max_measurement_lines(draw, shapes, font, conversion_factor)
+
+    draw_extreme_measurement_lines(draw, [
+        {'start': (overall_min_x, overall_min_y), 'end': (overall_max_x, overall_min_y)},
+        {'start': (overall_min_x, overall_max_y), 'end': (overall_max_x, overall_max_y)},
+        {'start': (overall_min_x, overall_min_y), 'end': (overall_min_x, overall_max_y)},
+        {'start': (overall_max_x, overall_min_y), 'end': (overall_max_x, overall_max_y)}
+    ], font, conversion_factor, offset=20)
 
     return img, shapes, lines
 
