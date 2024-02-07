@@ -69,6 +69,8 @@ lines, conversion_factor = parse_svg_for_lines(svg_lines)
 
 draw_measurements_on_image(lines, conversion_factor)
 
+
+
 #==========================================================
 #========================= shapes =========================
 #==========================================================
@@ -152,6 +154,7 @@ def draw_min_max_measurement_lines(draw, shapes, font, conversion_factor):
 
 
 # 🔥 ========================= 🔥 draw shapes 🔥 =========================
+# 🔥 =========================🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 =========================
 
 def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     # Extract lines with color from SVG paths
@@ -164,6 +167,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
 
     shapes = []  # List to store shape data
     temp_shape = []  # Temporary list to store lines of a shape
+    
 
     for line in lines:
         start, end, color = line
@@ -195,32 +199,35 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
             
-            total_area = sum(shape.area for shape in shapes)
-
-            # After all shapes are processed and before returning img, add the total area text
-            def draw_total_area(draw, total_area, font_path, img_size):
-                font_area_sum = ImageFont.truetype(font_path, size=48)
-                text = f"ΣS = {total_area:.3f} m²"
-                offset_x, offset_y = 2, 2
-                # offset_x, offset_y = img_size[0] / 10, img_size[1] / 10 
-                draw.text((offset_x, offset_y), text, fill='green', font=font_area_sum)
-
-            # Call this new function before the return statement of draw_shapes_with_lengths
-            img_size = img.size  # Get the size of the image for offset calculation
-            draw_total_area(draw, total_area, font_bold, img_size)
-            
-            # Draw individual areas
-            
+            # Draw individual areas            
             offset_x, offset_y = -50, -180
             # offset_x, offset_y = 0, -42
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)
-            
+                        
             shape = Shape(temp_shape)
             shape.area = area
             shapes.append(shape)
             temp_shape = []
+
+    total_area = sum(shape.area for shape in shapes)
     
+    def draw_total_area(draw, total_area, font_path, img_size, offset_x=1000, offset_y=400):
+        font_area_sum = ImageFont.truetype(font_path, size=48)
+        text = f"ΣS = {total_area:.3f} m²"
+
+        # Adjust the position based on the image size or as needed
+        position_x = img_size[0] - offset_x
+        position_y = offset_y
+        draw.text((position_x, position_y), text, fill='green', font=font_area_sum)
+
+    img_size = img.size
+    # img_size = 2000.00, 3000.00
+
+    # Call the function to draw the total area annotation after all shapes have been processed
+    draw_total_area(draw, total_area, font_bold, img_size)
+
+
     draw_min_max_measurement_lines(draw, shapes, font, conversion_factor)
 
     return img, shapes, lines
