@@ -103,11 +103,11 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
     img_aspect_ratio = img.shape[1] / img.shape[0]  # width / height
     ax.set_xlim(0, 1)
 
-    y_center = 0.5
-    y_margin = 0.5 / img_aspect_ratio
+    y_center = 3
+    y_margin = 7 / img_aspect_ratio
     ax.set_ylim(y_center - y_margin, y_center + y_margin)
     
-    ax.imshow(img, extent=[0, 1, y_center - y_margin, y_center + y_margin], aspect='auto')
+    ax.imshow(img, extent=[0, 1, y_center - y_margin, y_center + y_margin], aspect='auto', alpha=0.5)
         
     ax.plot(df[y_b2_column], df[czmax_ap_column], label='Czmax ap.', marker='o', linestyle='-')
     ax.plot(df[y_b2_column], df[czlok_column], label='Czlok', marker='x', linestyle='--')
@@ -116,7 +116,14 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
     separation_point = df[df[czmax_cb_ca_column] == czmax_final]
     if not separation_point.empty:
         sep_point_row = separation_point.iloc[0]
-        ax.scatter(sep_point_row[y_b2_column], sep_point_row[czmax_cb_ca_column], color='red', s=100, label='Flow Separation Point')
+        x_value = sep_point_row[y_b2_column]
+        y_value = sep_point_row[czmax_cb_ca_column]
+
+        # flow separation
+        ax.scatter(sep_point_row[y_b2_column], sep_point_row[czmax_cb_ca_column], color='red', s=100, label='Flow Separation Point')  
+        ax.annotate(f'y/(b/2) separation: {x_value:.3f}', (x_value, y_value), textcoords="offset points", xytext=(40,-20), ha='center', color='black')
+
+    
     else:
         st.error("Flow separation point not found in the data.")
     
@@ -318,7 +325,9 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     with open('./modules/fortran/short_output.java', 'r') as file:
         output = file.read()
-        st.code(output, language='brainfuck')
+        st.code(output, language='java')
+    
+    st.markdown('***')
     
     #==================== PLOT ====================#
     
@@ -335,6 +344,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     st.write(df)
 
+    spacer()
+    
     wing_image_path = './modules/draw/wing_cutout.png'
     
     draw_flow_separation(df, wing_image_path, 'y/(b/2)', 'Czmax ap.', 'Czlok', 'Czmax-Cb/Ca', czmax_final)
@@ -365,8 +376,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(r"a = \frac{a_0 \cdot \lambda}{2 + \sqrt{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{\tan^2(\phi)}{\beta^2}\right)}} = \frac{0.110 \cdot 3.888}{2 + \sqrt{4 + (3.888)^2 \cdot (0.71)^2 \cdot \left(1 + \frac{\tan^2(27^\circ)}{(0.71)^2}\right)}} = 0.07197 \approx 0.072")
     
     st.markdown("***")
-    
-    
     
     # ==================== 4. alpha_krst ============================================================
     st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")

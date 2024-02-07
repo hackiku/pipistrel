@@ -42,7 +42,8 @@
         "default": 0.1,
         "value": 0.1,
         "latex": "S_{f_{rel}}",
-        "unit": "m^2"
+        "unit": "m^2",
+        "changed": true
     },
     "S_20": {
         "name": "Aerodynamic Reference Area",
@@ -238,7 +239,7 @@
     "lmbda": {
         "name": "Wing Aspect Ratio",
         "default": 3.888,
-        "value": 3.358,
+        "value": 3.888,
         "latex": "\\lambda",
         "unit": "",
         "changed": true

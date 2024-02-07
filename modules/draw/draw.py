@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from svgpathtools import svg2paths
 
 # Path to the base image and SVG file
-base_image = "./modules/draw/base_image.png"
+base_image = "./modules/draw/base_image_vertical.png"
 svg_lines = "./modules/draw/lines.svg"
 font_path = './assets/Roboto_Mono/static/RobotoMono-Regular.ttf'
 
@@ -108,8 +108,8 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
 
     img = Image.open(base_image)
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(font_path, size=22)
-    font_area = ImageFont.truetype(font_path, size=32)
+    font = ImageFont.truetype(font_path, size=26)
+    font_area = ImageFont.truetype(font_path, size=42)
 
     shapes = []  # List to store shape data
     temp_shape = []  # Temporary list to store lines of a shape
@@ -120,7 +120,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
         end_pixels = (end[0], end[1])
 
         # Draw the line on the image
-        draw.line([start_pixels, end_pixels], fill=color, width=3)
+        draw.line([start_pixels, end_pixels], fill=color, width=4)
 
         # Calculate the length of the line in meters
         length_pixels = ((end[0] - start[0])**2 + (end[1] - start[1])**2)**0.5
@@ -144,7 +144,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
             
-            offset_x, offset_y = -60, 30
+            offset_x, offset_y = 110, -100
             text_position = (shape_center[0] + offset_x, shape_center[1] + offset_y)
             
             draw.text(text_position, f"{area:.3f} m²", fill=color, font=font_area)

@@ -146,6 +146,7 @@ def main():
 #==================== MASS ====================#
 
     st.subheader('🧲 Average mass')
+    spacer('1em')
     
     m_empty_poh = aircraft_specs["Weights"]["Design Empty Weight"]["value"]
     m_max_poh = aircraft_specs["Weights"]["Max Take Off Weight"]["value"]
@@ -176,6 +177,7 @@ def main():
     # ./modules/isa_lite.py
     
     st.subheader("🌤️ ISA air conditions")
+    spacer('1.5em')
 
     col1, col2 = st.columns(2)
     
@@ -216,7 +218,8 @@ def main():
     with col2:
         st.write()
         # unit = st.radio("", ['Km/h', 'm/s'])
-    
+    spacer('1.5em')
+
     v_max_poh = aircraft_specs["Performance"]["Max Structural Cruising Speed"]["value"]
     
     st.write(f"Pick the cruise speed as % of max structural cruising speed ({v_max_poh} Km/h), usually 70-80%")
@@ -243,6 +246,7 @@ def main():
 #==================== LIFT COEFF ====================#
 
     st.subheader("🎈 Lift coefficient at cruise")
+    spacer('1.5em')
 
     # toggle planet
     planet = st.radio("Select Planet", ['🌎 Earth', '🟠 Mars'], horizontal= True, index=0)
@@ -292,8 +296,7 @@ def main():
     update_variables(page_values, locals())
     log_changed_variables()
     
-    st.write(page_values)
-    
+    # danger zone!!
     if st.button('⚠️ Rewrite default values'):
         rewrite_default_values()
     
