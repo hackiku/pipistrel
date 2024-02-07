@@ -167,7 +167,8 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
 
     shapes = []  # List to store shape data
     temp_shape = []  # Temporary list to store lines of a shape
-    
+    centers = []  # List to store the center of each shape
+
 
     for line in lines:
         start, end, color = line
@@ -198,6 +199,7 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
         if len(temp_shape) == 4:
             area = calculate_area(temp_shape)
             shape_center = calculate_shape_center(temp_shape)
+            centers.append(shape_center)
             
             # Draw individual areas            
             offset_x, offset_y = -50, -180
@@ -212,21 +214,33 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
 
     total_area = sum(shape.area for shape in shapes)
     
-    def draw_total_area(draw, total_area, font_path, img_size, offset_x=1000, offset_y=400):
-        font_area_sum = ImageFont.truetype(font_path, size=48)
-        text = f"ΣS = {total_area:.3f} m²"
+    if centers:
+        avg_center_x = sum(x for x, y in centers) / len(centers)
+        avg_center_y = sum(y for x, y in centers) / len(centers)
+        img_size = img.size
 
-        # Adjust the position based on the image size or as needed
-        position_x = img_size[0] - offset_x
-        position_y = offset_y
-        draw.text((position_x, position_y), text, fill='green', font=font_area_sum)
+        if avg_center_y > img_size[1] * 0.7:
+            # Lower part of the image is crowded, place annotation towards the top
+            position_y = img_size[1] * 0.90  # 10% from the top
+        else:
+            # Default to bottom placement with adjustments
+            position_y = img_size[1] * 0.9  # 90% from the top
 
-    img_size = img.size
-    # img_size = 2000.00, 3000.00
+        if avg_center_x > img_size[0] * 0.8:
+            # Right half of the image is crowded, place annotation towards the left
+            position_x = img_size[0] * 0.1  # 10% from the left
+        else:
+            # Default to right placement with adjustments
+            position_x = img_size[0] * 0.9  # 90% from the left
 
-    # Call the function to draw the total area annotation after all shapes have been processed
-    draw_total_area(draw, total_area, font_bold, img_size)
+        def draw_total_area(draw, total_area, position, font_path=font_path):
+            font_area_sum = ImageFont.truetype(font_path, size=48)
+            text = f"S_tot = {total_area:.3f} m²"
+            draw.text(position, text, fill='green', font=font_area_sum)
+            # draw.text((position_x+20, position_y+30), f"{avg_center}", fill='red', font=font_area_sum)
 
+        # Call with calculated position
+        draw_total_area(draw, total_area, (position_x, position_y))
 
     draw_min_max_measurement_lines(draw, shapes, font, conversion_factor)
 
