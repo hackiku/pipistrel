@@ -217,25 +217,23 @@ def draw_shapes_with_lengths(svg_file_path, show_labels=True):
     if centers:
         avg_center_x = sum(x for x, y in centers) / len(centers)
         avg_center_y = sum(y for x, y in centers) / len(centers)
+
         img_size = img.size
-
-        if avg_center_y > img_size[1] * 0.7:
-            # Lower part of the image is crowded, place annotation towards the top
-            position_y = img_size[1] * 0.90  # 10% from the top
+        if avg_center_x > img_size[0] * 0.7:
+            position_x = avg_center_x - 300
         else:
-            # Default to bottom placement with adjustments
-            position_y = img_size[1] * 0.9  # 90% from the top
-
-        if avg_center_x > img_size[0] * 0.8:
-            # Right half of the image is crowded, place annotation towards the left
-            position_x = img_size[0] * 0.1  # 10% from the left
+            position_x = avg_center_x + 300
+        
+        if avg_center_y > img_size[1] * 0.8:
+            position_y = avg_center_y - 300
         else:
-            # Default to right placement with adjustments
-            position_x = img_size[0] * 0.9  # 90% from the left
+            position_y = avg_center_y + 300
+
 
         def draw_total_area(draw, total_area, position, font_path=font_path):
             font_area_sum = ImageFont.truetype(font_path, size=48)
-            text = f"S_tot = {total_area:.3f} m²"
+            tot = ImageFont.truetype(font_path, size=26)
+            text = f"Σ(S) = {total_area:.3f} m²"
             draw.text(position, text, fill='green', font=font_area_sum)
             # draw.text((position_x+20, position_y+30), f"{avg_center}", fill='red', font=font_area_sum)
 

@@ -47,7 +47,7 @@ def calculate_wingspan(shapes):
     return wingspan
 
 def main():
-    st.title("Wing Area Test Page")
+    st.title("Wing area drawing and calculations")
     
     svg_file_path = './modules/draw/wing_area/wings_both.svg'
     shapes = draw_wing_area(svg_file_path)
