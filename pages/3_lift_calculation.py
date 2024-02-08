@@ -364,8 +364,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     czmax_final = selected_czmax
 
     # Display the final c_z_max value
-    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
-
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final:.3f}")
 
     spacer()
     
@@ -373,44 +372,28 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     draw_flow_separation(df, wing_image_path, 'y/(b/2)', 'Czmax ap.', 'Czlok', 'Czmax-Cb/Ca', czmax_final)
 
-    st.markdown("***")
     
-    # update_variables(page_values, locals())
-    # log_changed_variables()
-    
-    
-    spacer()
-    spacer()
-    spacer()
-    spacer()
-    
-    # ==============================================================================
-    # ==================== 4. critical alpha_kr ====================================
-    # ==============================================================================
-
-    czmax_input = st.number_input('Set `c_z_max` manually', value=czmax_final, format="%.3f")
-    czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
-    
-    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
-    spacer('1em')
-    
-    czmax_cb_ca_column = 'Czmax-Cb/Ca'
-
+    # display flow separation point y/(b/2)
     if not df[df['Czmax-Cb/Ca'] == czmax_final].empty:
         y_b2 = df[df['Czmax-Cb/Ca'] == czmax_final]['y/(b/2)'].iloc[0]
     else:
         st.error("Flow separation point not found in the data.")
         y_b2 = 0.0  # Default/fallback value
 
-    # Now, 'y_b2' should be a simple float
-    st.write(f"Flow separation point (y/(b/2)): {y_b2}")
+    st.write("Flow separation point `y_b/2`")
+    st.latex(r"\frac{y}{(b/2)} = " + f"{y_b2:.3f}")
 
+    # update_variables(page_values, locals())
+    # log_changed_variables()
+    
+    st.markdown("***")
+    st.markdown("***")
+    st.markdown("***")
+    
+    # ==============================================================================
+    # ==================== 4. critical alpha_kr ====================================
+    # ==============================================================================
 
-    st.write(y_b2)
-    
-    
-    st.write("czmax final", czmax_final)
-    
     
     st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
     spacer()
@@ -418,12 +401,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     default_root_airfoil = 'NACA 66_1-212'
     default_tip_airfoil = 'NACA 66-209'
 
-    # st.write(df['y/(b/2)'], df['Czmax ap.'], df['Czmax-Cb/Ca'], df['Czlok'], df['Pmax [N/m]'])
+    st.write(df['y/(b/2)'].to_frame().T) # transpose!!! awghh
 
     root_index = list(airfoil_df['Name'].unique()).index(default_root_airfoil)
     tip_index = list(airfoil_df['Name'].unique()).index(default_tip_airfoil)
 
-    # airfoil retrieval rigamarole
+    # airfoil selection
     col1, col2 = st.columns(2)
     with col1:
         airfoil_name_root = st.selectbox(
@@ -437,8 +420,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
             airfoil_df['Name'].unique(),
             index=tip_index  # Set default selection using the found index
         )
-
-    # get airfoil data
+    
     root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
     tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
 
@@ -448,6 +430,21 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     alpha_kr_tip = tip_airfoil_row['alpha_kr']
     alpha_kr_root = root_airfoil_row['alpha_kr']
+    
+    st.write(alpha_kr_tip, alpha_kr_root, y_b2)
+    
+
+    col1, col2 = st.columns(2)
+    with col1:
+        y_b2_input = st.number_input("Flow separation point `y_b2)):")
+        
+    
+    czmax_input = st.number_input('Set `c_z_max` manually', value=czmax_final, format="%.3f")
+    czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
+    
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final:.3f}")
+    spacer('1em')
+
     
     # st.write(y_b2)
                     #     "y/(b/2)": y_b2,
