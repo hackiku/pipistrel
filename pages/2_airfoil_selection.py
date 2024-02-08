@@ -42,7 +42,7 @@ def main():
     # crate dataframe
     airfoil_df = pd.DataFrame(airfoil_data, columns=[
         "Name", "M_Re", "alpha_n", "a0", "Cz_max", "letter", "alpha_kr", 
-        "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
+            "Cz_op", "alpha_d", "Cd_min", "Cm_ac", "x_ac", "y_ac"
     ])
         
     airfoil_df['Thickness'] = airfoil_df['Name'].apply(extract_airfoil_specs)

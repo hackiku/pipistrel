@@ -329,24 +329,43 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     st.markdown('***')
     
-    #==================== PLOT ====================#
-    
+    # ==============================================================================
+    # ==================== 3. plot =================================================
+    # ==============================================================================
+
     st.header("📈 Flow separation")
     spacer()
     
-    st.markdown(f"##### Max lift coefficient `c_z_max`")
-    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
-    spacer('1em')
-
     df = pd.DataFrame(table_data)
     
     df['Highlight'] = df['Czmax ap.'].apply(lambda x: 'Yes' if x == czmax_final else 'No')
     
+    czmax_values = df['Czmax-Cb/Ca'].unique().tolist()
+    czmax_values_str = [f"{val:.3f}" for val in czmax_values]
+    
     st.write(df)
+    
+    st.write("Max lift coefficient `c_z_max`")
 
+    czmax_final_str = f"{czmax_final:.3f}"
+    
+    default_index = czmax_values_str.index(czmax_final_str) if czmax_final_str in czmax_values_str else 0 
 
-    y_b2 = df['y/(b/2)'].iloc[-1]  # last value of y/(b/2) column
-    st.write(f"Flow separation point (y/(b/2)): {y_b2}")
+    # Streamlit selectbox for predefined c_z_max values
+    selected_czmax_str = st.selectbox(
+        'Select possible `c_z_max` values',
+        czmax_values_str,
+        index=default_index
+    )
+
+    # string to float
+    selected_czmax = float(selected_czmax_str)
+    
+    czmax_final = selected_czmax
+
+    # Display the final c_z_max value
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
+
 
     spacer()
     
@@ -368,6 +387,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     # ==============================================================================
     # ==================== 4. critical alpha_kr ====================================
     # ==============================================================================
+
+    czmax_input = st.number_input('Set `c_z_max` manually', value=czmax_final, format="%.3f")
+    czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
+    
+    st.latex(f"C_{{z_{{max}}}} = {czmax_final}")
+    spacer('1em')
     
     czmax_cb_ca_column = 'Czmax-Cb/Ca'
 
@@ -383,6 +408,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     st.write(y_b2)
     
+    
+    st.write("czmax final", czmax_final)
     
     
     st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
