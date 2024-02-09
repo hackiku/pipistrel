@@ -396,8 +396,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     # ==================== 4. critical alpha_kr ====================================
     # ==============================================================================
 
-
-    
     st.markdown("#### 1️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
     spacer()
 
@@ -482,12 +480,16 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     # ε_km geometric washout ==============
     st.markdown("##### 3. Geometric washout angle at the flow separation point `epsilon_km`")
-    epsilon_k = 0 
-    epsilon_km = epsilon_k * y_b2
     
-    st.markdown(f"""
-        - $ \\epsilon_{{k}} = {epsilon_k:.1f}° $ {nbsp}– geometric twist of the airfoil (constructive twist)
-        """)
+    col1, col2 = st.columns(2)
+    with col1:
+        epsilon_k = st.number_input("Geometric twist of the airfoil `epsilon_k`", value=0.0, format="%.1f") 
+    with col2:
+        st.markdown(f"""
+            - $ \\epsilon_{{k}} = {epsilon_k:.1f}° $ {nbsp}– geometric twist of the airfoil (constructive twist)
+            """)
+
+    epsilon_km = epsilon_k * y_b2
 
     st.latex(f"\\epsilon_{{km}} = \\epsilon_{{k}} \\cdot \\frac{{y}}{{b/2}} = {epsilon_k:.2f} \\cdot {y_b2:.3f} = {epsilon_km:.2f}°")
     spacer()
@@ -497,27 +499,28 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     # Alpha im calculation ===========================    
     st.markdown("##### 4. Induced angle of attack at the flow separation point $ \\alpha_{{im}}$ `alpha_im`")    
     
-    # lmbda = 4.06
-    
+    lmbda = 3.358
+
     st.markdown(f"""
         - $ C_{{z_{{max}}}} = {czmax_final:.3f} $ {nbsp}maximum lift coefficient
         - $ \\lambda = {lmbda:.3f} $ {nbsp}wing aspect ratio
         """)
     
-    alpha_im = czmax_final / (3.14159 * lmbda) * 57.3 # Induced angle of attack
+    alpha_im = czmax_final / (math.pi * lmbda) * 57.3  # Induced angle of attack
+
     st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{czmax_final}}}{{\\pi \\cdot {lmbda:.3f}}} \\cdot 57.3 = {alpha_im:.4f}°")
     
     st.markdown("***")
 
     # α_kr ============================
-    st.markdown("##### Finally, the critical angle of attack `alpha_kr` can be calculated as:")
+    st.markdown("##### Critical angle of attack `alpha_kr`:")
     alpha_kr = alpha_krm - alpha_nm + alpha_n_root - epsilon_km + alpha_im
-    # alpha_kr = alpha_krm - (epsilon_km - epsilon_k) + alpha_im
+
     st.latex(f"\\alpha_{{kr}} = {alpha_krm:.2f}° - ({epsilon_km:.2f}° - {epsilon_k:.2f}°) + {alpha_im:.2f}° = {alpha_kr:.2f}°")
     spacer('1em')
 
     st.latex(f"\\alpha_{{kr}} = \\alpha_{{krm}} - (\\alpha_{{nm}}) + \\alpha_{{n\\_root}} - \\epsilon_{{km}} + \\alpha_{{im}}")
-    st.latex(f"\\alpha_{{kr}} = {alpha_krm:.3f}^{{\\circ}} + {alpha_nm:.2f}^{{\\circ}} + {alpha_n_root:.2f}^{{\\circ}} - {epsilon_km:.2f}^{{\\circ}} + {alpha_im:.3f}^{{\\circ}} = {alpha_kr:.3f}^{{\\circ}}")
+    st.latex(f"\\alpha_{{kr}} = {alpha_krm:.3f}^{{\\circ}} - ({alpha_nm:.2f}^{{\\circ}}) + {alpha_n_root:.2f}^{{\\circ}} - {epsilon_km:.2f}^{{\\circ}} + {alpha_im:.3f}^{{\\circ}} = {alpha_kr:.3f}^{{\\circ}}")
 
     spacer()
 
@@ -540,7 +543,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
 
     # ================================================================================
-    # ==================== 2. alpha_0 ================================================
+    # ==================== 2. alpha_0 ====================== FORTRAN =================
     # ================================================================================
     
     st.markdown("#### 2️⃣ Zero-lift angle of attack – $ \\alpha_0 $ `alpha_0`")
@@ -603,7 +606,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     a0 = (a0_s + a0_0) / 2
     
-    st.markdown("#### Average lift curve slope of main airfoils – $ a_0 $")
+    st.markdown("#### Compressibility scenario (M > 0) – $ a_0 $")
     st.write("The average value of the lift curve slope of the main airfoils:")
 
     # Display the formula and the calculated value
