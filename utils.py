@@ -66,7 +66,7 @@ def display_generic_table(data):
     return table
 
 
-def final_value_input(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):
+def final_value_input_oneline(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):
     session_key = f"value_{title}"  # Create a unique session key based on the title
     if session_key not in st.session_state:
         st.session_state[session_key] = value  # Initialize session state with the default value

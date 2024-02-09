@@ -2,7 +2,7 @@
 
 import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
-from utils import spacer, final_value_input
+from utils import spacer, final_value_input_oneline
 from data import airfoil_data
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -390,9 +390,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.markdown("***")
     st.markdown("***")
     
+    
+    
     # ==============================================================================
     # ==================== 4. critical alpha_kr ====================================
     # ==============================================================================
+
 
     
     st.markdown("#### 1️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
@@ -524,7 +527,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     warning_message = "$$ \\alpha_{{kr}} = {:.3f}^{{\\circ}} $$"
 
     # Call the function with the necessary parameters
-    alpha_kr = final_value_input(
+    alpha_kr = final_value_input_oneline(
         "Critical angle of attack",
         alpha_kr,
         success_message,
