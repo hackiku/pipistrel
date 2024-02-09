@@ -596,25 +596,37 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         warning_message_a
     )
 
-    a_s = airfoil_df[airfoil_df['Name'] == airfoil_name_root]['a0'].iloc[0]
-    a_0 = airfoil_df[airfoil_df['Name'] == airfoil_name_tip]['a0'].iloc[0]
+    st.latex(f"a = {extracted_values['a']}")
+
+    a0_s = airfoil_df[airfoil_df['Name'] == airfoil_name_root]['a0'].iloc[0]
+    a0_0 = airfoil_df[airfoil_df['Name'] == airfoil_name_tip]['a0'].iloc[0]
     
-    st.write(f"airfoil gradient root $a_s$ = {a_s:.3f} {a_0_root:.3f}")
-    st.write(f"airfoil gradient tip $a_0$ = {a_0:.3f} {a_0_tip:.3f}")
+    a0 = (a0_s + a0_0) / 2
+    
+    st.markdown("#### Average lift curve slope of main airfoils – $ a_0 $")
+    st.write("The average value of the lift curve slope of the main airfoils:")
+
+    # Display the formula and the calculated value
+    st.latex(r"a_0 = \frac{\alpha_{s} + \alpha_{0}}{2}")
+    st.latex(fr"a_0 = \frac{{{a0_s:.3f} + {a0_0:.3f}}}{2} = {a0:.3f}")
+
     
     st.write(a_0_root, a_0_tip)
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         phi_degrees = st.number_input("Wing sweep angle $\\phi$ (degrees)", value=10.00, format="%.2f", step=1.0)
     with col2:
         beta = st.number_input("Compressibility factor $\\beta$", value=0.714, format="%.2f", step=0.01)
-
+    with col3:
+        lmbda_input = st.number_input("Wing aspect ratio $\\lambda$", value=lmbda, format="%.3f")
+        lmbda = lmbda_input if lmbda_input != lmbda else lmbda
+    
     # Calculate the lift gradient a
-    a = a_0 * lmbda / (2 + (4 + lmbda**2 * beta**2 * (1 + (math.tan(math.radians(phi_degrees))**2 / beta**2)))**0.5)
+    a = a0 * lmbda / (2 + (4 + lmbda**2 * beta**2 * (1 + (math.tan(math.radians(phi_degrees))**2 / beta**2)))**0.5)
 
     st.latex(r"a = \frac{{a_0 \cdot \lambda}}{{2 + \sqrt{{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{{\tan^2(\phi)}}{{\beta^2}}\right)}}}}")
-    st.latex(f"a = \\frac{{{a_0:.3f} \\cdot {lmbda:.3f}}}{{2 + \\sqrt{{4 + ({lmbda:.3f})^2 \\cdot ({beta**2:.3f}) \\cdot \\left(1 + \\frac{{\\tan^2({phi_degrees}^\\circ)}}{{{beta**2:.3f}}}\\right)}}}} = {a:.5f}")
+    st.latex(f"a = \\frac{{{a0:.3f} \\cdot {lmbda:.3f}}}{{2 + \\sqrt{{4 + ({lmbda:.3f})^2 \\cdot ({beta**2:.3f}) \\cdot \\left(1 + \\frac{{\\tan^2({phi_degrees}^\\circ)}}{{{beta**2:.3f}}}\\right)}}}} = {a:.5f}")
 
     a = final_value_input_oneline(
         "Lift Gradient `a`",
@@ -622,7 +634,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         success_message_a,
         warning_message_a
     )
-
 
     st.markdown("***")
     
