@@ -100,7 +100,7 @@ def final_value_input_oneline(title, value, success_message, warning_message, ic
         spacer('2em')
         st.text(current_status)
     
-    return user_input  # Return the possibly updated user input
+    return user_input
 
 '''
 def final_value_input(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):

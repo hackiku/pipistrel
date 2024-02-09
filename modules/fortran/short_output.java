@@ -1,13 +1,13 @@
 KARAKTERISTIKE KRILA PRI ZADATOM KOEFICIJENTU UZGONA ILI REZIMU KRSTARENJA
 
-       KOEFICIJENT UZGONA KRILA            Cz = 0.105
-       KOEF. INDUKOVANOG OTPORA KRILA      Cxi = 0.00039
-       Popravni faktor indukovanog otpora  delta = 0.13835
-       GRADIJENT UZGONA KRILA              a =  0.0909 [1/o]
-       aerodinamicki napadni ugao krila    AlfaA =   1.16 [o]
-       aerodinamicki nap. ugao u korenu    AlfaAs=   0.94 [o]
-       GEOMETRIJSKI NAPADNI UGAO KRILA     Alfa  =  -1.56 [o]
-       UGAO NULTOG UZGONA KRILA            AlfaN =  -2.72 [o]
+       KOEFICIJENT UZGONA KRILA            Cz = 0.385
+       KOEF. INDUKOVANOG OTPORA KRILA      Cxi = 0.00491
+       Popravni faktor indukovanog otpora  delta = 0.06488
+       GRADIJENT UZGONA KRILA              a =  0.0906 [1/o]
+       aerodinamicki napadni ugao krila    AlfaA =   4.25 [o]
+       aerodinamicki nap. ugao u korenu    AlfaAs=   4.02 [o]
+       GEOMETRIJSKI NAPADNI UGAO KRILA     Alfa  =   1.52 [o]
+       UGAO NULTOG UZGONA KRILA            AlfaN =  -2.73 [o]
 
 
    y/(b/2)         Czmax ap.     (Czmax ap.-Cb)/Ca    Cz lok        Pmax [N/m]

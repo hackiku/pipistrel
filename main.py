@@ -61,7 +61,7 @@ def filter_data_for_preset(data, preset):
 def main():
     
     page_values = [
-        'S', 'l0', 'ls', 'b', 'm_sr', 'H', 'T', 'P', 'rho', 'c', 
+        'S', 'l0', 'ls', 'b', 'lmbda', 'm_sr', 'H', 'T', 'P', 'rho', 'c', 
         'g', 'nu', 'v_max_percent', 'v_krst', 'Re', 'c_z_krst',
         'm_empty', 'm_max'
     ]
@@ -145,9 +145,13 @@ def main():
     with col2:
         st.latex(f"S_1 = {S1:.3f}  \\, \\text{{m}}^2")
     with col3:
-        st.latex(f"S_{{pr}} = S_{{0}} + S_{{1}} = {Spr:.3f} \\, \\text{{m}}^2")
+        st.latex(f"S_{{pr}} = S_{{c}} + S_{{t}} = {Spr:.3f} \\, \\text{{m}}^2")
     
     st.latex(f"S = S_{{pr}} \\cdot 2 = {Spr:.3f} \\cdot 2 = {S:.3f} \\, \\text{{m}}^2")
+
+    lmbda = b**2 / S
+    st.latex(f"\\lambda = \\frac{{b^2}}{{S}} = \\frac{{{b:.3f}^2}}{{{S:.3f}}} = {lmbda:.3f}")
+
 
     # sweepback angle
     # st.latex(r"\varphi = \frac{\varphi_{UN} \cdot S_{UN} + \varphi_{SP} \cdot S_{SP}}{S}")
@@ -267,7 +271,7 @@ def main():
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            S_manual = st.number_input(f'Wing area (m²) `S`', value=S, step=0.1, format="%.5f")
+            S_manual = st.number_input(f'Wing area (m²) `S`', value=S, step=0.1)
             S = S_manual
         with col2:
             m_sr_manual = st.number_input('Average mass (kg) `m_sr`', value=m_sr, step=20.0, format="%.3f")

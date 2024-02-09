@@ -399,8 +399,11 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.markdown("#### 1️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
     spacer()
 
-    default_root_airfoil = 'NACA 66_1-212'
-    default_tip_airfoil = 'NACA 66-209'
+    default_root_airfoil = airfoil_name_root
+    default_tip_airfoil = airfoil_name_tip
+    
+    # default_root_airfoil = 'NACA 66_1-212'
+    # default_tip_airfoil = 'NACA 66-209'
 
     st.write(df['y/(b/2)'].to_frame().T) # transpose!!! awghh
 
@@ -411,15 +414,15 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     col1, col2 = st.columns(2)
     with col1:
         airfoil_name_root = st.selectbox(
-            '🕹️ Root Airfoil', 
+            '🕹️ Root airfoil (change)', 
             airfoil_df['Name'].unique(),
-            index=root_index  # Set default selection using the found index
+            index=root_index
         )
     with col2:
         airfoil_name_tip = st.selectbox(
-            '🔺 Tip Airfoil', 
+            '🔺 Tip airfoil (change)', 
             airfoil_df['Name'].unique(),
-            index=tip_index  # Set default selection using the found index
+            index=tip_index 
         )
     
     spacer()
@@ -445,13 +448,15 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     # 1 =========================
     st.markdown("##### 1. Critical angle of attack at flow separation `alpha_kr`")
-        
+    
+    st.markdown("Station $ s $ is root, aka plane of symmetry.")
+
     alpha_kr_tip = tip_airfoil_row['alpha_kr']
     alpha_kr_root = root_airfoil_row['alpha_kr']    
 
     st.markdown(f"""
-        - $ \\alpha_{{kr0}} = {alpha_kr_root:.1f}° $ {nbsp}– critical angle of attack at the root ($ s $ plane of symmetry)
-        - $ \\alpha_{{krs}} = {alpha_kr_tip:.1f}° $ {nbsp}– critical angle of attack at the wingtip
+        - $ \\alpha_{{krs}} = {alpha_kr_root:.1f}° $ {nbsp}– critical angle of attack at root - {airfoil_name_root}
+        - $ \\alpha_{{kr0}} = {alpha_kr_tip:.1f}° $ {nbsp}– critical angle of attack at the wingtip - {airfoil_name_tip}
         """)
 
     alpha_krm = alpha_kr_root * (1 - (1 - alpha_kr_tip /alpha_kr_root) * y_b2)
@@ -467,8 +472,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     alpha_n_root = root_airfoil_row['alpha_n']
     alpha_n_tip = tip_airfoil_row['alpha_n']
     st.markdown(f"""
-        - $ \\alpha_{{n,0}} = {alpha_n_tip:.1f}° $ {nbsp}zero-lift angle of attack at the wingtip
-        - $ \\alpha_{{n,s}} = {alpha_n_root:.1f}° $ {nbsp}zero-lift angle of attack in the plane of symmetry
+        - $ \\alpha_{{n,0}} = {alpha_n_tip:.1f}° $ {nbsp}zero-lift angle of attack at wingtip - {airfoil_name_tip}
+        - $ \\alpha_{{n,s}} = {alpha_n_root:.1f}° $ {nbsp}zero-lift angle of attack at root - {airfoil_name_root}
         """)
 
     alpha_nm = alpha_n_root * (1 - (1 - alpha_n_tip / alpha_n_root) * y_b2)
@@ -498,8 +503,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     # Alpha im calculation ===========================    
     st.markdown("##### 4. Induced angle of attack at the flow separation point $ \\alpha_{{im}}$ `alpha_im`")    
-    
-    lmbda = 3.358
 
     st.markdown(f"""
         - $ C_{{z_{{max}}}} = {czmax_final:.3f} $ {nbsp}maximum lift coefficient
@@ -515,9 +518,6 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     # α_kr ============================
     st.markdown("##### Critical angle of attack `alpha_kr`:")
     alpha_kr = alpha_krm - alpha_nm + alpha_n_root - epsilon_km + alpha_im
-
-    st.latex(f"\\alpha_{{kr}} = {alpha_krm:.2f}° - ({epsilon_km:.2f}° - {epsilon_k:.2f}°) + {alpha_im:.2f}° = {alpha_kr:.2f}°")
-    spacer('1em')
 
     st.latex(f"\\alpha_{{kr}} = \\alpha_{{krm}} - (\\alpha_{{nm}}) + \\alpha_{{n\\_root}} - \\epsilon_{{km}} + \\alpha_{{im}}")
     st.latex(f"\\alpha_{{kr}} = {alpha_krm:.3f}^{{\\circ}} - ({alpha_nm:.2f}^{{\\circ}}) + {alpha_n_root:.2f}^{{\\circ}} - {epsilon_km:.2f}^{{\\circ}} + {alpha_im:.3f}^{{\\circ}} = {alpha_kr:.3f}^{{\\circ}}")
