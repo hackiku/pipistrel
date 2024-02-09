@@ -77,9 +77,9 @@ def final_value_input_oneline(title, value, success_message, warning_message, ic
         spacer('2em')
         if st.button("🔄", key=f"reset_{title}"):  # Ensure a unique key by using title
             st.session_state[session_key] = value  # Reset the session state value
-            status = 'reset'
-        else:
-            status = 'default'
+            st.session_state[f"status_{title}"] = 'reset'  # Track the reset status separately in session state
+        # Display current status
+        current_status = st.session_state.get(f"status_{title}", 'default')
     
     with col2:
         # Use session state for number_input value
@@ -87,19 +87,20 @@ def final_value_input_oneline(title, value, success_message, warning_message, ic
         st.session_state[session_key] = user_input  # Update session state with new input
     
     with col3:
-        if st.session_state[session_key] == value:
+        if user_input == value:
             spacer('1em')
-            st.success(f"{success_message.format(st.session_state[session_key])}", icon=icon_success)
+            st.success(f"{success_message.format(user_input)}", icon=icon_success)
+            st.session_state[f"status_{title}"] = 'default'  # Update status in session state
         else:
             spacer('1em')
-            st.warning(f"{warning_message.format(st.session_state[session_key])}", icon=icon_warning)
-            status = f'changed from = {value:.5f}'
+            st.warning(f"{warning_message.format(user_input)}", icon=icon_warning)
+            st.session_state[f"status_{title}"] = 'changed'  # Update status in session state
     
     with col4:
         spacer('2em')
-        st.text(status)
+        st.text(current_status)
     
-    return st.session_state[session_key], status
+    return user_input  # Return the possibly updated user input
 
 '''
 def final_value_input(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):

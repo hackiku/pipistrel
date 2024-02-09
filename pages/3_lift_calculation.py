@@ -4,6 +4,7 @@ import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
 from utils import spacer, final_value_input_oneline
 from data import airfoil_data
+import math
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -123,7 +124,6 @@ def draw_flow_separation(df, wing_image_path, y_b2_column, czmax_ap_column, czlo
         ax.scatter(sep_point_row[y_b2_column], sep_point_row[czmax_cb_ca_column], color='red', s=100, label='Flow Separation Point')  
         ax.annotate(f'y/(b/2) separation: {x_value:.3f}', (x_value, y_value), textcoords="offset points", xytext=(40,-20), ha='center', color='black')
 
-    
     else:
         st.error("Flow separation point not found in the data.")
     
@@ -492,12 +492,12 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(f"\\epsilon_{{km}} = \\epsilon_{{k}} \\cdot \\frac{{y}}{{b/2}} = {epsilon_k:.2f} \\cdot {y_b2:.3f} = {epsilon_km:.2f}°")
     spacer()
 
-    epsilon_km = -3.36
+    # epsilon_km = -3.36
     
     # Alpha im calculation ===========================    
     st.markdown("##### 4. Induced angle of attack at the flow separation point $ \\alpha_{{im}}$ `alpha_im`")    
     
-    lmbda = 4.06 # !!!!!
+    # lmbda = 4.06
     
     st.markdown(f"""
         - $ C_{{z_{{max}}}} = {czmax_final:.3f} $ {nbsp}maximum lift coefficient
@@ -521,7 +521,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     spacer()
 
-    # -------------------- SUCCESS template --------------------
+    # -------------------- ! GREAT SUCCESS ! --------------------
     
     success_message = "$$ \\alpha_{{kr}} = {:.3f}^{{\\circ}} $$"
     warning_message = "$$ \\alpha_{{kr}} = {:.3f}^{{\\circ}} $$"
@@ -533,10 +533,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         success_message,
         warning_message
     )
-
-    st.markdown("***")
-    
-    
+    st.write(alpha_kr)
     st.markdown("***")
     spacer()
     st.markdown("***")
@@ -549,30 +546,88 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.markdown("#### 2️⃣ Zero-lift angle of attack – $ \\alpha_0 $ `alpha_0`")
     
     st.write("The zero lift angle of attack, is a specific angle at which an airfoil or wing generates no lift. It is an aerodynamic characteristic of the airfoil's shape and is determined by its geometry. ")
+    
+    alpha_n = extracted_values['AlfaN']
+
+    success_message = "$$ \\alpha_{{n}} = {:.3f}^{{\\circ}} $$"
+    warning_message = "$$ \\alpha_{{n}} = {:.3f}^{{\\circ}} $$"
+
+    # Call the function with the necessary parameters
+    alpha_n = final_value_input_oneline(
+        "Zero-lift angle of attack",
+        alpha_n,
+        success_message,
+        warning_message
+    )
+
+    st.code(alpha_n)
+    
     st.latex(f"\\alpha_n = {extracted_values['AlfaN']}°")
     
-    st.write("Analytical calculation of angle of zero lift:")
-    st.latex(f"\\alpha_n = \\alpha_{{ns}} + \\epsilon \cdot f_a")
-    st.latex(r"\alpha_n = \alpha_{ns} + \epsilon \cdot f_a")
+    with st.expander("🐞 math WIP"):
+        st.write("Analytical calculation of angle of zero lift:")
+        st.latex(f"\\alpha_n = \\alpha_{{ns}} + \\epsilon \cdot f_a")
+        st.latex(r"\alpha_n = \alpha_{ns} + \epsilon \cdot f_a")
 
-    st.markdown("""
-    - $$ \\alpha_{ns} $$ is the angle of zero lift of the airfoil in the plane of symmetry, $$ \\alpha_{ns} = -1^\\circ $$
-    - $$ \\varepsilon $$ is the total twist of the wing, $$ \\varepsilon = \\varepsilon_a + \\varepsilon_k = 0.3^\\circ + 0^\\circ - 0.3^\\circ $$
-    - $$ \\varepsilon_a $$ is the aerodynamic twist, $$ \\varepsilon_a = \\alpha_{ns} - \\alpha_{n0} = -1^\\circ - (-1.3^\\circ) \cdot 0.3^\\circ $$
-    - $$ \\varepsilon_k $$ is the constructive twist, $$ \\varepsilon_k = 0^\\circ $$ (as there is no constructive twist)
-    """)
+        st.markdown("""
+        - $$ \\varepsilon $$ is the total twist of the wing, $$ \\varepsilon = \\varepsilon_a + \\varepsilon_k = 0.3^\\circ + 0^\\circ - 0.3^\\circ $$
+        - $$ \\varepsilon_a $$ is the aerodynamic twist, $$ \\varepsilon_a = \\alpha_{ns} - \\alpha_{n0} = -1^\\circ - (-1.3^\\circ) \cdot 0.3^\\circ $$
+        - $$ \\varepsilon_k $$ is the constructive twist, $$ \\varepsilon_k = 0^\\circ $$ (as there is no constructive twist)
+        """)
 
     st.markdown("***")
-    # ==================== 3. a_0 ============================================================
     
+    # ================================================================================
+    # ==================== 3. Lift Gradient – $a$ ====================================
+    # ================================================================================
+
     st.markdown("#### 3️⃣ Lift Gradient – $a$ `a`")
-    st.latex(r"a = \frac{a_0 \cdot \lambda}{2 + \sqrt{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{\tan^2(\phi)}{\beta^2}\right)}} = \frac{0.110 \cdot 3.888}{2 + \sqrt{4 + (3.888)^2 \cdot (0.71)^2 \cdot \left(1 + \frac{\tan^2(27^\circ)}{(0.71)^2}\right)}} = 0.07197 \approx 0.072")
+
+    a = extracted_values['a']
+
+    success_message_a = "$$ a = {:.4f} $$"
+    warning_message_a = "$$ a = {:.4f} $$ updated"
+
+    # lmbda = 3.888
+    a = final_value_input_oneline(
+        "Fortran lift gradient",
+        a,
+        success_message_a,
+        warning_message_a
+    )
+
+    a_s = airfoil_df[airfoil_df['Name'] == airfoil_name_root]['a0'].iloc[0]
+    a_0 = airfoil_df[airfoil_df['Name'] == airfoil_name_tip]['a0'].iloc[0]
     
-    st.markdown("***")
+    st.write(f"airfoil gradient root $a_s$ = {a_s:.3f} {a_0_root:.3f}")
+    st.write(f"airfoil gradient tip $a_0$ = {a_0:.3f} {a_0_tip:.3f}")
     
+    st.write(a_0_root, a_0_tip)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        phi_degrees = st.number_input("Wing sweep angle $\\phi$ (degrees)", value=10.00, format="%.2f", step=1.0)
+    with col2:
+        beta = st.number_input("Compressibility factor $\\beta$", value=0.714, format="%.2f", step=0.01)
+
+    # Calculate the lift gradient a
+    a = a_0 * lmbda / (2 + (4 + lmbda**2 * beta**2 * (1 + (math.tan(math.radians(phi_degrees))**2 / beta**2)))**0.5)
+
+    st.latex(r"a = \frac{{a_0 \cdot \lambda}}{{2 + \sqrt{{4 + \lambda^2 \cdot \beta^2 \cdot \left(1 + \frac{{\tan^2(\phi)}}{{\beta^2}}\right)}}}}")
+    st.latex(f"a = \\frac{{{a_0:.3f} \\cdot {lmbda:.3f}}}{{2 + \\sqrt{{4 + ({lmbda:.3f})^2 \\cdot ({beta**2:.3f}) \\cdot \\left(1 + \\frac{{\\tan^2({phi_degrees}^\\circ)}}{{{beta**2:.3f}}}\\right)}}}} = {a:.5f}")
+
+    a = final_value_input_oneline(
+        "Lift Gradient `a`",
+        a,
+        success_message_a,
+        warning_message_a
+    )
+
 
     st.markdown("***")
-    # Update variables at the end of the session
+    
+    # update_variables(["lmbda", "a_0", "phi_degrees", "beta"], locals())    
+    
     update_variables(page_values, locals())
     log_changed_variables()
 

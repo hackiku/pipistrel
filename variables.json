@@ -240,7 +240,7 @@
     "lmbda": {
         "name": "Wing Aspect Ratio",
         "default": 3.888,
-        "value": 4.06,
+        "value": 10.231329457285618,
         "latex": "\\lambda",
         "unit": "",
         "changed": true
@@ -263,8 +263,9 @@
     "alpha_n": {
         "name": "Angle of Attack",
         "default": -1.3,
-        "value": -1.3,
+        "value": -2.72,
         "latex": "\\alpha_n",
-        "unit": "degrees"
+        "unit": "degrees",
+        "changed": true
     }
 }
