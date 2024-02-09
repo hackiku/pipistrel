@@ -118,7 +118,8 @@
         "default": 0.0026,
         "value": 0.0026,
         "latex": "C_{f_{KR}}",
-        "unit": ""
+        "unit": "",
+        "changed": true
     },
     "dl_eff_kr": {
         "name": "Effective Relative Thickness",
@@ -248,7 +249,7 @@
     "n": {
         "name": "Wing Taper Ratio",
         "default": 0.7265363128491618,
-        "value": 0.726536312849163,
+        "value": 0.7265363128491618,
         "latex": "n",
         "unit": "",
         "changed": true
@@ -263,7 +264,7 @@
     "alpha_n": {
         "name": "Angle of Attack",
         "default": -2.72,
-        "value": -2.73,
+        "value": -2.72,
         "latex": "\\alpha_n",
         "unit": "degrees",
         "changed": true

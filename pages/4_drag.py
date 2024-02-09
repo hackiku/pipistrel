@@ -1,7 +1,7 @@
 ### 4_4_drag_incompressible.py ###
 import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, get_variable_props, display_variable, update_variables, log_changed_variables
-from utils import spacer, emoji_header  # Assuming these are utility functions you've defined
+from utils import spacer, emoji_header 
 
 
 def main():
@@ -76,9 +76,9 @@ def main():
         st.latex(rf"\phi = {phi:.3f}")
         s = 20.602  # Reference area in square meters
         K_kr = st.number_input("Shape drag factor of the wing", value=get_variable_value('K_kr'), key='K_kr')
-        c_x_min_krilo = (K_kr * c_fkr * S_wet_kr) / s
+        c_x_min_krilo = (K_kr * c_fkr * Swet_wing) / s
         st.write("Koeficijent minimalnog otpora krila")
-        st.latex(rf"C_{{X min krilo}} = \frac{{K_{{KR}} \cdot C_{{fKR}} \cdot S_{{WET_{{KR}}}}}}{{S}} = \frac{{{K_kr:.2f} \cdot {c_fkr:.4f} \cdot {S_wet_kr:.3f}}}{{{s:.3f}}} = {c_x_min_krilo:.6f}")
+        st.latex(rf"C_{{X min krilo}} = \frac{{K_{{KR}} \cdot C_{{fKR}} \cdot S_{{WET_{{KR}}}}}}{{S}} = \frac{{{K_kr:.2f} \cdot {c_fkr:.4f} \cdot {Swet_wing:.3f}}}{{{s:.3f}}} = {c_x_min_krilo:.6f}")
 
     with col2:
         st.image('./assets/tmp_assets/koef_min_otpora.png', )

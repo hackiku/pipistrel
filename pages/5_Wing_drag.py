@@ -2,10 +2,13 @@
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image
+from variables_manager import initialize_session_state, get_variable_value, \
+    get_variable_props, display_variable, update_variables, log_changed_variables
+from utils import spacer, emoji_header 
 
 def draw_wing_area(svg_file_path, show_labels=True):
 
-    # choose color inversion and measurements
+    # radio buttons (2x)
     col1, col2 = st.columns(2)
     with col1:
         invert_choice = st.radio("Color", ["Black", "White"], index=0)
@@ -15,7 +18,7 @@ def draw_wing_area(svg_file_path, show_labels=True):
     if labels_choice == "Area only":
         show_labels = False
     
-    # draw the shapes    
+    # draw areas    
     img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
     
     # invert image colors (defailt to )
@@ -27,7 +30,7 @@ def draw_wing_area(svg_file_path, show_labels=True):
 
     return shapes
 
-
+# actually x, inverted line['start']
 def calculate_wingspan(shapes):
 
     conversion_hardcoded = 0.00584518884292006
@@ -35,21 +38,27 @@ def calculate_wingspan(shapes):
     min_y = float('inf')
     max_y = float('-inf')
 
-    # Iterate through each shape and update min and max y-coordinates
     for shape in shapes:
         for line in shape.lines:
-            start_y, end_y = line['start'][1], line['end'][1]
+            start_y, end_y = line['start'][0], line['end'][0]
             min_y = min(min_y, start_y, end_y)
             max_y = max(max_y, start_y, end_y)
         # st.code(f"min_y: {min_y}, max_y: {max_y}")
-    # Calculate wingspan as the difference between max and min y-coordinates
+    # wingspan = max - min min y-coord (actually x here due to image redrawing in figma)
     wingspan = (max_y - min_y) * conversion_hardcoded
     return wingspan
 
 def main():
     
     st.title("Wing area drag")
-    
+    page_values = [
+        'S', 'S_20', 'S_21', 'S_wet_kr', 'lT', 'l0', 'nT', 
+        'l_sat_kr', 'Re', 'v_krst', 'Cf_kr', 'dl_eff_kr', 'K_kr', 'C_X_min_krilo'
+    ]
+
+    initialize_session_state()
+
+
     svg_file_path = './modules/draw/wing_area/wings_both.svg'
     shapes = draw_wing_area(svg_file_path)
 
@@ -126,7 +135,53 @@ def main():
     y_a = \frac{y_{ac}S_c + y_{at}S_t}{S_c + S_t}
     ''')
 
+    # =============================================================
+    # ===================== final part ============================
+    # =============================================================
 
+    st.markdown("***")
+    st.markdown("***")
+    
+    col1, col2 = st.columns(2)
+    with col1: 
+        Swet_wing = st.number_input("Wetted area", value=9.046, key='Swet_wings')
+        st.latex(rf"S_{{wet_{{KR}}}} = {Swet_wing:.3f} \, m^2")
+    with col2:
+        lmac_wing = st.number_input("Mean aerodynamic chord", value=1.545, key='l_sat_kr')
+        st.latex(rf"l_{{SAT_{{kr}}}} =  {lmac_wing:.3f} \, m")
+
+    spacer()
+    
+    st.write('Reynolds number')
+    v_krst = 224.28 
+    nu = get_variable_value('nu')  # Kinematic viscosity in m^2/s
+    # 2.21e-5     # Kinematic viscosity in m^2/s
+    Re = v_krst * lmac_wing / nu
+    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{kr}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lmac_wing:.3f}}}{{{nu:.2e}}} \approx {Re:.2e}")
+    
+    # graph
+    st.markdown("""<div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
+    spacer()
+
+    # ==================== cx wing ==================== #
+
+    c_fkr = 0.0026 # TODO add to json
+    Cf_fkr = st.number_input("Coefficient of friction drag", value=get_variable_value('Cf_kr'), key='Cf_kr', format="%.4f")
+    st.latex(rf"C_{{f_{{KR}}}} = {c_fkr:.4f}")
+    
+    st.markdown("***")
+
+    
+
+
+
+
+    # =============================================================
+    
+    st.markdown("***")
+    st.markdown("***")
+    st.markdown("***")
+    
     with st.expander("Line Lengths"):
         markdown_content = ""
         for i, shape in enumerate(shapes):
@@ -164,6 +219,8 @@ def extract_lines_from_svg(svg_file_path):
     return 0.5 * (a + b) * h
 """)
 
+    update_variables(page_values, locals())
+    log_changed_variables()
 
 if __name__ == "__main__":
     main()
