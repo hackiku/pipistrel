@@ -2,7 +2,7 @@
 
 import streamlit as st
 from variables_manager import initialize_session_state, get_variable_value, update_variables, log_changed_variables
-from utils import spacer
+from utils import spacer, final_value_input
 from data import airfoil_data
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -520,37 +520,30 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     # -------------------- SUCCESS template --------------------
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        alpha_kr_input = st.number_input("Set `alpha_kr` manually", value=alpha_kr, format="%.3f")
-    with col2:
-        if alpha_kr_input == alpha_kr:
-            spacer('1em')
-            st.success(f"$$ \\alpha_{{kr}} = {alpha_kr:.3f}^{{\\circ}} $$", icon="✅")
-            status = 'default'
-        else:
-            alpha_kr = alpha_kr_input
-            spacer('1em')
-            st.warning(f"$$ \\alpha_{{kr}} = {alpha_kr:.3f}^{{\\circ}} $$", icon="⚠️")
-            status = 'changed'
-    with col3:
-        spacer('2em')
-        st.text(status)
+    success_message = "$$ \\alpha_{{kr}} = {:.3f}^{{\\circ}} $$"
+    warning_message = "$$ \\alpha_{{kr}} = {:.3f}^{{\\circ}} $$"
+
+    # Call the function with the necessary parameters
+    alpha_kr = final_value_input(
+        "Critical angle of attack",
+        alpha_kr,
+        success_message,
+        warning_message
+    )
+
+    st.markdown("***")
+    
     
     st.markdown("***")
-    spacer()
     spacer()
     st.markdown("***")
 
+
+    # ================================================================================
+    # ==================== 2. alpha_0 ================================================
+    # ================================================================================
     
-    
-    
-    
-    
-    
-    
-    # ==================== 2. alpha_0 ============================================================
-    st.markdown(r"#### 2️⃣ Zero-lift angle of attack – $\\alpha_0$ `alpha_0`")
+    st.markdown("#### 2️⃣ Zero-lift angle of attack – $ \\alpha_0 $ `alpha_0`")
     
     st.write("The zero lift angle of attack, is a specific angle at which an airfoil or wing generates no lift. It is an aerodynamic characteristic of the airfoil's shape and is determined by its geometry. ")
     st.latex(f"\\alpha_n = {extracted_values['AlfaN']}°")

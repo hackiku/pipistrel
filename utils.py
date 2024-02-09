@@ -64,3 +64,67 @@ def display_generic_table(data):
     # Combine all the rows into a single table string
     table = header_row + separator_row + data_rows
     return table
+
+
+def final_value_input(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):
+    session_key = f"value_{title}"  # Create a unique session key based on the title
+    if session_key not in st.session_state:
+        st.session_state[session_key] = value  # Initialize session state with the default value
+    
+    col1, col2, col3, col4 = st.columns([1, 2, 3, 3])  # Adjust the width ratio as needed
+    
+    with col1:
+        spacer('2em')
+        if st.button("🔄", key=f"reset_{title}"):  # Ensure a unique key by using title
+            st.session_state[session_key] = value  # Reset the session state value
+            status = 'reset'
+        else:
+            status = 'default'
+    
+    with col2:
+        # Use session state for number_input value
+        user_input = st.number_input(title, value=st.session_state[session_key], format="%.3f", key=f"num_input_{title}")
+        st.session_state[session_key] = user_input  # Update session state with new input
+    
+    with col3:
+        if st.session_state[session_key] == value:
+            spacer('1em')
+            st.success(f"{success_message.format(st.session_state[session_key])}", icon=icon_success)
+        else:
+            spacer('1em')
+            st.warning(f"{warning_message.format(st.session_state[session_key])}", icon=icon_warning)
+            status = f'changed from = {value:.5f}'
+    
+    with col4:
+        spacer('2em')
+        st.text(status)
+    
+    return st.session_state[session_key], status
+
+'''
+def final_value_input(title, value, success_message, warning_message, icon_success="✅", icon_warning="⚠️"):
+    col1, col2, col3, col4 = st.columns([1, 3, 3, 3])  # Adjust the width ratio as needed
+    default_value = value
+    with col1:
+        st.write("Reset")
+        if st.button("⏮️", key=f"reset_{title}"):  # Ensure a unique key by using title
+            value = default_value  # Reset the value
+            status = 'reset'
+        else:
+            status = 'default'
+    with col2:
+        user_input = st.number_input(title, value=value, format="%.3f")
+    with col3:
+        if user_input == value:
+            spacer('1em')
+            st.success(f"{success_message.format(value)}", icon=icon_success)
+        else:
+            spacer('1em')
+            st.warning(f"{warning_message.format(user_input)}", icon=icon_warning)
+            status = f'changed from = {default_value:.5f}'
+            value = user_input  # Update the value if needed
+    with col4:
+        spacer('2em')
+        st.text(status)
+    return value, status
+'''
