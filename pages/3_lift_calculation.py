@@ -395,7 +395,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     # ==============================================================================
 
     
-    st.markdown("#### 4️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
+    st.markdown("#### 1️⃣ Critical angle of attack – $\\alpha_{{kr}}$ `alpha_kr`")
     spacer()
 
     default_root_airfoil = 'NACA 66_1-212'
@@ -433,7 +433,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
         st.latex(f"C_{{z_{{max}}}} = {czmax_final:.3f}")
     
-    spacer('1em')
+    st.markdown("***")
     
     # +++++++++++++++++++++++++++++++ math alpha_kr +++++++++++++++++++++++++++++++++++++++++++++
     
@@ -458,7 +458,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     st.latex(f"\\alpha_{{krm}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kr_0}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b/2}}\\right)")
     st.latex(f"\\alpha_{{krm}} = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b2}}}{{2}}\\right) = {alpha_krm:.4f}°")
 
-    spacer()
+    st.markdown("***")
 
     # 2 =========================
     st.markdown("##### 2. Zero lift angle at flow separation `alpha_nm`")
@@ -474,7 +474,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     st.latex(fr"\alpha_{{nm}} = \alpha_{{ns}} \left(1 - \left(1 - \frac{{\alpha_{{n0}}}}{{\alpha_{{ns}}}}\right) \cdot \frac{{y}}{{b/2}}\right)")
     st.latex(fr"\alpha_{{nm}} = {alpha_n_root:.2f} \left(1 - \left(1 - \frac{{{alpha_n_tip:.2f}}}{{{alpha_n_root:.2f}}}\right) \cdot {y_b2:.3f}\right) = {alpha_nm:.2f}^\circ")
-    spacer()
+    
+    spacer('4em')
 
     # ε_km geometric washout ==============
     st.markdown("##### 3. Geometric washout angle at the flow separation point `epsilon_km`")
@@ -502,7 +503,8 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     
     alpha_im = czmax_final / (3.14159 * lmbda) * 57.3 # Induced angle of attack
     st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{czmax_final}}}{{\\pi \\cdot {lmbda:.3f}}} \\cdot 57.3 = {alpha_im:.4f}°")
-    spacer()
+    
+    st.markdown("***")
 
     # α_kr ============================
     st.markdown("##### Finally, the critical angle of attack `alpha_kr` can be calculated as:")
@@ -513,12 +515,29 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     st.latex(f"\\alpha_{{kr}} = \\alpha_{{krm}} - (\\alpha_{{nm}}) + \\alpha_{{n\\_root}} - \\epsilon_{{km}} + \\alpha_{{im}}")
     st.latex(f"\\alpha_{{kr}} = {alpha_krm:.3f}^{{\\circ}} + {alpha_nm:.2f}^{{\\circ}} + {alpha_n_root:.2f}^{{\\circ}} - {epsilon_km:.2f}^{{\\circ}} + {alpha_im:.3f}^{{\\circ}} = {alpha_kr:.3f}^{{\\circ}}")
-    # st.latex(f"\\alpha_{{kr}} =  {alpha_kr:.3f}^{{\\circ}}")
 
-    st.success(f"$$ \\alpha_{{kr}} = {alpha_kr:.3f}^{{\\circ}} $$", icon="✅")
-    st.markdown("***")
+    spacer()
+
+    # -------------------- SUCCESS template --------------------
     
-
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        alpha_kr_input = st.number_input("Set `alpha_kr` manually", value=alpha_kr, format="%.3f")
+    with col2:
+        if alpha_kr_input == alpha_kr:
+            spacer('1em')
+            st.success(f"$$ \\alpha_{{kr}} = {alpha_kr:.3f}^{{\\circ}} $$", icon="✅")
+            status = 'default'
+        else:
+            alpha_kr = alpha_kr_input
+            spacer('1em')
+            st.warning(f"$$ \\alpha_{{kr}} = {alpha_kr:.3f}^{{\\circ}} $$", icon="⚠️")
+            status = 'changed'
+    with col3:
+        spacer('2em')
+        st.text(status)
+    
+    st.markdown("***")
     spacer()
     spacer()
     st.markdown("***")
