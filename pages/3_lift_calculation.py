@@ -456,15 +456,29 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
         st.latex(f"y/(b/2) = {y_b2:.3f}")
     # alpha_krm = alpha_kr_root*(1 - (1 - alpha_kr_root/alpha_kr_tip)*y_b2)
 
-    
-    alpha_krm = (alpha_kr_tip - alpha_kr_root)*(y_b2 - 0)/(1 - 0) + alpha_kr_root
-    st.write(alpha_krm)
-    
-    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b2}}}{{2}}\\right) = {alpha_krm:.4f}°")
+    alpha_krm = alpha_kr_root * (1 - (1 - alpha_kr_tip /alpha_kr_root) * y_b2)
 
+    st.latex(f"\\alpha_{{krm}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kr_0}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b/2}}\\right)")
+    st.latex(f"\\alpha_{{krm}} = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b2}}}{{2}}\\right) = {alpha_krm:.4f}°")
+    
+    # 2 =========================
+    st.write("Zero lift angle at flow separation `alpha_nm`")
 
     alpha_n_root = root_airfoil_row['alpha_n']
     alpha_n_tip = tip_airfoil_row['alpha_n']
+    col1, col2 = st.columns(2)
+    with col1:
+        st.latex(f"\\alpha_{{n,0}} = {alpha_n_tip:.2f}°")
+    with col2:
+        st.latex(f"\\alpha_{{n,s}} = {alpha_n_root:.2f}°")
+
+    alpha_nm = alpha_n_root * (1 - (1 - alpha_n_tip / alpha_n_root) * y_b2)
+    
+    # alpha_nm = alpha_n_root + (alpha_n_tip - (alpha_n_root)) * (y_b2 - 0) / (1 - 0)
+    
+    st.latex(fr"\alpha_{{nm}} = \alpha_{{ns}} \left(1 - \left(1 - \frac{{\alpha_{{n0}}}}{{\alpha_{{ns}}}}\right) \cdot \frac{{y}}{{b/2}}\right)")
+    st.latex(fr"\alpha_{{nm}} = {alpha_n_root:.2f} \left(1 - \left(1 - \frac{{{alpha_n_tip:.2f}}}{{{alpha_n_root:.2f}}}\right) \cdot {y_b2:.3f}\right) = {alpha_nm:.2f}^\circ")
+
     alpha_nm = alpha_n_root*(1 - (1 - alpha_n_tip/alpha_n_root)*y_b2) 
 
     # Alpha im calculation
@@ -483,6 +497,7 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     
     st.markdown("***")
+    
     st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_n_root:.4f} \\left( 1 - \\left(1 - \\frac{{{alpha_n_tip}}}{{{alpha_n_root}}}\\right){y_b2}\\right) = {alpha_nm}°")
     st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lmbda}}} \\cdot 57.3 = {alpha_im:.4f}°")
     st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_b2} = {epsilon_m}°")
