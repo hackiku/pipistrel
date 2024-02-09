@@ -240,7 +240,7 @@
     "lmbda": {
         "name": "Wing Aspect Ratio",
         "default": 3.888,
-        "value": 3.358,
+        "value": 3.888,
         "latex": "\\lambda",
         "unit": "",
         "changed": true
