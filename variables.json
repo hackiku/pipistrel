@@ -40,7 +40,7 @@
     "S_f_relative": {
         "name": "Relative Flaps Wing Area",
         "default": 0.9785457722551221,
-        "value": 1.9986003529539296,
+        "value": 0.9785457722551221,
         "latex": "S_{f_{rel}}",
         "unit": "m^2",
         "changed": true
@@ -92,7 +92,7 @@
     "nT": {
         "name": "Taper Ratio",
         "default": 3.5373814905973475,
-        "value": 3.5373814905973413,
+        "value": 3.5373814905973475,
         "latex": "n_{T}",
         "unit": "",
         "changed": true

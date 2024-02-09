@@ -1,4 +1,4 @@
-# ./pages/draw_wing_areas.py
+# ./pages/5_Wing_drag.py
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image
@@ -47,26 +47,25 @@ def calculate_wingspan(shapes):
     return wingspan
 
 def main():
+    
     st.title("Wing area drag")
     
     svg_file_path = './modules/draw/wing_area/wings_both.svg'
     shapes = draw_wing_area(svg_file_path)
 
-    # Display table of lines and lengths for each shape
 
     # ===================== drawing =====================
-    Sc = shapes[1].area # rectangle
-    St = shapes[0].area # trapezoid
-    Sc_exp = shapes[2].area
+    Sc = shapes[2].area # rectangle till root
+    St = shapes[1].area # both trapezoids
+    Sc_exp = shapes[3].area
     St_exp = St
     l0 = shapes[0].lines[0]['length_meters']
     ls = shapes[0].lines[2]['length_meters']
-    b = 10.159
+    b = calculate_wingspan(shapes)
     S1 = Sc + St
     S = S1 * 2
     S_exp = Sc_exp + St_exp * 1.02 # TODO check in slides
     Swet = S_exp * 2
-
 
     # ===================== areas =====================
     st.markdown("##### Wing areas from drawing")
