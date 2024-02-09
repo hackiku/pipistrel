@@ -421,50 +421,54 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
             index=tip_index  # Set default selection using the found index
         )
     
-    root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
-    tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
-
-    # show airfoil name
-    st.text(f"Selected Root Airfoil: {airfoil_name_root}")
-    st.text(f"Selected Tip Airfoil: {airfoil_name_tip}")
-
-    alpha_kr_tip = tip_airfoil_row['alpha_kr']
-    alpha_kr_root = root_airfoil_row['alpha_kr']
+    spacer()
     
-    st.write(alpha_kr_tip, alpha_kr_root, y_b2)
-    
-
     col1, col2 = st.columns(2)
     with col1:
-        y_b2_input = st.number_input("Flow separation point `y_b2)):")
-        
-    
-    czmax_input = st.number_input('Set `c_z_max` manually', value=czmax_final, format="%.3f")
-    czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
+        y_b2_input = st.number_input("Flow separation point `y_b2`", value=y_b2, format="%.3f")
+        y_b2 = y_b2_input if y_b2_input != y_b2 else y_b2
+    with col2:
+        czmax_input = st.number_input('Set `c_z_max` manually', value=czmax_final, format="%.3f")
+        czmax_final = czmax_input if czmax_input != czmax_final else czmax_final
     
     st.latex(f"C_{{z_{{max}}}} = {czmax_final:.3f}")
     spacer('1em')
+    
+    # +++++++++++++++++++++++++++++++ math alpha_kr +++++++++++++++++++++++++++++++++++++++++++++
+    
+    root_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_root].iloc[0]
+    tip_airfoil_row = airfoil_df[airfoil_df['Name'] == airfoil_name_tip].iloc[0]
 
     
-    # st.write(y_b2)
-                    #     "y/(b/2)": y_b2,
-                    # "Czmax ap.": czmax_ap,
-                    # "Czmax-Cb/Ca": czmax_ap_cb_ca,
-                    # "Czlok": cz_lok,
-                    # "Pmax [N/m]": pmax_n_m
-        
-    
-    st.write(alpha_kr_tip, alpha_kr_root, y_b2)
 
-    # alpha flow separation
-    alpha_krm = alpha_kr_root*(1 - (1 - alpha_kr_root/alpha_kr_tip)*y_b2)
-        
+    # 1 =========================
+    st.write("Critical angle of attack at flow separation `alpha_kr`")
+
+    alpha_kr_tip = tip_airfoil_row['alpha_kr']
+    alpha_kr_root = root_airfoil_row['alpha_kr']    
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.latex(f"\\alpha_{{kr0}} = {alpha_kr_tip:.2f}°")
+    with col2:
+        st.latex(f"\\alpha_{{krs}} = {alpha_kr_root:.2f}°")
+    with col3:
+        st.latex(f"y/(b/2) = {y_b2:.3f}")
+    # alpha_krm = alpha_kr_root*(1 - (1 - alpha_kr_root/alpha_kr_tip)*y_b2)
+
+    
+    alpha_krm = (alpha_kr_tip - alpha_kr_root)*(y_b2 - 0)/(1 - 0) + alpha_kr_root
+    st.write(alpha_krm)
+    
+    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b2}}}{{2}}\\right) = {alpha_krm:.4f}°")
+
 
     alpha_n_root = root_airfoil_row['alpha_n']
     alpha_n_tip = tip_airfoil_row['alpha_n']
     alpha_nm = alpha_n_root*(1 - (1 - alpha_n_tip/alpha_n_root)*y_b2) 
 
     # Alpha im calculation
+    
     cz_max = 0.922  # Maximum lift coefficient
     lmbda = 3.358  # Wing aspect ratio
     alpha_im = cz_max / (3.14159 * lmbda) * 57.3 # Induced angle of attack
@@ -475,44 +479,16 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
 
     # Alpha kr calculation
     alpha_kr = 22.122  # The calculated value for alpha_kr
-
-    # Critical Angle of Attack Calculations
-    st.markdown("### Critical Angle of Attack Calculations")
-
-    # LaTeX presentation for clarity
-    st.latex(r"""
-    \begin{align*}
-    \text{Given:} \\
-    &\alpha_{kro} = """ + f"{alpha_kr_root}" + r"""^\circ \text{ (Root critical AoA)} \\
-    &\alpha_{krt} = """ + f"{alpha_kr_tip}" + r"""^\circ \text{ (Tip critical AoA)} \\
-    &y_{b/2} = """ + f"{y_b2}" + r""" \text{ (Relative spanwise position)} \\
-    \end{align*}
-    """)
-
-    st.latex(r"""
-    \begin{align*}
-    \text{Calculate:} \\
-    &\alpha_{krm} = \alpha_{krs} \left( 1 - \left(1 - \frac{\alpha_{kro}}{\alpha_{krs}}\right)\frac{y}{b}\right) = """ + f"{alpha_krm:.2f}" + r"""^\circ \text{ (Mid-span critical AoA)} \\
-    &\alpha_{nm} = \alpha_{ns} \left( 1 - \left(1 - \frac{\alpha_{n0}}{\alpha_{ns}}\right)\frac{y}{b}\right) = """ + f"{alpha_nm:.2f}" + r"""^\circ \text{ (Mid-span zero-lift AoA)} \\
-    &\alpha_{im} = \frac{C_{z_{max}}}{\pi \cdot \lambda} \cdot 57.3 = """ + f"{alpha_im:.2f}" + r"""^\circ \text{ (Induced AoA)} \\
-    &\epsilon_{m} = \epsilon_{k} \frac{y}{b} = """ + f"{epsilon_m:.2f}" + r"""^\circ \text{ (Washout angle at mid-span)} \\
-    &\alpha_{kr} = """ + f"{alpha_kr:.2f}" + r"""^\circ \text{ (Wing critical AoA)} \\
-    \end{align*}
-    """)
-
+    
 
     
-    st.code("NACA 65-206 # tip")
-    st.code("NACA 64-209 # root")
-    # Definitions in Markdown
+    st.markdown("***")
+    st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_n_root:.4f} \\left( 1 - \\left(1 - \\frac{{{alpha_n_tip}}}{{{alpha_n_root}}}\\right){y_b2}\\right) = {alpha_nm}°")
+    st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lmbda}}} \\cdot 57.3 = {alpha_im:.4f}°")
+    st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_b2} = {epsilon_m}°")
+    st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_n_root}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
+
     st.markdown("""
-        The critical angle of attack is used to determine the angle at which the wing will stall. It is calculated using the following formula:
-    
-    Stations:
-    
-    - $ m $ flow separation point
-    - $ s $ symmetry plane (root)
-    - $ 0 $ wing tip
 
     flow separation point
     
@@ -528,21 +504,19 @@ C     ******************** KRAJ UNOSA PODATAKA *************************"""
     - $ \\lambda $ is the wing aspect ratio.
     - $ \\epsilon_{m} $ is the washout angle at the wing's mid-span.
     - $ \\alpha_{kr} $ is the critical angle of attack of the wing.
-
-    The formulas are as follows:
     """)
 
-    # alpha krm
+
+
+
+    spacer()
+    spacer()
+    st.markdown("***")
 
     
     
-    # Insert the calculated values into the LaTeX string
-    st.latex(f"\\alpha_{{kr m}} = \\alpha_{{krs}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{kro}}}}{{\\alpha_{{krs}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_kr_root} \\left( 1 - \\left(1 - \\frac{{{alpha_kr_tip}}}{{{alpha_kr_root}}}\\right)\\frac{{{y_b2}}}{{2}}\\right) = {alpha_krm:.4f}°")
-    st.latex(f"\\alpha_{{nm}} = \\alpha_{{ns}} \\left( 1 - \\left(1 - \\frac{{\\alpha_{{n0}}}}{{\\alpha_{{ns}}}}\\right)\\frac{{y}}{{b}}\\right) = {alpha_n_root:.4f} \\left( 1 - \\left(1 - \\frac{{{alpha_n_tip}}}{{{alpha_n_root}}}\\right){y_b2}\\right) = {alpha_nm}°")
-    st.latex(f"\\alpha_{{im}} = \\frac{{C_{{z_{{max}}}}}}{{\\pi \\cdot \\lambda}} \\cdot 57.3 = \\frac{{{cz_max}}}{{\\pi \\cdot {lmbda}}} \\cdot 57.3 = {alpha_im:.4f}°")
-    st.latex(f"\\epsilon_{{m}} = \\epsilon_{{k}} \\frac{{y}}{{b}} = {epsilon_k} \\cdot {y_b2} = {epsilon_m}°")
-    st.latex(f"\\alpha_{{kr}} = {alpha_nm}° - ({alpha_nm}°) + ({alpha_n_root}°) - ({epsilon_m}°) + {alpha_im}° = {alpha_kr}°")
-
+    
+    
     
     
     
