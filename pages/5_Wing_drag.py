@@ -64,36 +64,61 @@ def main():
 
 
     # ===================== drawing =====================
-    Sc = shapes[2].area # rectangle till root
-    St = shapes[1].area # both trapezoids
-    Sc_exp = shapes[3].area
-    St_exp = St
+    
     l0 = shapes[0].lines[0]['length_meters']
     ls = shapes[0].lines[2]['length_meters']
     b = calculate_wingspan(shapes)
-    S1 = Sc + St
-    S = S1 * 2
-    S_exp = Sc_exp + St_exp * 1.02
-    Swet = S_exp * 2
+
 
     # ===================== areas =====================
     st.markdown("##### Wing areas from drawing")
-    col1, col2, col3 = st.columns(3)
+    st.write("Note: These are formulas for a centerplane wing, i.e. consisting of a trapezoidal midsection with rectangular outer sections. The mean aerodyanmic chord is calculated to take this config into accoutn. Later versions of the app will include formulas for different wing shapes.")
+    
+    st.write("Trapezoidal section")
+    col1, col2 = st.columns(2)
     with col1:
-        st.latex(f"S_T = {St:.3f}  \\, \\text{{m}}^2")
+        St_drawing = shapes[1].area # both trapezoids
+        St = st.number_input("Area of trapezoid `St`", value=St_drawing, key='St')
+        st.latex(f"S_T = {St_drawing:.3f}  \\, \\text{{m}}^2")
     with col2:
-        st.latex(f"S_C = {Sc:.3f}  \\, \\text{{m}}^2")
-    with col3:
+        St_exp = St
+        spacer('1em')
+        st.write("Area of exposed trapezoid `St_exp` is the same as the exposed area `St`")
         st.latex(f"S_{{T_{{exp}}}} = S_T = {St:.3f}  \\, \\text{{m}}^2")
     
-    st.latex(f"S_{{C_{{exp}}}} = {Sc_exp:.3f}  \\, \\text{{m}}^2")
-        
-    st.markdown("##### Calc wing areas")
+    st.write("Rectangular section")
+    col1, col2 = st.columns(2)
+    with col1:
+        Sc_drawing = shapes[2].area # rectangle till root
+        Sc = st.number_input("Area of rectangle till symmetry plane", value=Sc_drawing, key='Sc')
+        st.latex(f"S_C = {Sc_drawing:.3f}  \\, \\text{{m}}^2")
+    with col2:
+        Sc_exp_drawing = shapes[3].area
+        Sc_exp = st.number_input("Area of rectangle till fuselage (exposed)", value=Sc_exp_drawing, key='Sc_exp')
+        st.latex(f"S_{{C_{{exp}}}} = {Sc_exp:.3f}  \\, \\text{{m}}^2")
 
-    st.latex(f"S_{{1}} = S_{{C}} + S_{{T}} = {Sc:.3f} + {St:.3f} = {S1:.3f}  \\, \\text{{m}}^2")
+
+    st.write("Normal wing areas")
+
+    S_pr = Sc + St
+    st.latex(f"S_{{pr}} = S_{{C}} + S_{{T}} = {Sc:.3f} + {St:.3f} = {S_pr:.3f}  \\, \\text{{m}}^2") 
+    S = S_pr * 2
+    st.latex(f"S = 2 \\cdot S_{{pr}} = 2 \\cdot {S_pr:.3f} = {S:.3f}  \\, \\text{{m}}^2")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Exposed wing areas")
+    with col2:
+        S_exp = Sc_exp + St_exp * 1.02
+        S_exp_input = st.number_input("Change exposed wing area `S_exp`", value=S_exp, key='S_exp')
+    
+    S_exp = S_exp_input
     st.latex(f"S_{{exp}} = S_{{C_{{exp}}}} + S_{{T_{{exp}}}} = {Sc_exp:.3f} + {St_exp:.3f} = {S_exp:.3f}  \\, \\text{{m}}^2")
-    st.latex(f"S = 2 \\cdot S_1 = 2 \\cdot {S1:.3f} = {S:.3f}  \\, \\text{{m}}^2")
+    
+    Swet = S_exp * 2
     st.latex(f"S_{{WET}} = S_{{exp}} \\cdot 2 \\cdot 1.2 = {S_exp:.3f} \\cdot 2 \\cdot 1.2 = {Swet:.3f}  \\, \\text{{m}}^2")
+    
+    st.markdown("***")
     
     # ===================== calc Lsat =====================
 
@@ -141,7 +166,7 @@ def main():
 
     st.markdown("***")
     st.markdown("***")
-    
+
     col1, col2, col3 = st.columns(3)
     with col1: 
         Swet_wing = st.number_input("Wetted area", value=9.046, key='Swet_wings')
