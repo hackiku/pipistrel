@@ -143,6 +143,7 @@ def main():
 
     st.latex(rf"(C_{{X min}})_{{ver}} = \frac{{K_{{ver}} \cdot C_{{f_{{ver}}}} \cdot S_{{WET_{{ver}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_ht:.6f}")
 
+    
     # update_variables(page_values, locals())
     # log_changed_variables()
 

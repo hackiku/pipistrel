@@ -1,4 +1,5 @@
-# ./pages/draw_horizontal_tail_areas.py
+# ./pages/5_Horizontal_tail.py
+
 import streamlit as st
 from PIL import Image, ImageOps
 from utils import spacer, final_value_input_oneline
@@ -92,10 +93,7 @@ def main():
     with col2:
         nu_input = st.number_input("nu (m²/s)", get_variable_value("nu"), format="%.3e")
         nu = nu_input
-    # nu = get_variable_value("nu")
     
-    # nu = 2.44602e-5
-    st.write("ν =", nu)
     Re = v_krst * lsat / nu
     
     st.write("Reynolds number for the horizontal tail")
@@ -135,7 +133,7 @@ def main():
         st.latex(f"K = {K}")
     with col2:
         delta_K = st.number_input("Roughness correction factor", value=1.2, format="%.1f")
-        st.latex(f"\\Delta K = {delta_K:.2f}")
+        st.latex(f"\\Delta K = {delta_K:.1f}")
     
     # =================================================================== #
     # ======================= MINIMUM DRAG COEFF ======================== #
