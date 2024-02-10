@@ -1,11 +1,12 @@
-# ./pages/draw_horizontal_tail_areas.py
+# ./pages/5_Vertical_tail.py
 import streamlit as st
 from PIL import Image, ImageOps
 from utils import spacer, final_value_input_oneline
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
 from variables_manager import initialize_session_state, get_variable_value,\
     get_variable_props, display_variable, update_variables, log_changed_variables
-def draw_horizontal_tail(svg_file_path, show_labels=True):
+
+def draw_vertical_tail(svg_file_path, show_labels=True):
 
     # choose color inversion and measurements
     col1, col2 = st.columns(2)
@@ -22,7 +23,7 @@ def draw_horizontal_tail(svg_file_path, show_labels=True):
     if invert_choice == "Black":
         img = ImageOps.invert(img.convert('RGB'))
 
-    cropped_img = crop_image(img, 1600, 3000)
+    cropped_img = crop_image(img, 0, 650)
     st.image(cropped_img, caption='Wing areas')
 
     return shapes
@@ -35,12 +36,11 @@ def main():
 
     initialize_session_state()
     
-    st.title("Horizontal Tail Area Calculation")
+    st.title("Vertical Tail Area Calculation")
     
-    svg_file_path = './modules/draw/horizontal_draw/horizontal_tail.svg'
-    shapes = draw_horizontal_tail(svg_file_path)
+    svg_file_path = './modules/draw/vertical_draw/vertical_tail.svg'
+    shapes = draw_vertical_tail(svg_file_path)
 
-    # ===================== drawing =====================
     
     # ===================== areas =====================
     col1, col2 = st.columns([3,2])
@@ -48,9 +48,9 @@ def main():
         spacer()
         st.markdown("##### Vertical tail area from drawing")
     with col2:
-        S_exp_drawing = shapes[1].area
+        S_exp_drawing = shapes[0].area
         S_exp = st.number_input("Exposed area `S_exp` (m²)", value=S_exp_drawing, format="%.3f")
-
+    
     st.latex(f"S_{{exp}} = {S_exp:.3f}  \\, \\text{{m}}^2")
 
     Swet = 2 * S_exp * 1.02 # Wetted area horizontal tail
@@ -63,11 +63,11 @@ def main():
     
     col1, col2 = st.columns(2)
     with col1:
-        l0 = st.number_input("Tip chord (m)", value=shapes[1].lines[0]['length_meters'], format="%.3f")
+        l0 = st.number_input("Tip chord (m)", value=shapes[0].lines[1]['length_meters'], format="%.3f")
         st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
         st.write(l0)
     with col2:
-        lt = st.number_input("Root chord at fuselage (m)", value=shapes[1].lines[2]['length_meters'], format="%.3f")
+        lt = st.number_input("Root chord at fuselage (m)", value=shapes[0].lines[3]['length_meters'], format="%.3f")
         st.latex(f"l_t = {lt:.3f}  \\, \\text{{m}}")
         st.write(lt)
     
@@ -78,13 +78,14 @@ def main():
     # ===============+++  Mean aerodynamic chord ============== #
     st.markdown("##### Mean aerodynamic chord")
     lsat = (2/3) * lt * (1 + n_t + n_t**2) / (1 + n_t)
-    st.latex(f"l_{{SAT_{{hor}}}} = \\frac{{2}}{{3}} \\cdot l_t \\cdot \\frac{{1 + n_t + n_t^2}}{{1 + n_t}} = \\frac{{2}}{{3}} \\cdot {lt:.3f} \\cdot \\frac{{1 + {n_t:.3f} + {n_t:.3f}^2}}{{1 + {n_t:.3f}}} = {lsat:.3f}  \\, \\text{{m}}")
+    st.latex(f"l_{{SAT_{{ver}}}} = \\frac{{2}}{{3}} \\cdot l_t \\cdot \\frac{{1 + n_t + n_t^2}}{{1 + n_t}} = \\frac{{2}}{{3}} \\cdot {lt:.3f} \\cdot \\frac{{1 + {n_t:.3f} + {n_t:.3f}^2}}{{1 + {n_t:.3f}}} = {lsat:.3f}  \\, \\text{{m}}")
 
-    st.latex(f"l_{{SAT_{{hor}}}} = {lsat:.3f}  \\, \\text{{m}}")
+    st.latex(f"l_{{SAT_{{ver}}}} = {lsat:.3f}  \\, \\text{{m}}")
     
     # =================== Reynolds number =================== #
     st.markdown("***")
     
+
     col1, col2 = st.columns(2)
     with col1:
         v_krst_input = st.number_input("v_krst (m/s)", get_variable_value("v_krst"), format="%.3f")
@@ -94,12 +95,10 @@ def main():
         nu = nu_input
     # nu = get_variable_value("nu")
     
-    # nu = 2.44602e-5
-    st.write("ν =", nu)
+    st.write("Reynolds number for the horizontal tail")
     Re = v_krst * lsat / nu
     
-    st.write("Reynolds number for the horizontal tail")
-    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
+    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{ver}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
     
     spacer()
     
@@ -116,7 +115,7 @@ def main():
     st.markdown("***")
 
     # =============== form factor K ============== #
-
+    
     col1, col2 = st.columns(2)
     with col1:
         d_l_ratio = st.number_input("Effective relative thickness of horizontal tail", value=0.09, format="%.2f")
@@ -124,8 +123,6 @@ def main():
     with col2:
         phi = st.number_input("Sweep angle (degrees)", value=30.00, format="%.2f")
         st.latex(f"\\phi = {phi:.2f}°")
-    
-    spacer()
     
     st.image('./assets/tmp_assets/koef_min_otpora.png', )
     
@@ -135,18 +132,19 @@ def main():
         st.latex(f"K = {K}")
     with col2:
         delta_K = st.number_input("Roughness correction factor", value=1.2, format="%.1f")
-        st.latex(f"\\Delta K = {delta_K:.2f}")
+        st.latex(f"\\Delta K = {delta_K:.1f}")
     
     # =================================================================== #
     # ======================= MINIMUM DRAG COEFF ======================== #
-    # =================================================================== #
 
     S = get_variable_value("S")
-    Cx_min_ht = K * Cf * Swet / S
-    st.write(Cx_min_ht)
-    # st.latex(r"C_{X min ht} = \frac{K_{HR_{ht}} \cdot C_{fHT} \cdot S_{WETHT}}{S} = \frac{1.135 \cdot 0.00305 \cdot 16.153}{20.602} = 0.002714")
-    st.latex(rf"(C_{{X min}})_{{hor}} = \frac{{K_{{hor}} \cdot C_{{f_{{hor}}}} \cdot S_{{WET_{{hor}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_ht:.6f}")
 
+    Cx_min_ht = K * Cf * Swet / S
+
+    st.latex(rf"(C_{{X min}})_{{ver}} = \frac{{K_{{ver}} \cdot C_{{f_{{ver}}}} \cdot S_{{WET_{{ver}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_ht:.6f}")
+
+    # update_variables(page_values, locals())
+    # log_changed_variables()
 
 
 if __name__ == "__main__":
