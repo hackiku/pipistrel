@@ -73,7 +73,7 @@ def main():
     b = calculate_wingspan(shapes)
     S1 = Sc + St
     S = S1 * 2
-    S_exp = Sc_exp + St_exp * 1.02 # TODO check in slides
+    S_exp = Sc_exp + St_exp * 1.02
     Swet = S_exp * 2
 
     # ===================== areas =====================
@@ -142,18 +142,21 @@ def main():
     st.markdown("***")
     st.markdown("***")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1: 
         Swet_wing = st.number_input("Wetted area", value=9.046, key='Swet_wings')
         st.latex(rf"S_{{wet_{{KR}}}} = {Swet_wing:.3f} \, m^2")
     with col2:
         lmac_wing = st.number_input("Mean aerodynamic chord", value=1.545, key='l_sat_kr')
         st.latex(rf"l_{{SAT_{{kr}}}} =  {lmac_wing:.3f} \, m")
-
+    with col3:
+        v_krst_input = st.number_input("Cruise speed", value=get_variable_value('v_krst'), key='v_krst')
+        v_krst = v_krst_input
+        st.latex(rf"v_{{krst}} = {v_krst_input:.3f} \, m/s")
     spacer()
     
     st.write('Reynolds number')
-    v_krst = 224.28 
+    
     nu = get_variable_value('nu')  # Kinematic viscosity in m^2/s
     # 2.21e-5     # Kinematic viscosity in m^2/s
     Re = v_krst * lmac_wing / nu

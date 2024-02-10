@@ -1,8 +1,35 @@
 ### 4_4_drag_incompressible.py ###
 import streamlit as st
+from PIL import Image, ImageOps
 from variables_manager import initialize_session_state, get_variable_value, get_variable_props, display_variable, update_variables, log_changed_variables
 from utils import spacer, emoji_header 
 
+
+from modules.draw.draw import draw_shapes_with_lengths, crop_image
+
+def draw_wing_area(svg_file_path, show_labels=True):
+
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0)
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0)
+
+    if labels_choice == "Area only":
+        show_labels = False
+    
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(svg_file_path, show_labels)
+    
+    # invert image colors (defailt to )
+    if invert_choice == "Black":
+        img = ImageOps.invert(img.convert('RGB'))
+
+    cropped_img = crop_image(img, 1600, 3000)
+    st.image(cropped_img, caption='Wing areas')
+
+    return shapes
 
 def main():
     page_values = [
@@ -22,16 +49,21 @@ def main():
 
     spacer()
     
-    # st.text('– wetted area')
-    Swet_wing = st.number_input("Wetted area", value=9.046, key='Swet_wings')
-    st.latex(rf"S_{{wet_{{KR}}}} = {Swet_wing:.3f} \, m^2")
+    col1, col2, col3 = st.columns(3)
+    with col1: 
+        Swet_wing = st.number_input("Wetted area (wing)", value=9.046, key='Swet_wings')
+        st.latex(rf"S_{{wet_{{KR}}}} = {Swet_wing:.3f} \, m^2")
+    with col2:
+        lmac_wing = st.number_input("Mean aerodynamic chord (wing)", value=1.545, key='l_sat_kr')
+        st.latex(rf"l_{{SAT_{{kr}}}} =  {lmac_wing:.3f} \, m")
+    with col3:
+        v_krst_input = st.number_input("Cruise speed", value=get_variable_value('v_krst'), key='v_krst')
+        v_krst = v_krst_input
+        st.latex(rf"v_{{krst}} = {v_krst_input:.3f} \, m/s")
+    spacer()
     
     spacer()
 
-    # Mean aerodynamic chord (l_sat_kr)
-    lmac_wing = st.number_input("Mean aerodynamic chord", value=1.545, key='l_sat_kr')
-
-    st.latex(rf"l_{{SAT_{{kr}}}} =  {lmac_wing:.3f} \, m")
 
     # Reynolds number (Re)
     st.text('Reynolds number')
@@ -45,27 +77,32 @@ def main():
     st.markdown("""<div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
     spacer()
 
-    # ==================== cx wing ==================== #
+    # ==================== cx wing graph readout ==================== #
 
-    
-    st.write("Read from graphic Cf")
-    Cf_fkr = st.number_input("Coefficient of friction drag", value=get_variable_value('Cf_kr'), key='Cf_kr')
-    c_fkr = 0.0026 # TODO add to json
+    # c_fkr = 0.0026
+    c_fkr = st.number_input("Coefficient of friction drag", value=get_variable_value('Cf_kr'), key='Cf_kr', format="%.4f")
     st.latex(rf"C_{{fKR}} = {c_fkr:.4f}")
     
     st.markdown("***")
 
-    l0 = 1.574  # Root chord length in meters
-    dl0 = 0.09  # Relative thickness at the root
-    lT = 2.689  # Tip chord length in meters
-    dlT = 0.12  # Relative thickness at the tip
+
+
+    # Core variables with default values as inputs
+    l0 = st.number_input('Tip chord length (m)', value=1.186, format="%.3f")
+    lT = st.number_input('Fuselage attachment chord length (m)', value=3.523, format="%.3f")
+    dl0 = st.number_input('Relative thickness at tip', value=0.09, format="%.2f")
+    dlT = st.number_input('Relative thickness at the tip', value=0.12, format="%.2f")
 
     dl_effekKR = (l0 * dl0 + lT * dlT) / (l0 + lT)
-    
-    # Display the text and the equation
+    # dl_effekKR = (l0 * dl0 + lT * dlT) / (l0 + lT)
     st.write("Efektivna relativna debljina se dobija osrednjavanjem relativnih debljina u korenu i na kraju krila jer su različite:")
-    st.latex(rf"(d/l)_{{effekKR}} = \frac{{l_0 \cdot (d/l)_0 + l_T \cdot (d/l)_T}}{{l_0 + l_T}} = \frac{{{l0:.3f} \cdot {dl0} + {lT:.3f} \cdot {dlT}}}{{{l0:.3f} + {lT:.3f}}} = {dl_effekKR:.3f}")
+    st.latex(rf"(d/l)_{{effekKR}} = \frac{{l_0 \cdot (d/l)_0 + l_T \cdot (d/l)_T}}{{l_0 + l_T}} = \frac{{{l0:.3f} \cdot {dl0} + {lT:.3f} \cdot {dlT}}}{{{l0:.3f} + {lT:.3f}}} = {dl_effekKR:.4f}")
     
+
+# ==================== cx wing graph readout ==================== #
+
+
+        
     spacer()
     col1, col2 = st.columns(2)
     with col1:

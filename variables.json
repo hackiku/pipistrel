@@ -103,7 +103,7 @@
         "value": 1.545,
         "latex": "l_{sat_{KR}",
         "unit": "m",
-        "changed": false
+        "changed": true
     },
     "Re": {
         "name": "Reynolds Number",
