@@ -95,12 +95,12 @@ def readout_graph(graph_key, default_cross_x=None, default_cross_y=None):
 
                 col1, col2 = st.columns([3,1])
                 with col1:
-                    cross_position_x = st.slider('X position (left to right)', 0, width, default_cross_x, on_change=None)
-                    cross_position_y = st.slider('Y position (top to bottom)', 0, height, default_cross_y, on_change=None)
+                    cross_position_x = st.slider('X position (left to right)', 0, width, default_cross_x, on_change=None, key=f'cross_position_x_{graph_key}')
+                    cross_position_y = st.slider('Y position (top to bottom)', 0, height, default_cross_y, on_change=None, key=f'cross_position_y_{graph_key}')
                 with col2:
-                    show_grid = st.radio('Grid with sizing', ['Show', 'Hide'], index=1, horizontal=True)
-                    grid_spacing = st.slider('Grid spacing', 2, 50, 25, label_visibility="collapsed")
-                    invert_colors = st.radio('Invert colors', ['White', 'Black'], index=0, horizontal=True, label_visibility="collapsed")
+                    show_grid = st.radio('Grid with sizing', ['Hide', 'Show'], index=0, horizontal=True, key=f'show_grid_{graph_key}')
+                    grid_spacing = st.slider('Grid spacing', 2, 30, 8, key=f'grid_spacing_{graph_key}', label_visibility="collapsed")
+                    invert_colors = st.radio('Invert colors', ['White', 'Black'], index=0, horizontal=True, label_visibility="collapsed", key=f'invert_colors_{graph_key}')
 
                 grid_spacing = grid_spacing if show_grid == 'Show' else 0
                 modified_img = draw_red_cross_on_graph(image_path, cross_position_x, cross_position_y, grid_spacing, invert_colors)

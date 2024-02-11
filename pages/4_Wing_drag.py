@@ -70,7 +70,7 @@ def main():
     col1, col2 = st.columns(2)
     with col1:
         St_drawing = shapes[1].area # both trapezoids
-        St = st.number_input("Area of trapezoid `St`", value=St_drawing, key='St')
+        St = st.number_input("Area of trapezoid `St`", value=St_drawing, key='St', format="%.3f")
         st.latex(f"S_T = {St:.3f}  \\, \\text{{m}}^2")
     with col2:
         St_exp = St
@@ -82,7 +82,7 @@ def main():
     col1, col2 = st.columns(2)
     with col1:
         Sc_drawing = shapes[2].area # rectangle till root
-        Sc = st.number_input("Area of rectangle till symmetry plane", value=Sc_drawing, key='Sc')
+        Sc = st.number_input("Area of rectangle till symmetry plane", value=Sc_drawing, key='Sc', format="%.3f")
         st.latex(f"S_C = {Sc_drawing:.3f}  \\, \\text{{m}}^2")
     with col2:
         Sc_exp_drawing = shapes[3].area
@@ -204,19 +204,15 @@ def main():
         st.latex(f"\\phi = {phi:.2f}°")
     
     spacer()
-    # ============ GRAPH Re =================
+    # ============ GRAPH K wing =================
     graph_key = 'K_wing'
-    readout_graph(graph_key, 534, 278)
-    default_readout = 0.00445
+    readout_graph(graph_key, 554, 358)
+    default_readout = 1.30
     spacer()
-    
-    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=default_readout, format="%.5f")
-    Cf = Cf_readout * delta_K
-    st.latex(f"C_{{f_{{kr}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
     
     col1, col2 = st.columns(2)
     with col1:
-        K = st.number_input("Form factor K", value=1.2, format="%.2f")
+        K = st.number_input("Form factor K", value=default_readout, format="%.2f")
         st.latex(f"K = {K}")
     with col2:
         delta_K = st.number_input("Roughness correction factor", value=1.1, format="%.1f", step=0.1)
@@ -243,7 +239,7 @@ def main():
     
     # ============ GRAPH Re =================
     graph_key = 'Re'
-    readout_graph(graph_key, 534, 278)
+    readout_graph(graph_key, 536, 278)
     default_readout = 0.00445
     spacer()
     

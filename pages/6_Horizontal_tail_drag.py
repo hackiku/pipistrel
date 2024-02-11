@@ -67,15 +67,12 @@ def main():
     with col1:
         l0 = st.number_input("Tip chord (m)", value=shapes[1].lines[0]['length_meters'], format="%.3f")
         st.latex(f"l_0 = {l0:.3f}  \\, \\text{{m}}")
-        st.write(l0)
     with col2:
         lt = st.number_input("Root chord at fuselage (m)", value=shapes[1].lines[2]['length_meters'], format="%.3f")
         st.latex(f"l_t = {lt:.3f}  \\, \\text{{m}}")
-        st.write(lt)
     
     n_t = l0 / lt
     st.latex(f"n_{{T}} = \\frac{{l_0}}{{l_t}} = \\frac{{{l0:.3f}}}{{{lt:.3f}}} = {n_t:.3f}")
-    st.write(n_t)
 
     # ===============+++  Mean aerodynamic chord ============== #
     st.markdown("##### Mean aerodynamic chord")
@@ -84,20 +81,26 @@ def main():
 
     st.latex(f"l_{{SAT_{{hor}}}} = {lsat:.3f}  \\, \\text{{m}}")
     
+    
+    spacer()
 
     # =============== form factor K ============== #
 
     col1, col2 = st.columns(2)
     with col1:
-        d_l_ratio = st.number_input("Effective relative thickness of horizontal tail", value=0.09, format="%.2f")
+        d_l_ratio = st.number_input("Effective relative thickness of horizontal tail", value=0.12, format="%.2f")
         st.latex(f"\\left(\\frac{{d}}{{l}}\\right) = {d_l_ratio}")
     with col2:
-        phi = st.number_input("Sweep angle (degrees)", value=30.00, format="%.2f")
+        phi = st.number_input("Sweep angle (degrees)", value=7.01, format="%.2f")
         st.latex(f"\\phi = {phi:.2f}°")
     
     spacer()
     
-    st.image('./assets/tmp_assets/koef_min_otpora.png', )
+    # ============ GRAPH K wing =================
+    graph_key = 'K_wing'
+    readout_graph(graph_key, 554, 358)
+    default_readout = 1.30
+    spacer()
     
     col1, col2 = st.columns(2)
     with col1:
@@ -107,9 +110,11 @@ def main():
         delta_K = st.number_input("Roughness correction factor", value=1.1, format="%.1f", step=0.1)
         st.latex(f"\\Delta K = {delta_K:.1f}")
         
+    st.markdown("***")
 
     # =================== Reynolds number =================== #
-
+    
+    st.subheader("Reynolds number for the horizontal tail")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -121,23 +126,17 @@ def main():
     
     Re = v_krst * lsat / nu
     
-    st.markdown("***")
+    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.3f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
     
-    st.write("Reynolds number for the horizontal tail")
-    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
-    
-    # ============================================================================================
-    # ============================================================================================
 
+    # ============ GRAPH Re horizontal =================
     graph_key = 'Re'
-    readout_graph(graph_key, 200, 100)
-
-    # ============================================================================================
-    # ============================================================================================
-    
+    readout_graph(graph_key, 484, 278)
+    default_readout = 0.00464
     spacer()
     
-    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
+    
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=default_readout, format="%.5f")
     Cf = Cf_readout * delta_K
     st.latex(f"C_{{f_{{hor}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
 
