@@ -175,7 +175,7 @@ def main():
     with col1:
         # lt_input2 = st.number_input("Change tip chord length `lt`", value=lt, key='lt2')
         # lt = lt_input2        
-        dl_t = st.number_input('Relative thickness at the root', value=0.12, format="%.2f")
+        dl_t = st.number_input('Relative thickness at the root', value=0.15, format="%.2f")
         st.latex(f"\\left(\\frac{{d}}{{l}}\\right)_t = {dl_t:.2f}")
         dt = lt * dl_t
         st.latex(f"d_t = l_t \\cdot (\\frac{{d}}{{l}})_t = {lt:.3F} \\cdot {dl_t:.3F} = {dt:.3f}")
@@ -183,7 +183,7 @@ def main():
     with col2:
         # l0_input2 = st.number_input('Change root chord length `l0`', value=l0, key='l0_2')
         # l0 = l0_input2
-        dl_0 = st.number_input('Relative thickness at the tip', value=0.09, format="%.2f")
+        dl_0 = st.number_input('Relative thickness at the tip', value=0.12, format="%.2f")
         st.latex(f"\\left(\\frac{{d}}{{l}}\\right)_0 = {dl_0:.2f}")
         d0 = l0 * dl_0
         st.latex(f"d_t = l_t \\cdot (\\frac{{d}}{{l}})_t = {l0:.3F} \\cdot {dl_0:.3F} = {d0:.3f}") 
@@ -193,15 +193,26 @@ def main():
     st.write(f"The effective relative thickness of the wing `dl_wing` = {dl_wing}. You can change it below to recalculate manually:")
     st.latex(rf"(d/l)_{{eff_{{KR}}}} = \frac{{l_0 \cdot (d/l)_0 + l_T \cdot (d/l)_T}}{{l_0 + l_T}} = \frac{{{l0:.3f} \cdot {dl_0} + {lt:.3f} \cdot {dl_t}}}{{{l0:.3f} + {lt:.3f}}} = {dl_wing:.3f}")
 
+    spacer()
+    
     col1, col2 = st.columns(2)
     with col1:
         d_l_ratio = st.number_input("Effective relative thickness of wing", value=dl_wing, format="%.3f")
         st.latex(f"\\left(\\frac{{d}}{{l}}\\right) = {d_l_ratio:.3f}")
     with col2:
-        phi = st.number_input("Sweep angle (degrees)", value=30.00, format="%.2f")
+        phi = st.number_input("Sweep angle (degrees)", value=5.00, format="%.2f")
         st.latex(f"\\phi = {phi:.2f}°")
     
-    st.image('./assets/tmp_assets/koef_min_otpora.png', )
+    spacer()
+    # ============ GRAPH Re =================
+    graph_key = 'K_wing'
+    readout_graph(graph_key, 534, 278)
+    default_readout = 0.00445
+    spacer()
+    
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=default_readout, format="%.5f")
+    Cf = Cf_readout * delta_K
+    st.latex(f"C_{{f_{{kr}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -230,13 +241,13 @@ def main():
     
     spacer()
     
-    # draw Re graph!
+    # ============ GRAPH Re =================
     graph_key = 'Re'
-    readout_graph(graph_key, 532, 276)
-
+    readout_graph(graph_key, 534, 278)
+    default_readout = 0.00445
     spacer()
     
-    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.0046, format="%.5f")
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=default_readout, format="%.5f")
     Cf = Cf_readout * delta_K
     st.latex(f"C_{{f_{{kr}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
     
