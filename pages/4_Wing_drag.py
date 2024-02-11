@@ -2,6 +2,7 @@
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image
+from modules.graphs.graphs import readout_graph
 from variables_manager import initialize_session_state, get_variable_value, \
     get_variable_props, display_variable, update_variables, log_changed_variables
 from utils import spacer, emoji_header 
@@ -229,13 +230,13 @@ def main():
     
     spacer()
     
-    # placeholder graph
-    st.markdown("""
-    <div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
+    # draw Re graph!
+    graph_key = 'Re'
+    readout_graph(graph_key, 532, 276)
 
     spacer()
     
-    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.0046, format="%.5f")
     Cf = Cf_readout * delta_K
     st.latex(f"C_{{f_{{kr}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
     

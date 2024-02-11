@@ -126,10 +126,15 @@ def main():
     st.write("Reynolds number for the horizontal tail")
     st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
     
-    # !!! graph
-    readout_graph('Re')
+    # ============================================================================================
+    # ============================================================================================
 
+    graph_key = 'Re'
+    readout_graph(graph_key, 200, 100)
 
+    # ============================================================================================
+    # ============================================================================================
+    
     spacer()
     
     Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
