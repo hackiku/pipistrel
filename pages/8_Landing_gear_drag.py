@@ -9,18 +9,27 @@ from variables_manager import initialize_session_state, get_variable_value,\
 
 # Define a dictionary for the landing gear projection details
 projection_details = {
-    'front': {'name': 'Front Projection (1/3)', 'svg_path': './modules/draw/landing_gear/landing_gear.svg', 'crop_y': (650, 1500)},
+    'front': {'name': 'Front Projection (landing gear)', 'svg_path': './modules/draw/landing_gear/landing_gear.svg', 'crop_y': (650, 1500)},
 }
 
-def draw_landing_gear_area(projection_details, key):
+def draw_landing_gear_area(projection_details, key, show_labels=True):
 
-    # Draw the shapes    
-    img, shapes, lines = draw_shapes_with_lengths(projection_details['svg_path'], True)
+    # choose color inversion and measurements
+    col1, col2 = st.columns(2)
+    with col1:
+        invert_choice = st.radio("Color", ["Black", "White"], index=0, key=f"invert_choice_{key}")
+    with col2:
+        labels_choice = st.radio("Show measures", ["All", "Area only"], index=0, key=f"labels_choice_{key}")
+        show_labels = labels_choice != "Area only"
+
+    # draw the shapes    
+    img, shapes, lines = draw_shapes_with_lengths(projection_details['svg_path'], show_labels)
     
-    # Crop the image to the specified y coordinates
+    # invert image colors (defailt to )
+    if invert_choice == "Black":
+        img = ImageOps.invert(img.convert('RGB'))
+
     cropped_img = crop_image(img, *projection_details['crop_y'])
-    
-    # Display the cropped image
     st.image(cropped_img, caption=projection_details['name'])
 
     return shapes, lines
@@ -30,7 +39,7 @@ def draw_landing_gear_area(projection_details, key):
 # =================================================================== #
 
 def main():
-    st.title("Landing Gear Drag Calculation")
+    st.title("Landing gear drag")
 
     initialize_session_state()
     
@@ -69,29 +78,26 @@ def main():
     st.latex(f"S_{{total}} = {total_area:.3f} \\, \\text{{m}}^2")
 
     st.markdown("***")
-    st.markdown("***")
 
     # ===================== Landing Gear Drag Coefficient ===================== #
-    # Since the math is simplified and there's no need for user inputs, let's directly calculate the coefficients
-    
-    # Assuming 'v_krst' and 'nu' are available from the session state or user inputs
-    v_krst = get_variable_value('v_krst')
-    nu = get_variable_value('nu')
-    
-    # Coefficients as per the calculations in the image
-    S22 = 0.06
-    S23 = 0.094
-    S = 25.55  # Replace with actual value if different
 
-    delta_Cx_min_NN = (S22 / S) * 0.25 / S
-    delta_Cx_min_ST = (4 * S23 / S) * 0.25 / S
+    S = get_variable_value('S')
     
-    # Display the calculated drag coefficients
-    st.latex(rf"\Delta (C_{{Xmin}})_{NN} = \frac{{S_{{22}}}}{{S}} \cdot 0.25 = \frac{{0.06}}{{25.55}} = {delta_Cx_min_NN:.5f}")
-    st.latex(rf"\Delta (C_{{Xmin}})_{ST} = \frac{{4 \cdot S_{{23}}}}{{S}} \cdot 0.25 = \frac{{4 \cdot 0.094}}{{25.55}} = {delta_Cx_min_ST:.5f}")
+    col1, col2 = st.columns(2)
+    with col1:
+        S_NN_input = st.number_input("Front wheel area (m²)", value=shapes[1].area, format="%.3f")
+        S_NN = S_NN_input
+    with col2:
+        S_ST_input = st.number_input("Single wheel area (m²)", value=shapes[0].area, format="%.3f")
+        S_ST = S_ST_input
+    
+    delta_Cx_min_NN = 0.25 * S_NN / S
+    delta_Cx_min_ST = 0.25 * 2 * S_NN / S
+    
+    st.latex(rf"\Delta (C_{{Xmin}})_{{NN}} =  0.25 \cdot \frac{{{{S_{{NN}}}}}}{{{{S}}}} = 0.25 \cdot \frac{{{S_NN:.3f}}}{{{S:.3f}}} = {delta_Cx_min_NN:.5f}")
+    st.latex(rf"\Delta (C_{{Xmin}})_{{ST}} = 0.25 \cdot \frac{{4 \cdot S_{{ST}}}}{{{{S}}}} = 0.25 \cdot \frac{{4 \cdot {S_ST:.3f}}}{{{S:.3f}}} = {delta_Cx_min_ST:.5f}")
 
     st.markdown("***")
-
 
 if __name__ == "__main__":
     main()
