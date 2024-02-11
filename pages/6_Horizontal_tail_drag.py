@@ -4,6 +4,7 @@ import streamlit as st
 from PIL import Image, ImageOps
 from utils import spacer, final_value_input_oneline
 from modules.draw.draw import draw_shapes_with_lengths, crop_image, calculate_area
+from modules.graphs.graphs import readout_graph
 from variables_manager import initialize_session_state, get_variable_value,\
     get_variable_props, display_variable, update_variables, log_changed_variables
 def draw_horizontal_tail(svg_file_path, show_labels=True):
@@ -47,7 +48,7 @@ def main():
     col1, col2 = st.columns([3,2])
     with col1:
         spacer()
-        st.markdown("##### Horizontal tail area from drawing")
+        st.markdown("##### Horizontal tail area Draw&Drag™")
     with col2:
         S_exp_drawing = shapes[1].area
         S_exp = st.number_input("Exposed area `S_exp` (m²)", value=S_exp_drawing, format="%.3f")
@@ -125,9 +126,9 @@ def main():
     st.write("Reynolds number for the horizontal tail")
     st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
     
-    # placeholder graph
-    st.markdown("""
-    <div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
+    # !!! graph
+    readout_graph('Re')
+
 
     spacer()
     
