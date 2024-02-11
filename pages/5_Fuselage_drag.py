@@ -208,7 +208,7 @@ def main():
         K = st.number_input("Form factor K", value=1.2, format="%.2f")
         st.latex(f"K = {K}")
     with col2:
-        delta_K = st.number_input("Roughness correction factor", value=1.2, format="%.1f")
+        delta_K = st.number_input("Roughness correction factor", value=1.1, format="%.1f", step=0.1)
         st.latex(f"\\Delta K = {delta_K:.1f}")
     
     # =================== Reynolds number =================== #

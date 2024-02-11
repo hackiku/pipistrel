@@ -9,6 +9,7 @@ from variables_manager import initialize_session_state, get_variable_value, \
     update_variables, log_changed_variables, rewrite_default_values
 from pages.draw_wing_areas import draw_wing_area
 
+
 # TODO abstract wingspan
 def calculate_wingspan(shapes):
     conversion_hardcoded = 0.00584518884292006
@@ -321,8 +322,8 @@ def main():
     log_changed_variables()
     
     # danger zone!!
-    if st.button('⚠️ Rewrite default values'):
-        rewrite_default_values()
+    # if st.button('⚠️ Rewrite default values'):
+        # rewrite_default_values()
     
 if __name__ == "__main__":
     main()

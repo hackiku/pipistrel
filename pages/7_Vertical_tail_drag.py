@@ -82,37 +82,8 @@ def main():
 
     st.latex(f"l_{{SAT_{{ver}}}} = {lsat:.3f}  \\, \\text{{m}}")
     
-    # =================== Reynolds number =================== #
     st.markdown("***")
     
-
-    col1, col2 = st.columns(2)
-    with col1:
-        v_krst_input = st.number_input("v_krst (m/s)", get_variable_value("v_krst"), format="%.3f")
-        v_krst = v_krst_input
-    with col2:
-        nu_input = st.number_input("nu (m²/s)", get_variable_value("nu"), format="%.3e")
-        nu = nu_input
-    # nu = get_variable_value("nu")
-    
-    st.write("Reynolds number for the horizontal tail")
-    Re = v_krst * lsat / nu
-    
-    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{ver}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
-    
-    spacer()
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        Cf = st.number_input("Friction drag coefficient of horizontal tail from diagram", value=0.00305, format="%.5f")
-    with col2:
-        st.latex(f"C_{{f}} = {Cf:5f}")
-
-    # placeholder graph
-    st.markdown("""
-    <div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
-
-    st.markdown("***")
 
     # =============== form factor K ============== #
     
@@ -131,12 +102,46 @@ def main():
         K = st.number_input("Form factor K", value=1.2, format="%.2f")
         st.latex(f"K = {K}")
     with col2:
-        delta_K = st.number_input("Roughness correction factor", value=1.2, format="%.1f")
+        delta_K = st.number_input("Roughness correction factor", value=1.1, format="%.1f", step=0.1)
         st.latex(f"\\Delta K = {delta_K:.1f}")
+    
+    st.markdown("***")
+    
+    # =================== Reynolds number =================== #
+    st.subheader("Reynolds number for vertical tail")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        v_krst_input = st.number_input("Change cruising speed `v_krst` (m/s)", get_variable_value("v_krst"), format="%.3f")
+        v_krst = v_krst_input
+    with col2:
+        nu_input = st.number_input("Change kinematic viscosity `nu` (m²/s)", get_variable_value("nu"), format="%.3e")
+        nu = nu_input
+    
+    Re = v_krst * lsat / nu
+    
+    st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{ver}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
+    
+    spacer()
+
+    # placeholder graph
+    st.markdown("""
+    <div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
+
+    spacer()
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        Cf = st.number_input("Friction drag coefficient of horizontal tail from diagram", value=0.00305, format="%.5f")
+    with col2:
+        st.latex(f"C_{{f}} = {Cf:5f}")
+
+    st.markdown("***")
     
     # =================================================================== #
     # ======================= MINIMUM DRAG COEFF ======================== #
-
+    # =================================================================== #
+    
     S = get_variable_value("S")
 
     Cx_min_ht = K * Cf * Swet / S
