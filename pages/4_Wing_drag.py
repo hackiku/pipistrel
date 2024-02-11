@@ -54,7 +54,8 @@ def main():
     page_values = [
         'S', 'v_krst', 'nu'
     ]
-    # initialize_session_state()
+
+    initialize_session_state()
 
     svg_file_path = './modules/draw/wing_area/wings_both.svg'
     shapes = draw_wing_area(svg_file_path)
@@ -234,31 +235,22 @@ def main():
 
     spacer()
     
-    Cf_readout = st.number_input("Read wing friction drag coefficient from diagram", value=0.00305, format="%.5f")
-    
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
     Cf = Cf_readout * delta_K
+    st.latex(f"C_{{f_{{kr}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
     
-    st.latex(f"C_{{f}} = C_{{f_{{KR}}}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
-
     st.markdown("***")
 
     # =================================================================== #
     # ======================= MINIMUM DRAG COEFF ======================== #
     # =================================================================== #
     
-    
+    st.subheader("➡️ Minimum drag coefficient")    
 
-    Cx_min_ht = K * Cf * Swet / S
+    Cx_min_wing = K * Cf * Swet / S
 
-    st.latex(rf"(C_{{X min}})_{{ver}} = \frac{{K_{{ver}} \cdot C_{{f_{{ver}}}} \cdot S_{{WET_{{ver}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_ht:.6f}")
+    st.latex(rf"(C_{{X min}})_{{kr}} = \frac{{K_{{kr}} \cdot C_{{f_{{kr}}}} \cdot S_{{WET_{{kr}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_wing:.6f}")
 
-
-    # ==================== cx wing ==================== #
-
-    c_fkr = 0.0026 # TODO add to json
-    Cf_fkr = st.number_input("Coefficient of friction drag", value=get_variable_value('Cf_kr'), key='Cf_kr', format="%.4f")
-    st.latex(rf"C_{{f_{{KR}}}} = {c_fkr:.4f}")
-    
     st.markdown("***")
 
     

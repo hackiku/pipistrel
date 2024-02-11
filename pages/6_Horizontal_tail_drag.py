@@ -36,7 +36,7 @@ def main():
 
     initialize_session_state()
     
-    st.title("Horizontal Tail Area Calculation")
+    st.title("Horizontal tail area drag")
     
     svg_file_path = './modules/draw/horizontal_draw/horizontal_tail.svg'
     shapes = draw_horizontal_tail(svg_file_path)
@@ -47,7 +47,7 @@ def main():
     col1, col2 = st.columns([3,2])
     with col1:
         spacer()
-        st.markdown("##### Vertical tail area from drawing")
+        st.markdown("##### Horizontal tail area from drawing")
     with col2:
         S_exp_drawing = shapes[1].area
         S_exp = st.number_input("Exposed area `S_exp` (m²)", value=S_exp_drawing, format="%.3f")
@@ -109,7 +109,6 @@ def main():
 
     # =================== Reynolds number =================== #
 
-    st.markdown("***")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -121,22 +120,24 @@ def main():
     
     Re = v_krst * lsat / nu
     
+    st.markdown("***")
+    
     st.write("Reynolds number for the horizontal tail")
     st.latex(rf"Re = \frac{{v_{{krst}} \cdot l_{{SAT_{{hor}}}}}}{{\nu}} = \frac{{{v_krst:.2f} \cdot {lsat:.3f}}}{{{nu:.2e}}} \approx {Re:.3e}")
     
-    spacer()
-    
-    Cf_readout = st.number_input("Read wing friction drag coefficient from diagram", value=0.00305, format="%.5f")
-    
-    Cf = Cf_readout * delta_K
-    
-    st.latex(f"C_{{f}} = C_{{f_{{KR}}}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
-
     # placeholder graph
     st.markdown("""
     <div style="background-color: black; opacity: 0.3; padding: 100px"></div>""", unsafe_allow_html=True)
 
+    spacer()
+    
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
+    Cf = Cf_readout * delta_K
+    st.latex(f"C_{{f_{{hor}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
+
+
     st.markdown("***")
+
 
     # =================================================================== #
     # ======================= MINIMUM DRAG COEFF ======================== #

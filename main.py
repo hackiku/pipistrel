@@ -308,12 +308,14 @@ def main():
     
     st.markdown('***')
     
-    url = "https://www.example.com"
 
-    st.markdown(f'''<a href="{url}"><button style="color: white; background-color: #F34A4B; border: none;
-        padding: 6px 20px; text-align: center; text-decoration: none;
-        display: inline-block; font-size: 16px; margin: 0em 0em 0em 45%;
-        cursor: pointer; border-radius: 12px;">Next page</button></a>''', unsafe_allow_html=True)
+    # MARKDOWN BUTTON
+    
+    # url = "https://www.example.com"
+    # st.markdown(f'''<a href="{url}"><button style="color: white; background-color: #F34A4B; border: none;
+    #     padding: 6px 20px; text-align: center; text-decoration: none;
+    #     display: inline-block; font-size: 16px; margin: 0em 0em 0em 45%;
+    #     cursor: pointer; border-radius: 12px;">Next page</button></a>''', unsafe_allow_html=True)
 
     
     #==================== SESSION STATE ====================#

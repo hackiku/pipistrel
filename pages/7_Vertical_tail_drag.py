@@ -130,12 +130,10 @@ def main():
 
     spacer()
     
-    col1, col2 = st.columns(2)
-    with col1:
-        Cf = st.number_input("Friction drag coefficient of horizontal tail from diagram", value=0.00305, format="%.5f")
-    with col2:
-        st.latex(f"C_{{f}} = {Cf:5f}")
-
+    Cf_readout = st.number_input("Read out wing friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
+    Cf = Cf_readout * delta_K
+    st.latex(f"C_{{f_{{vert}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
+    
     st.markdown("***")
     
     # =================================================================== #
@@ -144,9 +142,9 @@ def main():
     
     S = get_variable_value("S")
 
-    Cx_min_ht = K * Cf * Swet / S
+    Cx_min_vertical = K * Cf * Swet / S
 
-    st.latex(rf"(C_{{X min}})_{{ver}} = \frac{{K_{{ver}} \cdot C_{{f_{{ver}}}} \cdot S_{{WET_{{ver}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_ht:.6f}")
+    st.latex(rf"(C_{{X min}})_{{ver}} = \frac{{K_{{ver}} \cdot C_{{f_{{ver}}}} \cdot S_{{WET_{{ver}}}}}}{{S}} = \frac{{{K:.3f} \cdot {Cf:.5f} \cdot {Swet:.3f}}}{{{S:.3f}}} = {Cx_min_vertical:.6f}")
 
     
     # update_variables(page_values, locals())

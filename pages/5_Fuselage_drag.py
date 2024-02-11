@@ -233,11 +233,9 @@ def main():
 
     spacer()
     
-    col1, col2 = st.columns(2)
-    with col1:
-        Cf = st.number_input("Read skin friction coefficient `C_f` from graph based on Re", value=0.003, format="%.5f")
-    with col2:
-        st.latex(f"C_{{f}} = {Cf:4f}")
+    Cf_readout = st.number_input("Read out skin friction drag coefficient $Cf$ from diagram 👆", value=0.00305, format="%.5f")
+    Cf = Cf_readout * delta_K
+    st.latex(f"C_{{f_{{\\text trup}}}} = C_{{f}} \cdot \Delta K = {Cf_readout:.5f} \cdot {delta_K:.1f} = {Cf:.5f}")
 
     st.markdown("***")
 

@@ -2,6 +2,7 @@
 import streamlit as st
 from PIL import Image, ImageOps
 from modules.draw.draw import draw_shapes_with_lengths, crop_image
+from inspect import getsource
 
 def draw_wing_area(svg_file_path, show_labels=True):
 
@@ -47,6 +48,9 @@ def calculate_wingspan(shapes):
     return wingspan
 
 def main():
-    st.write("Draw wing areas")
+    source_code = getsource(draw_wing_area) + '\n' + getsource(calculate_wingspan) + '\n' + getsource(main)
+    st.code(source_code, language='python')
+    
 if __name__ == "__main__":
     main()
+
